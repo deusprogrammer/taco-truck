@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import ModeSelect, { ADD, SELECT } from './elements/ModeSelect';
 import PartMenu from './menus/PartMenu';
 import ComponentMenu from './menus/ComponentMenu';
-import ComponentDisplay from './ComponentDisplay';
+import LayoutDisplay from './LayoutDisplay';
 import PartDetailsMenu from './menus/PartDetailsMenu';
 
 const ButtonLayout = ({layout, onLayoutChange}) => {
@@ -63,7 +63,7 @@ const ButtonLayout = ({layout, onLayoutChange}) => {
                 onLayoutChange={onLayoutChange} 
             />
 
-            <ComponentDisplay 
+            <LayoutDisplay 
                 layout={layout}
                 currentScale={currentScale}
                 selected={selected}

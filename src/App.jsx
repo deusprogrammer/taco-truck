@@ -157,7 +157,7 @@ const App = () => {
                     partId: "M6"
                 },
                 {
-                    id: "hole1",
+                    id: "hole2",
                     name: "M6-Hole",
                     type: "hole",
                     origin: [0, 1],
@@ -165,7 +165,7 @@ const App = () => {
                     partId: "M6"
                 },
                 {
-                    id: "hole1",
+                    id: "hole3",
                     name: "M6-Hole",
                     type: "hole",
                     origin: [1, 0],
@@ -173,7 +173,7 @@ const App = () => {
                     partId: "M6"
                 },
                 {
-                    id: "hole1",
+                    id: "hole4",
                     name: "M6-Hole",
                     type: "hole",
                     origin: [1, 1],
@@ -181,7 +181,7 @@ const App = () => {
                     partId: "M6"
                 },
                 {
-                    id: "hole1",
+                    id: "hole5",
                     name: "M6-Hole",
                     type: "hole",
                     origin: [0.5, 0],
@@ -189,7 +189,7 @@ const App = () => {
                     partId: "M6"
                 },
                 {
-                    id: "hole1",
+                    id: "hole6",
                     name: "M6-Hole",
                     type: "hole",
                     origin: [0.5, 1],
@@ -200,7 +200,7 @@ const App = () => {
                     id: "sega2p-buttons",
                     type: "custom",
                     origin: [0.5, 0.5],
-                    position: [-30, -44],
+                    position: [10, 10],
                     layout: buttonLayout
                 }
             ]
@@ -211,7 +211,7 @@ const App = () => {
         <div className="h-screen w-screen flex flex-column justify-center items-center">
             <ButtonLayout 
                 layout={panelLayout}
-                onLayoutChange={setButtonLayout}
+                onLayoutChange={setPanelLayout}
             />
         </div>
     )

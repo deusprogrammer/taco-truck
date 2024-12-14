@@ -38,4 +38,4 @@ export const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEnd
     const offsetY = offset * Math.sin(angle);
   
     return { x: midX + offsetX, y: midY + offsetY, rotation: angle };
-}
+} 

@@ -1,14 +1,16 @@
 import React, { useCallback } from 'react';
 import { Graphics, Text } from '@pixi/react';
+import CustomPart from './CustomPart';
 import { TextStyle } from 'pixi.js';
 import '@pixi/events';
 import { calculateRelativePosition, calculateTextPositionAndRotation } from '../utils';
 import { CIRCLE, partTable } from '../../data/parts.table';
-import ComponentDisplay from '../ComponentDisplay';
 
 const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => {
     const {partId, type, id} = part;
-    const {parts, panelDimensions: [panelWidth, panelHeight]} = parent;
+
+    const {parts, panelDimensions} = parent;
+    const [panelWidth, panelHeight] = panelDimensions || [0, 0];
     const [fixedX, fixedY] = calculateRelativePosition(part, parts, panelWidth, panelHeight);
 
     const drawCircle = useCallback((x, y, radius, rim, renderScale, g) => {
@@ -32,6 +34,11 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => 
         // Draw a line to the element it's relative to
         if (part.relativeTo) {
             const relativePart = parts.find(({id}) => part.relativeTo === id);
+
+            if (!relativePart) {
+                return;
+            }
+
             const [x2, y2] = calculateRelativePosition(relativePart, parts, panelWidth, panelHeight);
 
             g.lineStyle(1, "#FF0000");
@@ -43,21 +50,16 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => 
     }, [part, parts, panelHeight, panelWidth]);
 
     if (type === "custom") {
-        return <></>;
-        // return (
-        //     <ComponentDisplay 
-        //         layout={part.layout}
-        //         currentScale={scale}
-        //         selected={selectedPartId}
-        //         hovered={hoveredPartId}
-        //         mode={null}
-        //         placingPartId={null}
-        //         placingPartType={null}
-        //         onSelectPart={() => {}}
-        //         onSecondarySelectPart={null}
-        //         onLayoutChange={() => {}}
-        //     />
-        // )
+        return (
+            <CustomPart 
+                scale={scale}
+                part={part}
+                selectedPartId={selectedPartId}
+                hoveredPartId={hoveredPartId}
+                parent={parent}
+                onClick={onClick}
+            />
+        )
     }
 
     if (!partTable[type]?.[partId]) {

@@ -32,7 +32,7 @@ const PartDetailsMenu = ({selectedPart, onUpdatePart, onSetSecondarySelect}) => 
                     }}
                 >
                     {Object.keys(partTable).map((key) => (
-                        <option>{key}</option>
+                        <option key={key}>{key}</option>
                     ))}
                 </select>
             </div>
@@ -46,7 +46,7 @@ const PartDetailsMenu = ({selectedPart, onUpdatePart, onSetSecondarySelect}) => 
                     }}
                 >
                     {Object.keys(partTable[selectedPart?.type]).map((key) => (
-                        <option>{key}</option>
+                        <option key={key}>{key}</option>
                     ))}
                 </select>
             </div>

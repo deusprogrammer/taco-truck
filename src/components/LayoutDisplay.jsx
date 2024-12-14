@@ -4,8 +4,9 @@ import { generateUUID } from './utils';
 import { useContainerSize, useMouseDrag, useMousePosition } from '../hooks/MouseHooks';
 import { ADD, PAN } from './elements/ModeSelect';
 import Part from './parts/Part';
+import Panel from './parts/Panel';
 
-const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placingPartId, placingPartType, onSelectPart, onSecondarySelectPart, onLayoutChange}) => {
+const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPartId, placingPartType, onSelectPart, onSecondarySelectPart, onLayoutChange}) => {
     const componentRef = createRef();
     const containerRef = createRef();
 
@@ -13,7 +14,7 @@ const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placin
     const [mouseX, mouseY] = useMousePosition(containerRef);
     const [deltaX, deltaY, dragEnded] = useMouseDrag(containerRef);
 
-    const [workPiecePosition, setWorkPiecePosition] = useState([width / 2, height / 2]);
+    const [workPiecePosition, setWorkPiecePosition] = useState([0, 0]);
 
     const addPart = useCallback((evt) => {
         if (mode !== ADD) {
@@ -54,6 +55,10 @@ const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placin
             );
         }
     }, [dragEnded, deltaX, deltaY, mode]);
+
+    useEffect(() => {
+        setWorkPiecePosition([width/2, height/2]);
+    }, [width, height]);
     
     let component;
     switch (mode) {
@@ -79,8 +84,11 @@ const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placin
             break;
     }
 
+    const x = !dragEnded && mode === PAN ? workPiecePosition[0] - deltaX : workPiecePosition[0];
+    const y = !dragEnded && mode === PAN ? workPiecePosition[1] - deltaY : workPiecePosition[1];
+
     return (
-        <div ref={containerRef} className='flex-grow flex-shrink-0 w-full'>
+        <div ref={containerRef} className='flex-grow flex-shrink h-0 w-full'>
             <Stage 
                 width={width} 
                 height={height} 
@@ -89,11 +97,15 @@ const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placin
             >
                 <Container 
                     ref={componentRef}
-                    x={!dragEnded && mode === PAN ? workPiecePosition[0] - deltaX : workPiecePosition[0]} 
-                    y={!dragEnded && mode === PAN ? workPiecePosition[1] - deltaY : workPiecePosition[1]} 
-                    anchor={0.5} 
+                    x={x} 
+                    y={y}
                     sortChildren={true}
                 >
+                    <Panel 
+                        scale={currentScale}
+                        layout={layout}
+                        fill="#000000" 
+                    />
                     {component}
                     {layout.parts.map((part, index) => 
                         <Part 
@@ -113,4 +125,4 @@ const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placin
     );
 }
 
-export default ComponentDisplay;
+export default LayoutDisplay;

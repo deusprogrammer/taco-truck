@@ -81,28 +81,32 @@ export const useViewportSize = () => {
     return [dimensions.width, dimensions.height]
 }
 
-export const useContainerSize = ({element}) => {
-    const [dimensions, setDimensions] = useState({width: window.innerWidth, height: window.innerHeight});
+export const useContainerSize = (ref) => {
+    const [dimensions, setDimensions] = useState({width: 0, height: 0});
 
     const onResize = useCallback(() => {
+        if (dimensions.width === ref.current.clientWidth && dimensions.height === ref.current.clientHeight) {
+            return;
+        }
+
         setDimensions({
-            width: element.current.clientWidth, 
-            height: element.current.clientHeight
+            width: ref.current.clientWidth, 
+            height: ref.current.clientHeight
         });
-    }, [element]);
+    }, [ref]);
 
     useEffect(() => {
-        if (!element?.current) {
+        if (!ref?.current) {
             return () => {};
         }
 
-        const ele = element.current;
-
+        const ele = ref.current;
+        onResize();
         ele.addEventListener("resize", onResize);
         return () => {
             ele.removeEventListener("resize", onResize);
         }
-    }, [element, onResize]);
+    }, [ref, onResize]);
 
     return [dimensions.width, dimensions.height]
 }
