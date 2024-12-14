@@ -2,24 +2,10 @@ import React, { useCallback } from 'react';
 import { Graphics, Text } from '@pixi/react';
 import { TextStyle } from 'pixi.js';
 import '@pixi/events';
-import { calculateRelativePosition } from '../utils';
-import { partTable } from '../../data/parts.table';
+import { calculateRelativePosition, calculateTextPositionAndRotation } from '../utils';
+import { CIRCLE, partTable } from '../../data/parts.table';
 
-const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEndX, lineEndY, offset) => {
-    const dx = lineEndX - lineStartX;
-    const dy = lineEndY - lineStartY;
-    const angle = Math.atan2(dy, dx);
-  
-    const midX = (lineStartX + lineEndX) / 2;
-    const midY = (lineStartY + lineEndY) / 2;
-  
-    const offsetX = offset * Math.cos(angle);
-    const offsetY = offset * Math.sin(angle);
-  
-    return { x: midX + offsetX, y: midY + offsetY, rotation: angle };
-}
-
-const Button = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, panelDimensions: [panelWidth, panelHeight]}, onClick}) => {
+const Part = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, panelDimensions: [panelWidth, panelHeight]}, onClick}) => {
     const {partId, type, id} = part;
     const [fixedX, fixedY] = calculateRelativePosition(part, parts, panelWidth, panelHeight);
 
@@ -39,6 +25,8 @@ const Button = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, pan
     }, [id, selectedPartId, hoveredPartId]);
 
     const drawLine = useCallback((x, y, renderScale, g) => {
+        g.clear();
+        
         // Draw a line to the element it's relative to
         if (part.relativeTo) {
             const relativePart = parts.find(({id}) => part.relativeTo === id);
@@ -56,7 +44,7 @@ const Button = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, pan
         return <></>;
     }
 
-    const {size, rim} = partTable[type][partId];
+    const {shape, size, rim} = partTable[type][partId];
     const relativePart = parts.find(({id}) => part.relativeTo === id);
     const textComponents = [];
     if (relativePart) {
@@ -99,14 +87,24 @@ const Button = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, pan
         }
     }
 
+    let component;
+    switch (shape) {
+        case CIRCLE:
+        default:
+            component = (
+                <Graphics 
+                    draw={(g) => {drawCircle(fixedX, fixedY, size/2, rim,  scale, g)}}
+                    zIndex={0}
+                    interactive={true}
+                    onclick={() => {onClick(part)}}
+                />
+            );
+            break;
+    }
+
     return (
         <>
-            <Graphics 
-                draw={(g) => {drawCircle(fixedX, fixedY, size/2, rim,  scale, g)}}
-                zIndex={0}
-                interactive={true}
-                onclick={() => {onClick(part)}}
-            />
+            {component}
             <Graphics 
                 draw={(g) => drawLine(fixedX, fixedY,  scale, g)}
                 zIndex={5}
@@ -116,4 +114,4 @@ const Button = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, pan
     );
 }
 
-export default Button;
+export default Part;

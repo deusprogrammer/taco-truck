@@ -1,46 +1,13 @@
-import Button from "./parts/Button";
-import Custom from "./parts/Custom";
-import Hole from "./parts/Hole";
-
-export const getPart = (part, currentScale, parent, index, selected, hovered, onClick) => {
-    switch(part.type) {
-        case "hole":
-            return <Hole 
-                        key={`hole-${index}`}
-                        selectedPartId={selected}
-                        hoveredPartId={hovered}
-                        scale={currentScale} 
-                        part={part} 
-                        index={index}
-                        parent={parent}
-                        onClick={onClick} />;
-        case "button":
-            return <Button 
-                        key={`button-${index}`}
-                        selectedPartId={selected}
-                        hoveredPartId={hovered}
-                        scale={currentScale} 
-                        part={part} 
-                        index={index} 
-                        parent={parent}
-                        onClick={onClick} />;
-        case "custom":
-            return <Custom 
-                        key={`custom-${index}`}
-                        selectedPartId={selected}
-                        hoveredPartId={hovered}
-                        scale={currentScale} 
-                        part={part}  
-                        index={index}
-                        parent={parent}
-                        onClick={onClick} />;
-        default:
-            return null;
+export const generateUUID = () => {
+    let d = new Date().getTime();
+    if (typeof performance !== 'undefined' && performance.now) {
+      d += performance.now(); //use high-precision timer if available
     }
-}
-
-export const calculatePosition = (x, y, originX, originY, offsetX, offsetY, panelWidth, panelHeight) => {
-    return [(originX * panelWidth) + offsetX + x, (originY * panelHeight) + offsetY + y];
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      let r = (d + Math.random() * 16) % 16 | 0;
+      d = Math.floor(d / 16);
+      return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
+    });
 }
 
 export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, level = 0) => {
@@ -57,4 +24,18 @@ export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, 
     }
 
     return [(originX * panelWidth) + x + offsetX, (originY * panelHeight) + y + offsetY];
+}
+
+export const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEndX, lineEndY, offset) => {
+    const dx = lineEndX - lineStartX;
+    const dy = lineEndY - lineStartY;
+    const angle = Math.atan2(dy, dx);
+  
+    const midX = (lineStartX + lineEndX) / 2;
+    const midY = (lineStartY + lineEndY) / 2;
+  
+    const offsetX = offset * Math.cos(angle);
+    const offsetY = offset * Math.sin(angle);
+  
+    return { x: midX + offsetX, y: midY + offsetY, rotation: angle };
 }

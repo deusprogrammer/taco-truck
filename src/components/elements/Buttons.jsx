@@ -24,3 +24,24 @@ export const PartSelectionButton = ({name, partId, partType, placingPart, onClic
         {name}
     </button>
 );
+
+export const ZoomButton = ({currentZoom, onZoomChange}) => (
+    <>
+        <button 
+            className={`text-white bg-slate-600 w-64 h-20`} 
+            disabled={currentZoom === 0.5}
+            onClick={() => onZoomChange(-0.5)}
+        >
+            -
+        </button>
+        <div>
+            {currentZoom * 100}%
+        </div>
+        <button 
+            className={`text-white bg-slate-600 w-64 h-20`} 
+            onClick={() => onZoomChange(0.5)}
+        >
+            +
+        </button>
+    </>
+);

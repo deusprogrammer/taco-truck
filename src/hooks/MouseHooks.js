@@ -8,6 +8,10 @@ export const useMousePosition = (ref) => {
     }, []);
 
     useEffect(() => {
+        if (!ref?.current) {
+            return () => {}
+        }
+
         const ele = ref.current;
         ele.addEventListener('mousemove', updateStatus);
         return () => {
@@ -35,11 +39,14 @@ export const useMouseDrag = (ref) => {
     }, []);
 
     const startDrag = useCallback((evt) => {
-        console.log("START DRAG");
         dragStart.current = [evt.clientX, evt.clientY];
     }, []);
 
     useEffect(() => {
+        if (!ref?.current) {
+            return () => {}
+        }
+        
         const ele = ref.current;
         ele.addEventListener('mousemove', updateStatus);
         ele.addEventListener('mousedown', startDrag);

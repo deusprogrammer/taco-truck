@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import './App.css'
 import ButtonLayout from './components/ButtonLayout'
-import Panel from './components/Panel'
 
 const App = () => {
     const [buttonLayout, setButtonLayout] = useState(
         {
             name: "sega-2p",
             units: "mm",
+            panelDimensions: [0, 0],
             parts: [
                 {
                      "id": "120b3d4e-e487-41f8-857a-124a011c806b",
@@ -202,7 +202,6 @@ const App = () => {
                 layout={buttonLayout}
                 onLayoutChange={setButtonLayout}
             />
-            {/* <Panel layout={panelLayout} /> */}
         </div>
     )
 }
