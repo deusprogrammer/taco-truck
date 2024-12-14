@@ -97,7 +97,7 @@ const ComponentDisplay = ({layout, currentScale, selected, hovered, mode, placin
                     {component}
                     {layout.parts.map((part, index) => 
                         <Part 
-                            key={`button-${index}`}
+                            key={`part-${index}`}
                             selectedPartId={selected}
                             hoveredPartId={hovered}
                             scale={currentScale} 

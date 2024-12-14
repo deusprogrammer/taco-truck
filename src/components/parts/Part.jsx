@@ -4,9 +4,11 @@ import { TextStyle } from 'pixi.js';
 import '@pixi/events';
 import { calculateRelativePosition, calculateTextPositionAndRotation } from '../utils';
 import { CIRCLE, partTable } from '../../data/parts.table';
+import ComponentDisplay from '../ComponentDisplay';
 
-const Part = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, panelDimensions: [panelWidth, panelHeight]}, onClick}) => {
+const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => {
     const {partId, type, id} = part;
+    const {parts, panelDimensions: [panelWidth, panelHeight]} = parent;
     const [fixedX, fixedY] = calculateRelativePosition(part, parts, panelWidth, panelHeight);
 
     const drawCircle = useCallback((x, y, radius, rim, renderScale, g) => {
@@ -39,6 +41,24 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent: {parts, panel
             g.lineTo(renderScale * x2, renderScale * y2);
         }
     }, [part, parts, panelHeight, panelWidth]);
+
+    if (type === "custom") {
+        return <></>;
+        // return (
+        //     <ComponentDisplay 
+        //         layout={part.layout}
+        //         currentScale={scale}
+        //         selected={selectedPartId}
+        //         hovered={hoveredPartId}
+        //         mode={null}
+        //         placingPartId={null}
+        //         placingPartType={null}
+        //         onSelectPart={() => {}}
+        //         onSecondarySelectPart={null}
+        //         onLayoutChange={() => {}}
+        //     />
+        // )
+    }
 
     if (!partTable[type]?.[partId]) {
         return <></>;

@@ -149,48 +149,59 @@ const App = () => {
             panelDimensions: [280, 155],
             parts: [
                 {
+                    id: "hole1",
+                    name: "M6-Hole",
                     type: "hole",
                     origin: [0, 0],
                     position: [15, 15],
                     partId: "M6"
                 },
                 {
+                    id: "hole1",
+                    name: "M6-Hole",
                     type: "hole",
                     origin: [0, 1],
                     position: [15, -15],
                     partId: "M6"
                 },
                 {
+                    id: "hole1",
+                    name: "M6-Hole",
                     type: "hole",
                     origin: [1, 0],
                     position: [-15, 15],
                     partId: "M6"
                 },
                 {
+                    id: "hole1",
+                    name: "M6-Hole",
                     type: "hole",
                     origin: [1, 1],
                     position: [-15, -15],
                     partId: "M6"
                 },
                 {
+                    id: "hole1",
+                    name: "M6-Hole",
                     type: "hole",
                     origin: [0.5, 0],
                     position: [0, 6],
                     partId: "M6"
                 },
                 {
+                    id: "hole1",
+                    name: "M6-Hole",
                     type: "hole",
                     origin: [0.5, 1],
                     position: [0, -6],
                     partId: "M6"
                 },
                 {
+                    id: "sega2p-buttons",
                     type: "custom",
                     origin: [0.5, 0.5],
                     position: [-30, -44],
-                    components: [
-                        ...buttonLayout.parts
-                    ]
+                    layout: buttonLayout
                 }
             ]
         }
@@ -199,7 +210,7 @@ const App = () => {
     return (
         <div className="h-screen w-screen flex flex-column justify-center items-center">
             <ButtonLayout 
-                layout={buttonLayout}
+                layout={panelLayout}
                 onLayoutChange={setButtonLayout}
             />
         </div>
