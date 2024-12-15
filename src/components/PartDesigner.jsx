@@ -5,7 +5,7 @@ import ComponentMenu from './menus/ComponentMenu';
 import LayoutDisplay from './LayoutDisplay';
 import PartDetailsMenu from './menus/PartDetailsMenu';
 
-const ButtonLayout = ({layout, onLayoutChange}) => {
+const PartDesigner = ({layout, onLayoutChange}) => {
     const [currentScale, setCurrentScale] = useState(5.0);
 
     const [mode, setMode] = useState(SELECT);
@@ -85,4 +85,4 @@ const ButtonLayout = ({layout, onLayoutChange}) => {
     )
 }
 
-export default ButtonLayout;
+export default PartDesigner;

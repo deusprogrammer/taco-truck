@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import PartDesigner from './components/PartDesigner'
 import './App.css'
-import ButtonLayout from './components/ButtonLayout'
 
 const App = () => {
     const [buttonLayout, setButtonLayout] = useState(
@@ -211,7 +211,7 @@ const App = () => {
 
     return (
         <div className="h-screen w-screen flex flex-column justify-center items-center">
-            <ButtonLayout 
+            <PartDesigner 
                 layout={panelLayout}
                 onLayoutChange={setPanelLayout}
             />
