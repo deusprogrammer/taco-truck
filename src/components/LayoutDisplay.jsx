@@ -107,7 +107,7 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
                         fill="#000000" 
                     />
                     {component}
-                    {layout.parts.map((part, index) => 
+                    {layout?.parts?.map((part, index) => 
                         <Part 
                             key={`part-${index}`}
                             selectedPartId={selected}

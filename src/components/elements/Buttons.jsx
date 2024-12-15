@@ -16,6 +16,15 @@ export const SaveButton = ({onClick}) => (
     </button>
 );
 
+export const ImportButton = ({onClick}) => (
+    <button 
+        className={`text-white w-64 h-20 bg-slate-600`} 
+        onClick={onClick}
+    >
+        Import
+    </button>
+);
+
 export const PartSelectionButton = ({name, partId, partType, placingPart, onClick}) => (
     <button 
         className={`text-white w-64 h-20 ${placingPart === partId ? "bg-black" : "bg-slate-600"}`} 

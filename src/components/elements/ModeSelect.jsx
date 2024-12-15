@@ -1,10 +1,10 @@
-import { ModeButton, SaveButton, ZoomButton } from "./Buttons";
+import { ImportButton, ModeButton, SaveButton, ZoomButton } from "./Buttons";
 
 export const ADD = "ADD";
 export const SELECT = "SELECT";
 export const PAN = "PAN";
 
-const ModeSelect = ({currentMode, currentZoom, onModeChange, onSave, onZoomChange}) => {
+const ModeSelect = ({currentMode, currentZoom, onModeChange, onSave, onImport, onZoomChange}) => {
     const onClick = (e, value) => {
         onModeChange(value);
     }
@@ -14,6 +14,7 @@ const ModeSelect = ({currentMode, currentZoom, onModeChange, onSave, onZoomChang
             <ModeButton mode="Add" currentMode={currentMode} onClick={onClick} />
             <ModeButton mode="Pan" currentMode={currentMode} onClick={onClick} />
             <ZoomButton currentZoom={currentZoom} onZoomChange={onZoomChange} />
+            <ImportButton onClick={onImport} />
             <SaveButton onClick={onSave} />
         </div>
     );

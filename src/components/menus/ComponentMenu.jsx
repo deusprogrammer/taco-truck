@@ -11,7 +11,7 @@ const ComponentMenu = ({layout, onLayoutChange, onSelect, onHover}) => {
             {[...Object.keys(partTable), "custom"].map((key) => (
                 <React.Fragment key={key}>
                     <h4 className="bg-slate-300">{key.toUpperCase()}</h4>
-                    {layout.parts.filter(({type}) => key === type).map(({id, type, partId, name}, index) => (
+                    {layout?.parts?.filter(({type}) => key === type).map(({id, type, partId, name}, index) => (
                         <button 
                             key={`element-${index}`} 
                             className='p-3 bg-white hover:bg-slate-400 hover:text-white' 

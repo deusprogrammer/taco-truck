@@ -38,4 +38,29 @@ export const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEnd
     const offsetY = offset * Math.sin(angle);
   
     return { x: midX + offsetX, y: midY + offsetY, rotation: angle };
-} 
+}
+
+export const normalizePartPositionsToZero = (parts) => {
+    // Find the minimum x and y values
+    let minX = Infinity;
+    let minY = Infinity;
+    parts.forEach(part => {
+        minX = Math.min(minX, part.position[0]);
+        minY = Math.min(minY, part.position[1]);
+    });
+
+    console.log("MIN X: " + minX);
+    console.log("MIN Y: " + minY);
+
+    console.log("PARTS BEFORE: " + JSON.stringify(parts, null, 5));
+
+    // Normalize each point by subtracting the minimum values
+    parts.filter(({relativeTo}) => !relativeTo).forEach(part => {
+        part.position[0] -= minX;
+        part.position[1] -= minY;
+    });
+
+    console.log("UPDATED PARTS: " + JSON.stringify(parts, null, 5));
+
+    return parts;
+}

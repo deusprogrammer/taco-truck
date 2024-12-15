@@ -4,6 +4,9 @@ import PartMenu from './menus/PartMenu';
 import ComponentMenu from './menus/ComponentMenu';
 import LayoutDisplay from './LayoutDisplay';
 import PartDetailsMenu from './menus/PartDetailsMenu';
+import SaveModal from './menus/SaveModal';
+import ImportModal from './menus/ImportModal';
+import { generateUUID, normalizePartPositionsToZero } from './utils';
 
 const PartDesigner = ({layout, onLayoutChange}) => {
     const [currentScale, setCurrentScale] = useState(5.0);
@@ -16,8 +19,65 @@ const PartDesigner = ({layout, onLayoutChange}) => {
     const [selected, setSelected] = useState(null);
     const [hovered, setHovered] = useState(null);
 
-    const saveComponent = () => {
+    const [saveModalOpen, setSaveModalOpen] = useState(false);
+    const [importModalOpen, setImportModalOpen] = useState(false);
 
+    const saveComponent = () => {
+        setSaveModalOpen(true);
+    }
+
+    const importCustomPart = () => {
+        setImportModalOpen(true);
+    }
+
+    const completeSave = (name, type) => {
+        if (!localStorage.getItem("taco-truck-data")) {
+            localStorage.setItem("taco-truck-data", JSON.stringify(
+                {
+                    customParts: [],
+                    panelDesigns: []
+                }
+            ));
+        }
+
+        // Normalize values to zero
+        const layoutCopy = {
+            ...layout,
+            name,
+            parts: type === "customParts" ? normalizePartPositionsToZero([...layout.parts]) : layout.parts
+        }
+
+        const data = JSON.parse(localStorage.getItem("taco-truck-data"));
+        data[type].push(
+            {
+                id: generateUUID(),
+                name,
+                layout: layoutCopy
+            }
+        );
+
+        localStorage.setItem("taco-truck-data", JSON.stringify(
+            data
+        ));
+    }
+
+    const completeImport = (partIds) => {
+        const dataJSON = localStorage.getItem("taco-truck-data");
+        const data = JSON.parse(dataJSON);
+
+        const partsToImport = data.customParts.filter(({id}) => partIds.includes(id)).map((part) => (
+            {
+                type: "custom",
+                position: [0, 0],
+                origin: [0, 0],
+                ...part
+            }
+        ));
+
+        onLayoutChange({
+            ...layout,
+            parts: [...layout.parts, ...partsToImport]
+        });
     }
 
     const selectPlacingPart = (partType, partId) => {
@@ -40,15 +100,27 @@ const PartDesigner = ({layout, onLayoutChange}) => {
         setAfterSelect(null);
     }
 
-    const selectedPart = layout.parts.find(({id}) => id === selected);
+    const selectedPart = layout?.parts?.find(({id}) => id === selected);
 
     return (
         <div className="flex flex-col w-full h-screen">
+            <SaveModal 
+                open={saveModalOpen}
+                onSaveComplete={completeSave}
+                onClose={() => setSaveModalOpen(false)}
+            />
+            <ImportModal 
+                open={importModalOpen}
+                onImportComplete={completeImport}
+                onClose={() => setImportModalOpen(false)}
+            />
+
             <ModeSelect 
                 currentMode={mode} 
                 currentZoom={currentScale}
                 onModeChange={setMode} 
-                onSave={saveComponent} 
+                onSave={saveComponent}
+                onImport={importCustomPart}
                 onZoomChange={(zoomChange) => setCurrentScale(currentScale + zoomChange)}
             />
             <PartMenu 
@@ -62,7 +134,6 @@ const PartDesigner = ({layout, onLayoutChange}) => {
                 onHover={setHovered} 
                 onLayoutChange={onLayoutChange} 
             />
-
             <LayoutDisplay 
                 layout={layout}
                 currentScale={currentScale}
@@ -75,7 +146,6 @@ const PartDesigner = ({layout, onLayoutChange}) => {
                 onSecondarySelectPart={afterSelect}
                 onLayoutChange={onLayoutChange}
             />
-
             <PartDetailsMenu 
                 selectedPart={selectedPart}
                 onUpdatePart={updatePart}
