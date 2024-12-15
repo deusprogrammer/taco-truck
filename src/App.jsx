@@ -1,26 +1,19 @@
-import { useState } from 'react';
-import PartDesigner from './components/PartDesigner'
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import Home from './routes/Home';
+import PartDesignerRoute from './routes/PartDesignerRoute';
+import ComponentManagerRoute from './routes/ComponentManagerRoute';
 import './App.css'
 
 const App = () => {
-    const [layout, setLayout] = useState(
-        {
-            
-            units: "mm",
-            panelDimensions: [0, 0],
-            parts: []
-        }
-    );
-
-
-    return (
-        <div className="h-screen w-screen flex flex-column justify-center items-center">
-            <PartDesigner 
-                layout={layout}
-                onLayoutChange={setLayout}
-            />
-        </div>
-    )
+     return (
+          <BrowserRouter>
+               <Routes>
+                    <Route index element={<Home />} />
+                    <Route path={`/designer/:type/:id`} element={<PartDesignerRoute />} />
+                    <Route path={`/manager`} element={<ComponentManagerRoute />} />
+               </Routes>
+          </BrowserRouter>    
+     )
 }
 
-export default App
+export default App;
