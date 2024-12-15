@@ -13,6 +13,8 @@ const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick
         <Container
             x={fixedX * scale}
             y={fixedY * scale}
+            onclick={() => onClick(part)}
+            interactive={true}
         >
             {part.layout.parts.map((customPart, index) => (
                 <Part 
@@ -23,7 +25,7 @@ const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick
                     part={customPart} 
                     index={index} 
                     parent={part.layout}
-                    onClick={onClick} 
+                    onClick={onClick}
                 />
             ))}
         </Container>

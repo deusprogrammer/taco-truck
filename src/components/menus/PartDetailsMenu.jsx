@@ -31,7 +31,7 @@ const PartDetailsMenu = ({selectedPart, onUpdatePart, onSetSecondarySelect}) => 
                         onUpdatePart(selectedPart.id, {...selectedPart, type: value})
                     }}
                 >
-                    {Object.keys(partTable).map((key) => (
+                    {Object.keys(selectedPart?.type === "custom" ? {custom : {custom: {}}} : partTable).map((key) => (
                         <option key={key}>{key}</option>
                     ))}
                 </select>
@@ -45,7 +45,7 @@ const PartDetailsMenu = ({selectedPart, onUpdatePart, onSetSecondarySelect}) => 
                         onUpdatePart(selectedPart.id, {...selectedPart, partId: value})
                     }}
                 >
-                    {Object.keys(partTable[selectedPart?.type]).map((key) => (
+                    {Object.keys(partTable[selectedPart?.type] || {custom: {}}).map((key) => (
                         <option key={key}>{key}</option>
                     ))}
                 </select>

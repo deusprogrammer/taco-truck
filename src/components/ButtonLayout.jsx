@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import ModeSelect, { ADD, SELECT } from './elements/ModeSelect';
 import PartMenu from './menus/PartMenu';
 import ComponentMenu from './menus/ComponentMenu';

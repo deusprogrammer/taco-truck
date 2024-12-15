@@ -198,9 +198,11 @@ const App = () => {
                 },
                 {
                     id: "sega2p-buttons",
+                    name: "right-bb",
                     type: "custom",
                     origin: [0.5, 0.5],
                     position: [10, 10],
+                    partId: "sega2p-buttons",
                     layout: buttonLayout
                 }
             ]
