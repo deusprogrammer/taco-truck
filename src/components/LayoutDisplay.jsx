@@ -54,8 +54,6 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, workspace
             updatedParts[index] = {...updatedPart, position: [updatedPart.position[0] - deltaX, updatedPart.position[1] - deltaY]};
             const updatedLayout = {...layout, parts: updatedParts};
 
-            console.log("UPDATED PART: " + JSON.stringify(updatedParts[index], null, 5));
-
             onLayoutChange(updatedLayout);
         }
     }, [selected, layout, onLayoutChange, isDragging, previousIsDragging, deltaX, deltaY, mode]);

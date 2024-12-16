@@ -1,7 +1,8 @@
 import React from 'react';
 import { partTable } from '../../data/parts.table';
+import { calculateRelativePosition } from '../utils';
 
-const PartDetailsMenu = ({selectedPart, onUpdatePart, onSecondarySelectPart, onSetSecondarySelect}) => {
+const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectPart, onSetSecondarySelect}) => {
     if (!selectedPart) {
         return null;
     }
@@ -9,8 +10,10 @@ const PartDetailsMenu = ({selectedPart, onUpdatePart, onSecondarySelectPart, onS
     const adjustPositionToRelative = (part, referencePart) => {
         let copy = {...part};
 
-        copy.position[0] -= referencePart.position[0];
-        copy.position[1] -= referencePart.position[1];
+        const relativePartPosition = calculateRelativePosition(referencePart, layout.parts, 0, 0);
+
+        copy.position[0] -= relativePartPosition[0];
+        copy.position[1] -= relativePartPosition[1];
 
         return copy;
     }

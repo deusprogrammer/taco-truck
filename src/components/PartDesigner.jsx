@@ -180,6 +180,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
                 onLayoutChange={onLayoutChange}
             />
             <PartDetailsMenu 
+                layout={layout}
                 selectedPart={selectedPart}
                 onUpdatePart={updatePart}
                 onSecondarySelectPart={afterSelect}
