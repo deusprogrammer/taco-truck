@@ -3,10 +3,10 @@ import { partTable } from '../../data/parts.table';
 
 const ComponentMenu = ({layout, onLayoutChange, onSelect, onHover}) => {
     return (
-        <div className='flex flex-col gap-1 absolute left-[10px] top-[50%] h-[600px] w-[400px] overflow-y-auto translate-y-[-50%] bg-slate-400'>
+        <div className='flex flex-col gap-1 absolute left-[10px] top-[50%] max-h-[50%] w-[400px] overflow-y-auto translate-y-[-50%] bg-slate-400'>
             <h2>Component</h2>
             <h2>Name:</h2>
-            <input value={layout.name} placeholder="part name" onChange={({target: {value}}) => {onLayoutChange({...layout, name: value})}} />
+            <input value={layout?.name} placeholder="part name" onChange={({target: {value}}) => {onLayoutChange({...layout, name: value})}} />
             <h3>Parts:</h3>
             {[...Object.keys(partTable), "custom"].map((key) => (
                 <React.Fragment key={key}>

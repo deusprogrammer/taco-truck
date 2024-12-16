@@ -9,7 +9,7 @@ import ImportModal from './menus/ImportModal';
 import { generateUUID, normalizePartPositionsToZero } from './utils';
 
 const PartDesigner = ({layout, onLayoutChange}) => {
-    const [currentScale, setCurrentScale] = useState(5.0);
+    const [currentScale, setCurrentScale] = useState(2.0);
 
     const [mode, setMode] = useState(SELECT);
     const [placingPartId, setPlacingPartId] = useState("SANWA-24mm");
@@ -149,6 +149,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
             <PartDetailsMenu 
                 selectedPart={selectedPart}
                 onUpdatePart={updatePart}
+                onSecondarySelectPart={afterSelect}
                 onSetSecondarySelect={setAfterSelect}
             />
         </div>

@@ -84,8 +84,8 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
             break;
     }
 
-    const x = !dragEnded && mode === PAN ? workPiecePosition[0] - deltaX : workPiecePosition[0];
-    const y = !dragEnded && mode === PAN ? workPiecePosition[1] - deltaY : workPiecePosition[1];
+    const screenX = !dragEnded && mode === PAN ? workPiecePosition[0] - deltaX : workPiecePosition[0];
+    const screenY = !dragEnded && mode === PAN ? workPiecePosition[1] - deltaY : workPiecePosition[1];
 
     return (
         <div ref={containerRef} className='flex-grow flex-shrink h-0 w-full'>
@@ -97,8 +97,8 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
             >
                 <Container 
                     ref={componentRef}
-                    x={x} 
-                    y={y}
+                    x={screenX} 
+                    y={screenY}
                     sortChildren={true}
                 >
                     <Panel 
