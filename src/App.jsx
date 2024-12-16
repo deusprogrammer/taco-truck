@@ -9,6 +9,7 @@ const App = () => {
           <BrowserRouter>
                <Routes>
                     <Route index element={<Home />} />
+                    <Route path={`/designer`} element={<PartDesignerRoute />} />
                     <Route path={`/designer/:type/:id`} element={<PartDesignerRoute />} />
                     <Route path={`/manager`} element={<ComponentManagerRoute />} />
                </Routes>
