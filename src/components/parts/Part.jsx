@@ -86,7 +86,8 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => 
                     anchor={{x: 1, y: 0.5}}
                     rotation={text1Rotation}
                     style={ new TextStyle({
-                        fill: "#FF0000"
+                        fill: "#FF0000",
+                        fontSize: 5 * scale
                     })}
                     text={`${xMax - xMin}mm`}
                 />
@@ -101,7 +102,8 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => 
                     anchor={{x: 1, y: 0.5}}
                     rotation={text2Rotation}
                     style={ new TextStyle({
-                        fill: "#00FF00"
+                        fill: "#00FF00",
+                        fontSize: 5 * scale
                     })}
                     text={`${Math.abs(y2 - fixedY)}mm`}
                 />

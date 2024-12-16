@@ -22,6 +22,16 @@ export const useMousePosition = (ref) => {
     return [status.x, status.y, status.buttons];
 }
 
+export const usePrevious = (value) => {
+    const ref = useRef();
+
+    useEffect(() => {
+        ref.current = value;
+    },[value]); 
+
+    return ref.current;
+}
+
 export const useMouseDrag = (ref) => {
     const [delta, setDelta] = useState({x: 0, y: 0});
     const dragStart = useRef(null);
@@ -58,7 +68,7 @@ export const useMouseDrag = (ref) => {
         }
     }, [ref, updateStatus, startDrag, clearDrag]);
 
-    return [delta.x, delta.y, dragStart.current === null];
+    return [delta.x, delta.y, dragStart.current !== null];
 }
 
 export const useViewportSize = () => {

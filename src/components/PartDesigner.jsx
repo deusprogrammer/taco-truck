@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import ModeSelect, { ADD, SELECT } from './elements/ModeSelect';
+import React, { createRef, useEffect, useState } from 'react';
+import ModeSelect, { ADD, PAN, SELECT } from './elements/ModeSelect';
 import PartMenu from './menus/PartMenu';
 import ComponentMenu from './menus/ComponentMenu';
 import LayoutDisplay from './LayoutDisplay';
@@ -7,9 +7,16 @@ import PartDetailsMenu from './menus/PartDetailsMenu';
 import SaveModal from './menus/SaveModal';
 import ImportModal from './menus/ImportModal';
 import { generateUUID, normalizePartPositionsToZero } from './utils';
+import { useContainerSize, useMouseDrag, usePrevious } from '../hooks/MouseHooks';
 
 const PartDesigner = ({layout, onLayoutChange}) => {
     const [currentScale, setCurrentScale] = useState(2.0);
+
+    const containerRef = createRef();
+    const [deltaX, deltaY, isDragging] = useMouseDrag(containerRef);
+    const previousIsDragging = usePrevious(isDragging);
+    const [width, height] = useContainerSize(containerRef);
+    const [workspacePosition, setWorkspacePosition] = useState([0, 0]);
 
     const [mode, setMode] = useState(SELECT);
     const [placingPartId, setPlacingPartId] = useState("SANWA-24mm");
@@ -100,7 +107,29 @@ const PartDesigner = ({layout, onLayoutChange}) => {
         setAfterSelect(null);
     }
 
+    useEffect(() => {
+        if (previousIsDragging === isDragging) {
+            return () => {};
+        }
+
+        if (!isDragging && mode === PAN) {
+            setWorkspacePosition(
+                (old) => [
+                    old[0] - deltaX, 
+                    old[1] - deltaY
+                ]
+            );
+        }
+    }, [isDragging, previousIsDragging, deltaX, deltaY, mode]);
+
+    useEffect(() => {
+        setWorkspacePosition([width/2, height/2]);
+    }, [width, height]);
+
     const selectedPart = layout?.parts?.find(({id}) => id === selected);
+
+    const screenX = isDragging && mode === PAN ? workspacePosition[0] - deltaX : workspacePosition[0];
+    const screenY = isDragging && mode === PAN ? workspacePosition[1] - deltaY : workspacePosition[1];
 
     return (
         <div className="flex flex-col w-full h-screen">
@@ -130,16 +159,20 @@ const PartDesigner = ({layout, onLayoutChange}) => {
             />
             <ComponentMenu 
                 layout={layout} 
+                selectedPartId={selected}
                 onSelect={setSelected} 
                 onHover={setHovered} 
                 onLayoutChange={onLayoutChange} 
             />
             <LayoutDisplay 
+                workspaceRef={containerRef}
                 layout={layout}
                 currentScale={currentScale}
                 selected={selected}
                 hovered={hovered}
                 mode={mode}
+                workspaceDimensions={[width, height]}
+                workspacePosition={[screenX, screenY]}
                 placingPartId={placingPartId}
                 placingPartType={placingPartType}
                 onSelectPart={selectPart}

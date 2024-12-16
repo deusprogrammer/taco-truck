@@ -1,20 +1,16 @@
 import { Container, Stage } from '@pixi/react';
-import React, { createRef, useCallback, useEffect, useState } from 'react';
+import React, { createRef, useCallback, useEffect } from 'react';
 import { generateUUID } from './utils';
-import { useContainerSize, useMouseDrag, useMousePosition } from '../hooks/MouseHooks';
-import { ADD, PAN } from './elements/ModeSelect';
+import { useMouseDrag, useMousePosition, usePrevious } from '../hooks/MouseHooks';
+import { ADD, SELECT } from './elements/ModeSelect';
 import Part from './parts/Part';
 import Panel from './parts/Panel';
 
-const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPartId, placingPartType, onSelectPart, onSecondarySelectPart, onLayoutChange}) => {
+const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, workspaceDimensions, workspacePosition, workspaceRef, placingPartId, placingPartType, onSelectPart, onSecondarySelectPart, onLayoutChange}) => {
     const componentRef = createRef();
-    const containerRef = createRef();
-
-    const [width, height] = useContainerSize(containerRef);
-    const [mouseX, mouseY] = useMousePosition(containerRef);
-    const [deltaX, deltaY, dragEnded] = useMouseDrag(containerRef);
-
-    const [workPiecePosition, setWorkPiecePosition] = useState([0, 0]);
+    const [mouseX, mouseY] = useMousePosition(workspaceRef);
+    const [deltaX, deltaY, isDragging] = useMouseDrag(workspaceRef);
+    const previousIsDragging = usePrevious(isDragging);
 
     const addPart = useCallback((evt) => {
         if (mode !== ADD) {
@@ -28,37 +24,41 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
                 name: `${placingPartType}-${placingPartId}`,
                 type: placingPartType,
                 partId: placingPartId,
-                position: [(evt.offsetX - workPiecePosition[0])/currentScale, (evt.offsetY - workPiecePosition[1])/currentScale],
+                position: [(evt.offsetX - workspacePosition[0])/currentScale, (evt.offsetY - workspacePosition[1])/currentScale],
                 origin: [0, 0]
             }
         );
         const updatedLayout = {...layout, parts: partsCopy};
         onLayoutChange(updatedLayout);
-    }, [layout, onLayoutChange, mode, currentScale, placingPartId, placingPartType, workPiecePosition]);
+    }, [layout, onLayoutChange, mode, currentScale, placingPartId, placingPartType, workspacePosition]);
     
     useEffect(() => {
-        const ele = containerRef.current;
+        const ele = workspaceRef.current;
         
         ele.addEventListener('click', addPart);
         return () => {
             ele.removeEventListener('click', addPart);
         }
-    }, [addPart, containerRef]);
+    }, [addPart, workspaceRef]);
 
     useEffect(() => {
-        if (dragEnded && mode === PAN) {
-            setWorkPiecePosition(
-                (old) => [
-                    old[0] - deltaX, 
-                    old[1] - deltaY
-                ]
-            );
+        if (previousIsDragging === isDragging) {
+            return () => {};
         }
-    }, [dragEnded, deltaX, deltaY, mode]);
 
-    useEffect(() => {
-        setWorkPiecePosition([width/2, height/2]);
-    }, [width, height]);
+        if (!isDragging && selected && mode === SELECT) {
+            const updatedParts = [...layout.parts];
+            const index = updatedParts.findIndex(({id}) => id === selected);
+
+            const updatedPart = updatedParts[index];
+            updatedParts[index] = {...updatedPart, position: [updatedPart.position[0] - deltaX, updatedPart.position[1] - deltaY]};
+            const updatedLayout = {...layout, parts: updatedParts};
+
+            console.log("UPDATED PART: " + JSON.stringify(updatedParts[index], null, 5));
+
+            onLayoutChange(updatedLayout);
+        }
+    }, [selected, layout, onLayoutChange, isDragging, previousIsDragging, deltaX, deltaY, mode]);
     
     let component;
     switch (mode) {
@@ -69,12 +69,12 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
                     part={{
                         partId: placingPartId,
                         type: placingPartType,
-                        position: [(mouseX - workPiecePosition[0])/currentScale, (mouseY - workPiecePosition[1])/currentScale], 
+                        position: [(mouseX - workspacePosition[0])/currentScale, (mouseY - workspacePosition[1])/currentScale], 
                         origin: [0, 0]
                     }} 
                     parent={{
                         parts: layout.parts,
-                        panelDimensions: [width, height]
+                        panelDimensions: workspaceDimensions
                     }} 
                     onClick={() => {}}
                 />
@@ -84,21 +84,18 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
             break;
     }
 
-    const screenX = !dragEnded && mode === PAN ? workPiecePosition[0] - deltaX : workPiecePosition[0];
-    const screenY = !dragEnded && mode === PAN ? workPiecePosition[1] - deltaY : workPiecePosition[1];
-
     return (
-        <div ref={containerRef} className='flex-grow flex-shrink h-0 w-full'>
+        <div ref={workspaceRef} className='flex-grow flex-shrink h-0 w-full'>
             <Stage 
-                width={width} 
-                height={height} 
+                width={workspaceDimensions[0]} 
+                height={workspaceDimensions[1]} 
                 renderOnComponentChange={false} 
                 options={{ background: 0x1099bb }}
             >
                 <Container 
                     ref={componentRef}
-                    x={screenX} 
-                    y={screenY}
+                    x={workspacePosition[0]} 
+                    y={workspacePosition[1]}
                     sortChildren={true}
                 >
                     <Panel 
@@ -113,7 +110,9 @@ const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, placingPa
                             selectedPartId={selected}
                             hoveredPartId={hovered}
                             scale={currentScale} 
-                            part={part} 
+                            part={{...part,
+                                position: selected === part.id && isDragging && mode === SELECT ? [part.position[0] - deltaX, part.position[1] - deltaY] : part.position
+                            }} 
                             index={index} 
                             parent={layout}
                             onClick={onSecondarySelectPart || onSelectPart} />

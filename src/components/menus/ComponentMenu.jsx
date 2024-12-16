@@ -1,7 +1,7 @@
 import React from 'react';
 import { partTable } from '../../data/parts.table';
 
-const ComponentMenu = ({layout, onLayoutChange, onSelect, onHover}) => {
+const ComponentMenu = ({layout, selectedPartId, onLayoutChange, onSelect, onHover}) => {
     return (
         <div className='flex flex-col gap-1 absolute left-[10px] top-[50%] max-h-[50%] max-w-[300px] p-2 overflow-y-auto translate-y-[-50%] bg-slate-400'>
             <h2>Component</h2>
@@ -14,7 +14,7 @@ const ComponentMenu = ({layout, onLayoutChange, onSelect, onHover}) => {
                     {layout?.parts?.filter(({type}) => key === type).map(({id, type, partId, name}, index) => (
                         <button 
                             key={`element-${index}`} 
-                            className='p-3 bg-white hover:bg-slate-400 hover:text-white' 
+                            className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} hover:bg-slate-600 hover:text-white`}
                             onClick={() => {onSelect(id)}}
                             onMouseEnter={() => {onHover(id)}}
                             onMouseOut={() => {onHover(null)}}
