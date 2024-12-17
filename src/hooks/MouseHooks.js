@@ -120,3 +120,34 @@ export const useContainerSize = (ref) => {
 
     return [dimensions.width, dimensions.height]
 }
+
+export const usePixiContainerSize = (ref) => {
+    const [dimensions, setDimensions] = useState({width: 0, height: 0});
+
+    const onResize = useCallback(() => {
+        let bounds = ref.current?.getLocalBounds();
+
+        if (!bounds) {
+            return;
+        }
+
+        if (!bounds || (dimensions.width === bounds.width && dimensions.height === bounds.height)) {
+            return;
+        }
+
+        setDimensions({
+            width: bounds.width, 
+            height: bounds.height
+        });
+    }, [ref, dimensions.width, dimensions.height]);
+
+    useEffect(() => {
+        if (!ref?.current) {
+            return () => {};
+        }
+
+        onResize();
+    }, [ref, onResize]);
+
+    return [dimensions.width, dimensions.height]
+}

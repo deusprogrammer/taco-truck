@@ -1,3 +1,5 @@
+import { CIRCLE, partTable } from "../data/parts.table";
+
 export const generateUUID = () => {
     let d = new Date().getTime();
     if (typeof performance !== 'undefined' && performance.now) {
@@ -23,6 +25,8 @@ export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, 
         offsetY += relativeOffsetY;
     }
 
+    console.log(`${part.name}: ${panelWidth}X${panelHeight}`);
+
     return [(originX * panelWidth) + x + offsetX, (originY * panelHeight) + y + offsetY];
 }
 
@@ -45,22 +49,35 @@ export const normalizePartPositionsToZero = (parts) => {
     let minX = Infinity;
     let minY = Infinity;
     parts.forEach(part => {
-        minX = Math.min(minX, part.position[0]);
-        minY = Math.min(minY, part.position[1]);
+        const position = calculateRelativePosition(part, parts, 0, 0);
+        let xAdj = 0;
+        let yAdj = 0;
+
+        // If the part is not a custom part.
+        if (part.type && part.type !== "custom") {
+            const {size, shape} = partTable[part.type][part.partId];
+            xAdj = size;
+            yAdj = size;
+            if (Array.isArray(size)) {
+                xAdj = size[0];
+                yAdj = size[1];
+            }
+
+            if (shape === CIRCLE) {
+                xAdj /= 2;
+                yAdj /= 2;
+            }
+        }
+
+        minX = Math.min(minX, position[0] - xAdj);
+        minY = Math.min(minY, position[1] - yAdj);
     });
 
-    console.log("MIN X: " + minX);
-    console.log("MIN Y: " + minY);
-
-    console.log("PARTS BEFORE: " + JSON.stringify(parts, null, 5));
-
     // Normalize each point by subtracting the minimum values
-    parts.filter(({relativeTo}) => !relativeTo).forEach(part => {
+    parts.filter(({relativeTo}) => !relativeTo).forEach((part) => {
         part.position[0] -= minX;
         part.position[1] -= minY;
     });
-
-    console.log("UPDATED PARTS: " + JSON.stringify(parts, null, 5));
 
     return parts;
 }

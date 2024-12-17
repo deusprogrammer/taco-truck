@@ -68,7 +68,7 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                     className='text-center' 
                     value={selectedPart?.rotation || 0} 
                     onChange={({target: {value}}) => {
-                        onUpdatePart(selectedPart.id, {...selectedPart, rotation: parseInt(value)});
+                        onUpdatePart(selectedPart.id, {...selectedPart, rotation: parseFloat(value)});
                     }}
                 />
             </div>
@@ -78,7 +78,7 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                     className='text-center' 
                     value={selectedPart?.position[0]} 
                     onChange={({target: {value}}) => {
-                        onUpdatePart(selectedPart.id, {...selectedPart, position: [parseInt(value), selectedPart.position[1]]});
+                        onUpdatePart(selectedPart.id, {...selectedPart, position: [parseFloat(value), selectedPart.position[1]]});
                     }}
                 />
             </div>
@@ -88,7 +88,27 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                     className='text-center' 
                     value={selectedPart?.position[1]}
                     onChange={({target: {value}}) => {
-                        onUpdatePart(selectedPart.id, {...selectedPart, position: [selectedPart.position[0], parseInt(value)]});
+                        onUpdatePart(selectedPart.id, {...selectedPart, position: [selectedPart.position[0], parseFloat(value)]});
+                    }}
+                />
+            </div>
+            <div className='flex flex-row gap-1 items-center'>
+                <label>Origin X:</label>
+                <input 
+                    className='text-center' 
+                    value={selectedPart?.origin[0]} 
+                    onChange={({target: {value}}) => {
+                        onUpdatePart(selectedPart.id, {...selectedPart, origin: [parseFloat(value), selectedPart.origin[1]]});
+                    }}
+                />
+            </div>
+            <div className='flex flex-row gap-1 items-center'>
+                <label>Origin Y:</label>
+                <input 
+                    className='text-center' 
+                    value={selectedPart?.origin[1]}
+                    onChange={({target: {value}}) => {
+                        onUpdatePart(selectedPart.id, {...selectedPart, origin: [selectedPart.origin[0], parseFloat(value)]});
                     }}
                 />
             </div>

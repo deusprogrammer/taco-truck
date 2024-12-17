@@ -20,17 +20,17 @@ const ComponentManagerRoute = () => {
         const filtered = [...panelDesigns.filter(({id}) => id !== idToDelete)];
         setPanelDesigns(filtered);
         localStorage.setItem("taco-truck-data", JSON.stringify({
-            panelDesigns, 
+            panelDesigns: filtered, 
             customParts
         }));
     }
 
     const deletePart = (idToDelete) => {
         const filtered = [...customParts.filter(({id}) => id !== idToDelete)];
-        setPanelDesigns(filtered);
+        setCustomParts(filtered);
         localStorage.setItem("taco-truck-data", JSON.stringify({
             panelDesigns, 
-            customParts
+            customParts: filtered
         }));
     }
 
