@@ -1,6 +1,6 @@
 export const ModeButton = ({mode, currentMode, onClick}) => (
     <button 
-        className={`text-white w-64 h-20 ${currentMode === mode.toUpperCase() ? "bg-black" : "bg-slate-600"}`} 
+        className={`text-white w-64 h-20 ${currentMode === mode.toUpperCase() ? "bg-black" : "bg-slate-600"} border-solid border-2 border-black`} 
         onClick={(e) => {onClick(e, mode.toUpperCase())}}
     >
         {mode}
@@ -9,7 +9,7 @@ export const ModeButton = ({mode, currentMode, onClick}) => (
 
 export const SaveButton = ({onClick}) => (
     <button 
-        className={`text-white w-64 h-20 bg-slate-600`} 
+        className={`text-white w-64 h-20 bg-slate-600 border-solid border-2 border-black`} 
         onClick={onClick}
     >
         Save
@@ -18,7 +18,7 @@ export const SaveButton = ({onClick}) => (
 
 export const ImportButton = ({onClick}) => (
     <button 
-        className={`text-white w-64 h-20 bg-slate-600`} 
+        className={`text-white w-64 h-20 bg-slate-600 border-solid border-2 border-black`} 
         onClick={onClick}
     >
         Import
@@ -27,7 +27,7 @@ export const ImportButton = ({onClick}) => (
 
 export const PartSelectionButton = ({name, partId, partType, placingPart, onClick}) => (
     <button 
-        className={`text-white w-64 h-20 ${placingPart === partId ? "bg-black" : "bg-slate-600"}`} 
+        className={`text-white w-64 h-20 ${placingPart === partId ? "bg-black" : "bg-slate-600"} border-solid border-2 border-black`} 
         onClick={() => onClick(partType, partId)}
     >
         {name}
@@ -37,7 +37,7 @@ export const PartSelectionButton = ({name, partId, partType, placingPart, onClic
 export const ZoomButton = ({currentZoom, onZoomChange}) => (
     <>
         <button 
-            className={`text-white bg-slate-600 w-64 h-20`} 
+            className={`text-white bg-slate-600 w-64 h-20 border-solid border-2 border-black`} 
             disabled={currentZoom === 0.5}
             onClick={() => onZoomChange(-0.5)}
         >
@@ -47,7 +47,7 @@ export const ZoomButton = ({currentZoom, onZoomChange}) => (
             {currentZoom * 100}%
         </div>
         <button 
-            className={`text-white bg-slate-600 w-64 h-20`} 
+            className={`text-white bg-slate-600 w-64 h-20 border-solid border-2 border-black`} 
             onClick={() => onZoomChange(0.5)}
         >
             +
