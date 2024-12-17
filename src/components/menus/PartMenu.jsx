@@ -8,7 +8,7 @@ const PartMenu = ({active, currentPart, onChange}) => {
     }
 
     return (
-        <div className="flex flex-row justify-around items-center gap-10 w-full p-2 bg-slate-400">
+        <div className="flex flex-row justify-around items-center gap-10 w-full p-2 bg-slate-400 overflow-y-scroll">
             {Object.keys(partTable).map(partType => {
                 return Object.keys(partTable[partType]).map(partId => {
                     return (

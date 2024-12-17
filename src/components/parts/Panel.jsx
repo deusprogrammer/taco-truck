@@ -9,7 +9,6 @@ const Panel = ({layout, scale, fill}) => (
             g.drawRect(0, 0, layout?.panelDimensions?.[0] * scale, layout?.panelDimensions?.[1] * scale);
             g.endFill();
         }}
-        anchor={0.5}
     />
 );
 

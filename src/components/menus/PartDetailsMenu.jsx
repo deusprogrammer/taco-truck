@@ -19,7 +19,7 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
     }
 
     return (
-        <div className='flex flex-row justify-around items-center gap-10 px-2 absolute left-[0px] bottom-[0px] w-full z-50 border-solid border-white bg-slate-400'>
+        <div className='flex flex-row justify-around items-center gap-10 px-2 absolute left-[0px] bottom-[0px] w-full z-50 overflow-y-scroll border-solid border-white bg-slate-400'>
             <div className='flex flex-row gap-1 items-center'>
                 <label>Type:</label>
                 <input className='text-center' value={selectedPart?.type} />
@@ -61,6 +61,16 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                         <option key={key}>{key}</option>
                     ))}
                 </select>
+            </div>
+            <div className='flex flex-row gap-1 items-center'>
+                <label>rotation:</label>
+                <input 
+                    className='text-center' 
+                    value={selectedPart?.rotation || 0} 
+                    onChange={({target: {value}}) => {
+                        onUpdatePart(selectedPart.id, {...selectedPart, rotation: parseInt(value)});
+                    }}
+                />
             </div>
             <div className='flex flex-row gap-1 items-center'>
                 <label>x:</label>

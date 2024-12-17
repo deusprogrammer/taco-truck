@@ -4,10 +4,10 @@ import CustomPart from './CustomPart';
 import { TextStyle } from 'pixi.js';
 import '@pixi/events';
 import { calculateRelativePosition, calculateTextPositionAndRotation } from '../utils';
-import { CIRCLE, partTable } from '../../data/parts.table';
+import { CIRCLE, SQUARE, partTable } from '../../data/parts.table';
 
 const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => {
-    const {partId, type, id} = part;
+    const {partId, type, id, rotation} = part;
 
     const {parts, panelDimensions} = parent;
     const [panelWidth, panelHeight] = panelDimensions || [0, 0];
@@ -25,6 +25,23 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => 
         g.drawCircle(renderScale * x, renderScale * y, renderScale * radius);
         g.beginFill(0xff0000);
         g.drawCircle(renderScale * x, renderScale * y, renderScale * 2);
+        g.endFill();
+    }, [id, selectedPartId, hoveredPartId]);
+
+    const drawRectangle = useCallback((x, y, size, rim, renderScale, g) => {
+        x = x - size[0]/2;
+        y = y - size[1]/2;
+        g.clear();
+        if ((selectedPartId === id || hoveredPartId === id) && (selectedPartId || hoveredPartId)) {
+            g.beginFill(selectedPartId === id ? 0x00ff00 : 0x00ffff);
+            g.drawRect(renderScale * (x - rim - 2), renderScale * (y - rim - 2), renderScale * (size[0] + (rim * 2) + 4), renderScale * (size[1] + (rim * 2) + 4));
+        }
+        g.beginFill(0xffffff);
+        g.drawRect(renderScale * (x - rim), renderScale * (y - rim), renderScale * (size[0] + (2 * rim)), renderScale * (size[1] + (2 * rim)));
+        g.beginFill(0x000000);
+        g.drawRect(renderScale * x, renderScale * y, renderScale * size[0], renderScale * size[1]);
+        g.beginFill(0xff0000);
+        g.drawCircle(renderScale * (x + size[0]/2), renderScale * (y + size[1]/2), renderScale * 2);
         g.endFill();
     }, [id, selectedPartId, hoveredPartId]);
 
@@ -113,11 +130,23 @@ const Part = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => 
 
     let component;
     switch (shape) {
+        case SQUARE:
+            component = (
+                <Graphics 
+                    draw={(g) => {drawRectangle(fixedX, fixedY, size, rim,  scale, g)}}
+                    angle={rotation || 0}
+                    zIndex={0}
+                    interactive={true}
+                    onclick={() => {onClick(part)}}
+                />
+            );
+            break;
         case CIRCLE:
         default:
             component = (
                 <Graphics 
                     draw={(g) => {drawCircle(fixedX, fixedY, size/2, rim,  scale, g)}}
+                    angle={rotation || 0}
                     zIndex={0}
                     interactive={true}
                     onclick={() => {onClick(part)}}
