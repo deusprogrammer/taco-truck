@@ -113,6 +113,26 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                 />
             </div>
             <div className='flex flex-row gap-1 items-center'>
+                <label>Anchor X:</label>
+                <input 
+                    className='text-center' 
+                    value={selectedPart?.anchor?.[0] || 0} 
+                    onChange={({target: {value}}) => {
+                        onUpdatePart(selectedPart.id, {...selectedPart, anchor: [parseFloat(value), selectedPart?.anchor?.[1] || 0]});
+                    }}
+                />
+            </div>
+            <div className='flex flex-row gap-1 items-center'>
+                <label>Anchor Y:</label>
+                <input 
+                    className='text-center' 
+                    value={selectedPart?.anchor?.[1] || 0}
+                    onChange={({target: {value}}) => {
+                        onUpdatePart(selectedPart.id, {...selectedPart, anchor: [selectedPart?.anchor?.[0] || 0, parseFloat(value)]});
+                    }}
+                />
+            </div>
+            <div className='flex flex-row gap-1 items-center'>
                 <label>Relative to:</label>
                 <button 
                     className={`h-8 p-1 min-w-20 ${onSecondarySelectPart ? 'bg-black text-white' : 'bg-white'}`}

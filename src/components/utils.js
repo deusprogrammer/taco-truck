@@ -25,9 +25,20 @@ export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, 
         offsetY += relativeOffsetY;
     }
 
-    console.log(`${part.name}: ${panelWidth}X${panelHeight}`);
+    let anchorAdjustmentX = 0;
+    let anchorAdjustmentY = 0;
+    if (!part.anchor) {
+        part.anchor = [0, 0];
+    }
 
-    return [(originX * panelWidth) + x + offsetX, (originY * panelHeight) + y + offsetY];
+    if (!part.dimensions) {
+        part.dimensions = [0, 0];
+    }
+
+    anchorAdjustmentX = part.anchor[0] * part.dimensions[0];
+    anchorAdjustmentY = part.anchor[1] * part.dimensions[1];
+
+    return [(originX * panelWidth) + x + offsetX - anchorAdjustmentX, (originY * panelHeight) + y + offsetY - anchorAdjustmentY];
 }
 
 export const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEndX, lineEndY, offset) => {

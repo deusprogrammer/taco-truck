@@ -11,7 +11,7 @@ const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick
 
     const {parts, panelDimensions} = parent;
     const [panelWidth, panelHeight] = panelDimensions || [0, 0];
-    const [fixedX, fixedY] = calculateRelativePosition(part, parts, panelWidth, panelHeight);
+    const [fixedX, fixedY] = calculateRelativePosition({...part, dimensions: [width/scale, height/scale]}, parts, panelWidth, panelHeight);
 
     return (
         <Container
@@ -43,7 +43,6 @@ const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick
                     g.endFill();
                 }}
             />
-            {/* <BoundingBox container={containerRef} enabled={true} /> */}
         </Container>
     );
 }
