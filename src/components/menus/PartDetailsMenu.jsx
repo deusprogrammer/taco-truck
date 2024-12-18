@@ -23,7 +23,7 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
             <div className='flex flex-col gap-1 overflow-y-auto'>
                 <div className='flex flex-col gap-1'>
                     <label>type:</label>
-                    <input value={selectedPart?.type} />
+                    <input value={selectedPart?.type} disabled />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>name:</label>
