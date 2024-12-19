@@ -120,11 +120,16 @@ const PartDesigner = ({layout, onLayoutChange}) => {
     }
 
     useEffect(() => {
-        window.addEventListener("wheel", onScroll);
-        return () => {
-            window.removeEventListener("wheel", onScroll);
+        if (!containerRef?.current) {
+            return () => {}
         }
-    }, [onScroll]);
+
+        const element = containerRef.current;
+        element.addEventListener("wheel", onScroll);
+        return () => {
+            element.removeEventListener("wheel", onScroll);
+        }
+    }, [onScroll, containerRef]);
 
     useEffect(() => {
         if (previousIsDragging === isDragging) {
