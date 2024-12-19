@@ -4,9 +4,15 @@ import { calculateRelativePosition } from '../utils';
 import PartSvg from './PartSvg';
 
 const CustomPartSvg = ({scale, part, parent}) => {
+    const svgElement = document.querySelector('svg');
+    const boundingRect = svgElement.getBoundingClientRect();
+
+    const width = boundingRect.width;
+    const height = boundingRect.height;
+
     const {parts, panelDimensions} = parent;
     const [panelWidth, panelHeight] = panelDimensions || [0, 0];
-    const [fixedX, fixedY] = calculateRelativePosition({...part, dimensions: [parent.panelDimensions[0]/scale, parent.panelDimensions[1]/scale]}, parts, panelWidth, panelHeight);
+    const [fixedX, fixedY] = calculateRelativePosition({...part, dimensions: [width/scale, height/scale]}, parts, panelWidth, panelHeight);
 
     return (
         <>
@@ -16,7 +22,7 @@ const CustomPartSvg = ({scale, part, parent}) => {
                         scale={scale} 
                         part={customPart}
                         adjustments={{x: fixedX * scale, y: fixedY * scale, rotation: part.rotation || 0}}
-                        parent={{...part.layout, panelDimensions: [parent.panelDimensions[0], parent.panelDimensions[1]]}}
+                        parent={{...part.layout, panelDimensions: [width, height]}}
                     />
                 </React.Fragment>
             ))}
