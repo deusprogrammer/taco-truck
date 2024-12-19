@@ -188,7 +188,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
                 onHover={setHovered} 
                 onLayoutChange={onLayoutChange} 
             />
-            <LayoutDisplay 
+            <LayoutDisplay
                 workspaceRef={containerRef}
                 layout={layout}
                 currentScale={currentScale}

@@ -54,3 +54,9 @@ export const ZoomButton = ({currentZoom, onZoomChange}) => (
         </button>
     </>
 );
+
+export const ExportButton = ({layout}) => (
+    <svg>
+        
+    </svg>
+)
