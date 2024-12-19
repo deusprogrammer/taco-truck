@@ -1,5 +1,6 @@
 import React from 'react';
 import { calculateRelativePosition } from '../utils';
+import BufferedInput from '../elements/BufferedInput';
 
 const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectPart, onSetSecondarySelect}) => {
     if (!selectedPart) {
@@ -34,34 +35,6 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                         }} 
                     />
                 </div>
-                {/* <div className='flex flex-row gap-1 items-center'>
-                    <label>Part Type:</label>
-                    <select 
-                        className='text-center'
-                        value={selectedPart?.type}
-                        onChange={({target: {value}}) => {
-                            onUpdatePart(selectedPart.id, {...selectedPart, type: value})
-                        }}
-                    >
-                        {Object.keys(selectedPart?.type === "custom" ? {custom : {custom: {}}} : partTable).map((key) => (
-                            <option key={key}>{key}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className='flex flex-row gap-1 items-center'>
-                    <label>Part Id:</label>
-                    <select 
-                        className='text-center'
-                        value={selectedPart?.partId}
-                        onChange={({target: {value}}) => {
-                            onUpdatePart(selectedPart.id, {...selectedPart, partId: value})
-                        }}
-                    >
-                        {Object.keys(partTable[selectedPart?.type] || {custom: {}}).map((key) => (
-                            <option key={key}>{key}</option>
-                        ))}
-                    </select>
-                </div> */}
                 <div className='flex flex-col gap-1'>
                     <label>relative to:</label>
                     <button 
@@ -79,63 +52,70 @@ const PartDetailsMenu = ({layout, selectedPart, onUpdatePart, onSecondarySelectP
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>rotation:</label>
-                    <input 
+                    <BufferedInput
+                        type="number"
                         value={selectedPart?.rotation || 0} 
-                        onChange={({target: {value}}) => {
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, rotation: parseFloat(value)});
                         }}
                     />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>x:</label>
-                    <input 
+                    <BufferedInput
+                        type="number"
                         value={selectedPart?.position[0]} 
-                        onChange={({target: {value}}) => {
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, position: [parseFloat(value), selectedPart.position[1]]});
                         }}
                     />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>y:</label>
-                    <input 
+                    <BufferedInput
+                        type="number"
                         value={selectedPart?.position[1]}
-                        onChange={({target: {value}}) => {
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, position: [selectedPart.position[0], parseFloat(value)]});
                         }}
                     />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>origin x:</label>
-                    <input 
-                        value={selectedPart?.origin[0]} 
-                        onChange={({target: {value}}) => {
+                    <BufferedInput
+                        type="number"
+                        value={selectedPart?.origin[0]}
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, origin: [parseFloat(value), selectedPart.origin[1]]});
                         }}
                     />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>origin y:</label>
-                    <input 
+                    <BufferedInput
+                        type="number"
                         value={selectedPart?.origin[1]}
-                        onChange={({target: {value}}) => {
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, origin: [selectedPart.origin[0], parseFloat(value)]});
                         }}
                     />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>anchor x:</label>
-                    <input 
-                        value={selectedPart?.anchor?.[0] || 0} 
-                        onChange={({target: {value}}) => {
+                    <BufferedInput
+                        type="number"
+                        value={selectedPart?.anchor?.[0] || 0}
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, anchor: [parseFloat(value), selectedPart?.anchor?.[1] || 0]});
                         }}
                     />
                 </div>
                 <div className='flex flex-col gap-1'>
                     <label>anchor y:</label>
-                    <input 
+                    <BufferedInput
+                        type="number"
                         value={selectedPart?.anchor?.[1] || 0}
-                        onChange={({target: {value}}) => {
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {...selectedPart, anchor: [selectedPart?.anchor?.[0] || 0, parseFloat(value)]});
                         }}
                     />

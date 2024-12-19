@@ -32,6 +32,31 @@ export const usePrevious = (value) => {
     return ref.current;
 }
 
+export const useButtonDown = () => {
+    const [buttonsDown, setButtonsDown] = useState([]);
+
+    const onButtonDown = useCallback(({key}) => {
+        if (!buttonsDown.includes(key)) {
+            setButtonsDown([...buttonsDown, key]);
+        }
+    }, [buttonsDown]);
+
+    const onButtonUp = useCallback(({key}) => {
+        setButtonsDown(buttonsDown.filter((button) => key !== button));
+    }, [buttonsDown]);
+
+    useEffect(() => {
+        window.addEventListener("keydown", onButtonDown);
+        window.addEventListener("keyup", onButtonUp);
+        return () => {
+            window.removeEventListener("keydown", onButtonDown);
+            window.removeEventListener("keyup", onButtonUp);
+        }
+    }, [onButtonDown, onButtonUp]);
+
+    return buttonsDown;
+}
+
 export const useMouseDrag = (ref) => {
     const [delta, setDelta] = useState({x: 0, y: 0});
     const dragStart = useRef(null);

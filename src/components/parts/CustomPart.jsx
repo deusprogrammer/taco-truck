@@ -11,7 +11,7 @@ const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick
 
     const {parts, panelDimensions} = parent;
     const [panelWidth, panelHeight] = panelDimensions || [0, 0];
-    const [fixedX, fixedY] = calculateRelativePosition({...part, dimensions: [width/scale, height/scale]}, parts, panelWidth, panelHeight);
+    const [fixedX, fixedY, anchorX, anchorY] = calculateRelativePosition({...part, dimensions: [width/scale, height/scale]}, parts, panelWidth, panelHeight);
 
     return (
         <Container
@@ -39,7 +39,7 @@ const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick
                 draw={(g) => {
                     g.clear();
                     g.beginFill('#00ffff');
-                    g.drawCircle(0, 0, 5);
+                    g.drawCircle(anchorX * scale, anchorY * scale, 2 * scale);
                     g.endFill();
                 }}
             />

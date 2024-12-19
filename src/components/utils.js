@@ -38,7 +38,7 @@ export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, 
     anchorAdjustmentX = part.anchor[0] * part.dimensions[0];
     anchorAdjustmentY = part.anchor[1] * part.dimensions[1];
 
-    return [(originX * panelWidth) + x + offsetX - anchorAdjustmentX, (originY * panelHeight) + y + offsetY - anchorAdjustmentY];
+    return [(originX * panelWidth) + x + offsetX - anchorAdjustmentX, (originY * panelHeight) + y + offsetY - anchorAdjustmentY, anchorAdjustmentX, anchorAdjustmentY];
 }
 
 export const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEndX, lineEndY, offset) => {

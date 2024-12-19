@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from 'react';
+import React, { createRef, useCallback, useEffect, useState } from 'react';
 import ModeSelect, { ADD, PAN, SELECT } from './elements/ModeSelect';
 import PartMenu from './menus/PartMenu';
 import ComponentMenu from './menus/ComponentMenu';
@@ -7,13 +7,16 @@ import PartDetailsMenu from './menus/PartDetailsMenu';
 import SaveModal from './menus/SaveModal';
 import ImportModal from './menus/ImportModal';
 import { generateUUID, normalizePartPositionsToZero } from './utils';
-import { useContainerSize, useMouseDrag, usePrevious } from '../hooks/MouseHooks';
+import { useButtonDown, useContainerSize, useMouseDrag, usePrevious } from '../hooks/MouseHooks';
+
+const SCALE_RATIO = 10;
 
 const PartDesigner = ({layout, onLayoutChange}) => {
     const [currentScale, setCurrentScale] = useState(2.0);
 
     const containerRef = createRef();
     const [deltaX, deltaY, isDragging] = useMouseDrag(containerRef);
+    const buttons = useButtonDown();
     const previousIsDragging = usePrevious(isDragging);
     const [width, height] = useContainerSize(containerRef);
     const [workspacePosition, setWorkspacePosition] = useState([0, 0]);
@@ -36,6 +39,15 @@ const PartDesigner = ({layout, onLayoutChange}) => {
     const importCustomPart = () => {
         setImportModalOpen(true);
     }
+
+    const onScroll = useCallback(({deltaX, deltaY}) => {
+        if (buttons.includes("Shift")) {
+            setCurrentScale(Math.max(1, currentScale - (deltaY/SCALE_RATIO)));
+            return;
+        }
+
+        setWorkspacePosition([workspacePosition[0] - deltaX, workspacePosition[1] - deltaY]);
+    }, [workspacePosition, currentScale, buttons]);
 
     const completeSave = (name, type) => {
         if (!localStorage.getItem("taco-truck-data")) {
@@ -108,6 +120,13 @@ const PartDesigner = ({layout, onLayoutChange}) => {
     }
 
     useEffect(() => {
+        window.addEventListener("wheel", onScroll);
+        return () => {
+            window.removeEventListener("wheel", onScroll);
+        }
+    }, [onScroll]);
+
+    useEffect(() => {
         if (previousIsDragging === isDragging) {
             return () => {};
         }
@@ -132,7 +151,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
     const screenY = isDragging && mode === PAN ? workspacePosition[1] - deltaY : workspacePosition[1];
 
     return (
-        <div className="flex flex-col w-full h-screen">
+        <div className="flex flex-col w-full h-screen" style={{overscrollBehavior: "none"}}>
             <SaveModal 
                 open={saveModalOpen}
                 onSaveComplete={completeSave}
