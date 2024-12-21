@@ -2,9 +2,8 @@ import React from 'react'
 import PartSvg from './PartSvg'
 import PanelSvg from './PanelSvg'
 import { saveAs } from 'file-saver'
-import { svgToDxf } from '../utils'
 
-const LayoutDisplaySvg = ({ layout }) => {
+const LayoutDisplaySvg = ({ layout, hideButton }) => {
     const svgRef = React.createRef()
 
     const convertToInkscapeSvg = (svgData) => {
@@ -64,41 +63,26 @@ const LayoutDisplaySvg = ({ layout }) => {
         saveAs(blob, `${layout.name}.svg`)
     }
 
-    const downloadDxf = () => {
-        const svgElement = svgRef.current
-        const svgData = new XMLSerializer().serializeToString(svgElement)
-        const dxfData = svgToDxf(svgData)
-        const blob = new Blob([dxfData], {
-            type: 'text/plain;charset=utf-8',
-        })
-        saveAs(blob, `${layout.name}.dxf`)
-    }
-
     return (
-        <div className="flex flex-grow flex-shrink h-0 w-full justify-center p-14">
-            <div className="flex flex-col items-center">
-                <svg
-                    ref={svgRef}
-                    width={layout.panelDimensions[0]}
-                    height={layout.panelDimensions[1]}
-                >
-                    <PanelSvg layout={layout} />
-                    {layout?.parts?.map((part, index) => (
-                        <PartSvg
-                            key={`part-${index}`}
-                            part={part}
-                            adjustments={[0, 0, 0]}
-                            parent={layout}
-                        />
-                    ))}
-                </svg>
+        <div className="flex flex-col items-center gap-4">
+            <svg ref={svgRef} className="overflow-visible">
+                <PanelSvg layout={layout} />
+                {layout?.parts?.map((part, index) => (
+                    <PartSvg
+                        key={`part-${index}`}
+                        part={part}
+                        parent={layout}
+                    />
+                ))}
+            </svg>
+            {!hideButton ? (
                 <button
                     onClick={downloadInkscapeSvg}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
                     Save SVG
                 </button>
-            </div>
+            ) : null}
         </div>
     )
 }
