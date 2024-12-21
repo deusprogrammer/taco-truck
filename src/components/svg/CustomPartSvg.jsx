@@ -3,7 +3,7 @@ import '@pixi/events'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import PartSvg from './PartSvg'
 
-const CustomPartSvg = ({ scale, part, parent }) => {
+const CustomPartSvg = ({ part, parent }) => {
     const [width, height] = calculateSizeOfPart(part)
     const { parts, panelDimensions } = parent
     const [panelWidth, panelHeight] = panelDimensions || [0, 0]
@@ -17,13 +17,12 @@ const CustomPartSvg = ({ scale, part, parent }) => {
     return (
         <>
             <g
-                transform={`translate(${fixedX}, ${fixedY}) rotate(${part.rotate || 0})`}
+                transform={`rotate(${part.rotation || 0}, ${width / 2}, ${height / 2}) translate(${fixedX}, ${fixedY})`}
             >
                 {part.layout.parts.map((customPart, index) => (
                     <>
                         <PartSvg
                             key={`part-${index}`}
-                            scale={scale}
                             part={customPart}
                             parent={{
                                 ...part.layout,

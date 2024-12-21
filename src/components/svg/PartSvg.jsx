@@ -3,7 +3,7 @@ import { calculateRelativePosition } from '../utils'
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import CustomPartSvg from './CustomPartSvg'
 
-const PartSvg = ({ scale, part, parent }) => {
+const PartSvg = ({ part, parent }) => {
     const { partId, type, rotation } = part
 
     const { parts, panelDimensions } = parent
@@ -16,7 +16,7 @@ const PartSvg = ({ scale, part, parent }) => {
     )
 
     if (type === 'custom') {
-        return <CustomPartSvg scale={scale} part={part} parent={parent} />
+        return <CustomPartSvg part={part} parent={parent} />
     }
 
     if (!partTable[type]?.[partId]) {
@@ -36,7 +36,7 @@ const PartSvg = ({ scale, part, parent }) => {
                     rotate={rotation || 0}
                     fill="white"
                     stroke="black"
-                    strokeWidth={1 * scale}
+                    strokeWidth={1}
                 />
             )
             break
