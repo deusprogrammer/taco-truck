@@ -29,15 +29,38 @@ const PartSvg = ({scale, part, parent, adjustments}) => {
     switch (shape) {
         case SQUARE:
             component = (
-                <rect x={(fixedX * scale) + adjustments.x} y={(fixedY * scale) + adjustments.y} width={size[0] * scale} height={size[1] * scale} rotate={rotation + adjustments.rotation || 0} stroke="black" />
+                <rect 
+                    x={fixedX * scale} 
+                    y={fixedY * scale} 
+                    width={size[0] * scale} 
+                    height={size[1] * scale} 
+                    rotate={rotation || 0} 
+                    fill='white'
+                    stroke="black" 
+                    strokeWidth={1 * scale}
+                />
             );
             break;
         case CIRCLE:
         default:
             component = (
                 <>
-                    <circle cx={(fixedX * scale) + adjustments.x} cy={(fixedY * scale) + adjustments.y} r={(size/2) * scale} stroke="white" />
-                    <circle cx={(fixedX * scale) + adjustments.x} cy={(fixedY * scale) + adjustments.y} r={1 * scale} stroke="white" />
+                    <circle 
+                        cx={fixedX * scale} 
+                        cy={fixedY * scale} 
+                        r={(size/2) * scale} 
+                        fill='white'
+                        stroke='black'
+                        strokeWidth={1 * scale}
+                    />
+                    <circle 
+                        cx={fixedX * scale} 
+                        cy={fixedY * scale} 
+                        r={1 * scale} 
+                        fill='white'
+                        stroke='black'
+                        strokeWidth={1 * scale}
+                    />
                 </>
             );
             break;

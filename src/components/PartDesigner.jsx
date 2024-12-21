@@ -3,6 +3,7 @@ import ModeSelect, { ADD, PAN, SELECT } from './elements/ModeSelect';
 import PartMenu from './menus/PartMenu';
 import ComponentMenu from './menus/ComponentMenu';
 import LayoutDisplay from './LayoutDisplay';
+import LayoutDisplaySvg from './svg/LayoutDisplaySvg';
 import PartDetailsMenu from './menus/PartDetailsMenu';
 import SaveModal from './menus/SaveModal';
 import ImportModal from './menus/ImportModal';
@@ -19,6 +20,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
     const buttons = useButtonDown();
     const previousIsDragging = usePrevious(isDragging);
     const [width, height] = useContainerSize(containerRef);
+
     const [workspacePosition, setWorkspacePosition] = useState([0, 0]);
 
     const [mode, setMode] = useState(SELECT);
@@ -28,6 +30,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
 
     const [selected, setSelected] = useState(null);
     const [hovered, setHovered] = useState(null);
+    const [viewingSVG, setViewingSVG] = useState(false);
 
     const [saveModalOpen, setSaveModalOpen] = useState(false);
     const [importModalOpen, setImportModalOpen] = useState(false);
@@ -152,8 +155,8 @@ const PartDesigner = ({layout, onLayoutChange}) => {
 
     const selectedPart = layout?.parts?.find(({id}) => id === selected);
 
-    const screenX = isDragging && mode === PAN ? workspacePosition[0] - deltaX : workspacePosition[0];
-    const screenY = isDragging && mode === PAN ? workspacePosition[1] - deltaY : workspacePosition[1];
+    const screenX = isDragging ? workspacePosition[0] - deltaX : workspacePosition[0];
+    const screenY = isDragging ? workspacePosition[1] - deltaY : workspacePosition[1];
 
     return (
         <div className="flex flex-col w-full h-screen" style={{overscrollBehavior: "none"}}>
@@ -174,6 +177,7 @@ const PartDesigner = ({layout, onLayoutChange}) => {
                 onModeChange={setMode} 
                 onSave={saveComponent}
                 onImport={importCustomPart}
+                onExport={setViewingSVG}
                 onZoomChange={(zoomChange) => setCurrentScale(currentScale + zoomChange)}
             />
             <PartMenu 
@@ -188,21 +192,29 @@ const PartDesigner = ({layout, onLayoutChange}) => {
                 onHover={setHovered} 
                 onLayoutChange={onLayoutChange} 
             />
-            <LayoutDisplay
-                workspaceRef={containerRef}
-                layout={layout}
-                currentScale={currentScale}
-                selected={selected}
-                hovered={hovered}
-                mode={mode}
-                workspaceDimensions={[width, height]}
-                workspacePosition={[screenX, screenY]}
-                placingPartId={placingPartId}
-                placingPartType={placingPartType}
-                onSelectPart={selectPart}
-                onSecondarySelectPart={afterSelect}
-                onLayoutChange={onLayoutChange}
-            />
+            {viewingSVG ? 
+                <LayoutDisplaySvg 
+                    workspaceRef={containerRef}
+                    layout={layout}
+                    currentScale={currentScale}
+                    workspacePosition={[screenX, screenY]}
+                /> : 
+                <LayoutDisplay
+                    workspaceRef={containerRef}
+                    layout={layout}
+                    currentScale={currentScale}
+                    selected={selected}
+                    hovered={hovered}
+                    mode={mode}
+                    workspaceDimensions={[width, height]}
+                    workspacePosition={[screenX, screenY]}
+                    placingPartId={placingPartId}
+                    placingPartType={placingPartType}
+                    onSelectPart={selectPart}
+                    onSecondarySelectPart={afterSelect}
+                    onLayoutChange={onLayoutChange}
+                />
+            }
             <PartDetailsMenu 
                 layout={layout}
                 selectedPart={selectedPart}

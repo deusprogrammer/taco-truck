@@ -27,6 +27,8 @@ export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, 
 
     let anchorAdjustmentX = 0;
     let anchorAdjustmentY = 0;
+    let originCoordX = 0;
+    let originCoordY = 0;
     if (!part.anchor) {
         part.anchor = [0, 0];
     }
@@ -38,7 +40,10 @@ export const calculateRelativePosition = (part, parts, panelWidth, panelHeight, 
     anchorAdjustmentX = part.anchor[0] * part.dimensions[0];
     anchorAdjustmentY = part.anchor[1] * part.dimensions[1];
 
-    return [(originX * panelWidth) + x + offsetX - anchorAdjustmentX, (originY * panelHeight) + y + offsetY - anchorAdjustmentY, anchorAdjustmentX, anchorAdjustmentY];
+    originCoordX = originX * panelWidth;
+    originCoordY = originY * panelHeight;
+
+    return [originCoordX + x + offsetX - anchorAdjustmentX, originCoordY + y + offsetY - anchorAdjustmentY, anchorAdjustmentX, anchorAdjustmentY];
 }
 
 export const calculateTextPositionAndRotation = (lineStartX, lineStartY, lineEndX, lineEndY, offset) => {
@@ -91,4 +96,57 @@ export const normalizePartPositionsToZero = (parts) => {
     });
 
     return parts;
+}
+
+export const calculateSizeOfPart = (part) => {
+    if (part.type !== "custom") {
+        let {size} = partTable[part.type][part.partId];
+
+        if (Array.isArray(size)) {
+            return size;
+        } else {
+            return [size, size];
+        }
+    } else {
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+
+        let layout = part.layout;
+        // console.log("PARTS for " + part.name + ":");
+        layout.parts.forEach((childPart) => {
+            let [x, y] = calculateRelativePosition(childPart, layout.parts, layout.panelDimensions[0], layout.panelDimensions[1]);
+
+            // If the part is not a custom part.
+            let xAdj = 0;
+            let yAdj = 0;
+            if (childPart.type && childPart.type !== "custom") {
+                const {size, shape} = partTable[childPart.type][childPart.partId];
+                xAdj = size;
+                yAdj = size;
+                if (Array.isArray(size)) {
+                    xAdj = size[0];
+                    yAdj = size[1];
+                }
+
+                if (shape === CIRCLE) {
+                    xAdj /= 2;
+                    yAdj /= 2;
+                }
+                minX = Math.min(minX, x - xAdj);
+                minY = Math.min(minY, y - yAdj);
+                maxX = Math.max(maxX, x + xAdj);
+                maxY = Math.max(maxY, y + yAdj);
+            } else {
+                [xAdj, yAdj] = calculateSizeOfPart(childPart);
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + xAdj);
+                maxY = Math.max(maxY, y + yAdj);
+            }
+        });
+        
+        return [maxX - minX, maxY - minY];
+    }
 }

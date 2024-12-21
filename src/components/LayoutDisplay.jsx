@@ -5,7 +5,6 @@ import { useMouseDrag, useMousePosition, usePrevious } from '../hooks/MouseHooks
 import { ADD, SELECT } from './elements/ModeSelect';
 import Part from './parts/Part';
 import Panel from './parts/Panel';
-import BoundingBox from './elements/BoundingBox';
 
 const LayoutDisplay = ({layout, currentScale, selected, hovered, mode, workspaceDimensions, workspacePosition, workspaceRef, placingPartId, placingPartType, onSelectPart, onSecondarySelectPart, onLayoutChange}) => {
     const componentRef = createRef();

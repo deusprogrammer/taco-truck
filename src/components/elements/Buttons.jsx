@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export const ModeButton = ({mode, currentMode, onClick}) => (
     <button 
         className={`text-white w-64 h-20 ${currentMode === mode.toUpperCase() ? "bg-black" : "bg-slate-600"} border-solid border-2 border-black`} 
@@ -55,8 +57,17 @@ export const ZoomButton = ({currentZoom, onZoomChange}) => (
     </>
 );
 
-export const ExportButton = ({layout}) => (
-    <svg>
-        
-    </svg>
-)
+export const ExportButton = ({onClick}) => {
+    const [toggle, setToggle] = useState(false);
+    return (
+        <button 
+            className={`text-white w-64 h-20 bg-slate-600 border-solid border-2 border-black`} 
+            onClick={() => {
+                setToggle(!toggle);
+                onClick(!toggle);
+            }}
+        >
+            {!toggle ? "Visual Mode" : "SVG Mode"}
+        </button>
+    )
+}

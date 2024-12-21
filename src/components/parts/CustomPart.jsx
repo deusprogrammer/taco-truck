@@ -1,17 +1,16 @@
 import React, { createRef } from 'react';
 import '@pixi/events';
-import { calculateRelativePosition } from '../utils';
+import { calculateRelativePosition, calculateSizeOfPart } from '../utils';
 import { Container, Graphics } from '@pixi/react';
 import Part from './Part';
-import { usePixiContainerSize } from '../../hooks/MouseHooks';
 
 const CustomPart = ({scale, part, selectedPartId, hoveredPartId, parent, onClick}) => {
     const containerRef = createRef();
-    const [width, height] = usePixiContainerSize(containerRef);
+    const [width, height] = calculateSizeOfPart(part);
 
     const {parts, panelDimensions} = parent;
     const [panelWidth, panelHeight] = panelDimensions || [0, 0];
-    const [fixedX, fixedY, anchorX, anchorY] = calculateRelativePosition({...part, dimensions: [width/scale, height/scale]}, parts, panelWidth, panelHeight);
+    const [fixedX, fixedY, anchorX, anchorY] = calculateRelativePosition({...part, dimensions: [width, height]}, parts, panelWidth, panelHeight);
 
     return (
         <Container
