@@ -1,5 +1,7 @@
 import { CIRCLE, partTable } from "../data/parts.table";
 
+import Drawing from 'dxf-writer';
+
 export const generateUUID = () => {
     let d = new Date().getTime();
     if (typeof performance !== 'undefined' && performance.now) {
@@ -150,3 +152,64 @@ export const calculateSizeOfPart = (part) => {
         return [maxX - minX, maxY - minY];
     }
 }
+
+// Adjust this to handle group tags
+export const svgToDxf = (svgString) => {
+    // 1. Parse the SVG string into an XML document
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+
+    // 2. Extract necessary data from the SVG 
+    const svgElements = doc.querySelectorAll('path, line, circle, rect, polygon, polyline');
+
+    let d = new Drawing();
+    d.setUnits('Millimeters');
+    d.addLayer('l_green', Drawing.ACI.GREEN, 'CONTINUOUS');
+    d.setActiveLayer('l_green');
+    svgElements.forEach(element => {
+        d = svgElementToDxf(element, d);
+    });
+
+    return d.toDxfString();
+}
+
+export const svgElementToDxf = (element, drawing) => {
+    switch (element.tagName) {
+        case 'line':
+            const x1 = parseFloat(element.getAttribute('x1'));
+            const y1 = -parseFloat(element.getAttribute('y1'));
+            const x2 = parseFloat(element.getAttribute('x2'));
+            const y2 = -parseFloat(element.getAttribute('y2'));
+            drawing.drawLine(x1, y1, x2, y2);
+            break;
+        case 'circle':
+            const cx = parseFloat(element.getAttribute('cx'));
+            const cy = -parseFloat(element.getAttribute('cy'));
+            const r = parseFloat(element.getAttribute('r'));
+            drawing.drawCircle(cx, cy, r);
+            break;
+        case 'rect':
+            const x = parseFloat(element.getAttribute('x'));
+            const y = -parseFloat(element.getAttribute('y'));
+            const width = parseFloat(element.getAttribute('width'));
+            const height = -parseFloat(element.getAttribute('height'));
+            drawing.drawRect(x, y, width, height);
+            break;
+        default:
+            // Handle other SVG elements or log a warning
+            console.warn(`Unsupported SVG element: ${element.tagName}`);
+    }
+
+  return drawing;
+}
+
+// // Example usage:
+// const svgString = '<svg><line x1="0" y1="0" x2="100" y2="100" /></svg>';
+// const dxfString = svgToDxf(svgString);
+
+// // Download the DXF file
+// const blob = new Blob([dxfString], { type: 'text/plain' });
+// const link = document.createElement('a');
+// link.href = URL.createObjectURL(blob);
+// link.download = 'output.dxf';
+// link.click();

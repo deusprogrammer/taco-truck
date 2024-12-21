@@ -1,14 +1,15 @@
-import React from 'react';
+import React from 'react'
 
-const PanelSvg = ({layout, scale, fill}) => (
-    <rect 
-        x={0} 
-        y={0} 
-        width={layout?.panelDimensions?.[0] * scale} 
-        height={layout?.panelDimensions?.[1] * scale} 
-        stroke="black" 
-        strokeWidth={1 * scale}
-        fill={fill} />
-);
+const PanelSvg = ({ layout, fill }) => (
+    <rect
+        x={0}
+        y={0}
+        width={layout?.panelDimensions?.[0]}
+        height={layout?.panelDimensions?.[1]}
+        stroke="black"
+        strokeWidth={1}
+        fill="white"
+    />
+)
 
-export default PanelSvg;
+export default PanelSvg

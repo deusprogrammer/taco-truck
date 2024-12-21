@@ -7,7 +7,6 @@ const PartDesignerRoute = () => {
 
     const [layout, setLayout] = useState(
         {
-            
             units: "mm",
             panelDimensions: [0, 0],
             parts: []
