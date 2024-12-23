@@ -49,14 +49,6 @@ const CustomPart = ({
                     />
                 </React.Fragment>
             ))}
-            <Graphics
-                draw={(g) => {
-                    g.clear()
-                    g.beginFill('#00ffff')
-                    g.drawCircle(anchorX * scale, anchorY * scale, 2 * scale)
-                    g.endFill()
-                }}
-            />
         </Container>
     )
 }

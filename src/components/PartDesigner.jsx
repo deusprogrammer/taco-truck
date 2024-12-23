@@ -1,5 +1,5 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
-import ModeSelect, { ADD, PAN, SELECT } from './elements/ModeSelect'
+import ModeSelect, { ADD, SELECT } from './elements/ModeSelect'
 import PartMenu from './menus/PartMenu'
 import ComponentMenu from './menus/ComponentMenu'
 import LayoutDisplay from './LayoutDisplay'
@@ -21,7 +21,10 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
     const [currentScale, setCurrentScale] = useState(2.0)
 
     const containerRef = createRef()
-    const [deltaX, deltaY, isDragging] = useMouseDrag(containerRef)
+    const [deltaX, deltaY, isDragging, reset] = useMouseDrag(
+        containerRef,
+        'middle'
+    )
     const buttons = useButtonDown()
     const previousIsDragging = usePrevious(isDragging)
     const [width, height] = useContainerSize(containerRef)
@@ -57,12 +60,9 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                 return
             }
 
-            setWorkspacePosition([
-                workspacePosition[0] - deltaX,
-                workspacePosition[1] - deltaY,
-            ])
+            setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
         },
-        [workspacePosition, currentScale, buttons]
+        [currentScale, buttons]
     )
 
     const completeSave = (name, type) => {
@@ -152,10 +152,11 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
             return () => {}
         }
 
-        if (!isDragging && mode === PAN) {
+        if (!isDragging) {
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
+            reset()
         }
-    }, [isDragging, previousIsDragging, deltaX, deltaY, mode])
+    }, [isDragging, previousIsDragging, deltaX, deltaY, reset])
 
     useEffect(() => {
         setWorkspacePosition([width / 2, height / 2])

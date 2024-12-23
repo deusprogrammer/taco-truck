@@ -29,8 +29,8 @@ const PartSvg = ({ part, parent }) => {
         case SQUARE:
             component = (
                 <rect
-                    x={fixedX}
-                    y={fixedY}
+                    x={fixedX - size[0] / 2}
+                    y={fixedY - size[1] / 2}
                     width={size[0]}
                     height={size[1]}
                     rotate={rotation || 0}

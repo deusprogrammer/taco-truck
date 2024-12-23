@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+export const getMouseButtonsMap = (evt) => {
+    return {
+        left: !!(evt.buttons & 1),
+        right: !!(evt.buttons & 2),
+        middle: !!(evt.buttons & 4),
+        back: !!(evt.buttons & 8),
+        forward: !!(evt.buttons & 16),
+    };
+};
+
 export const useMousePosition = (ref) => {
     const [status, setStatus] = useState({x: 0, y: 0, buttons: null});
 
@@ -57,16 +67,23 @@ export const useButtonDown = () => {
     return buttonsDown;
 }
 
-export const useMouseDrag = (ref) => {
+export const useMouseDrag = (ref, button) => {
     const [delta, setDelta] = useState({x: 0, y: 0});
     const dragStart = useRef(null);
 
     const updateStatus = useCallback((evt) => {
-        if (!dragStart.current) {
+        const buttonMap = getMouseButtonsMap(evt);
+
+        if (!dragStart.current || !buttonMap[button]) {
             return;
         }
 
         setDelta({x: dragStart.current[0] - evt.clientX, y: dragStart.current[1] - evt.clientY});
+    }, [button]);
+
+    const reset = useCallback(() => {
+        dragStart.current = null;
+        setDelta({ x: 0, y: 0 });
     }, []);
 
     const clearDrag = useCallback(() => {
@@ -93,7 +110,7 @@ export const useMouseDrag = (ref) => {
         }
     }, [ref, updateStatus, startDrag, clearDrag]);
 
-    return [delta.x, delta.y, dragStart.current !== null];
+    return [delta.x, delta.y, dragStart.current !== null, reset];
 }
 
 export const useViewportSize = () => {

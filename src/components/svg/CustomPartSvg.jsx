@@ -17,7 +17,7 @@ const CustomPartSvg = ({ part, parent }) => {
     return (
         <>
             <g
-                transform={`rotate(${part.rotation || 0}, ${width / 2}, ${height / 2}) translate(${fixedX}, ${fixedY})`}
+                transform={`translate(${fixedX}, ${fixedY}) rotate(${part.rotation || 0}, 0, 0)`}
             >
                 {part.layout.parts.map((customPart, index) => (
                     <>
