@@ -35,7 +35,7 @@ const LayoutDisplay = ({
 
     const addPart = useCallback(
         (evt) => {
-            if (mode !== ADD || evt.buttons !== 1) {
+            if (mode !== ADD) {
                 return
             }
 

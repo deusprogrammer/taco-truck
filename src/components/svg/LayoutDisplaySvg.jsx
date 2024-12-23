@@ -1,10 +1,15 @@
-import React from 'react'
+import React, { createRef } from 'react'
 import PartSvg from './PartSvg'
 import PanelSvg from './PanelSvg'
 import { saveAs } from 'file-saver'
+import { calculateSizeOfPart } from '../utils'
 
 const LayoutDisplaySvg = ({ layout, hideButton }) => {
-    const svgRef = React.createRef()
+    const svgRef = createRef()
+    const [partsWidth, partsHeight] = calculateSizeOfPart({
+        type: 'custom',
+        layout: layout,
+    })
 
     const convertToInkscapeSvg = (svgData) => {
         const parser = new DOMParser()
@@ -65,7 +70,20 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
 
     return (
         <div className="flex flex-col items-center gap-4">
-            <svg ref={svgRef} className="overflow-visible">
+            <svg
+                ref={svgRef}
+                width={
+                    layout?.panelDimensions[0] !== 0
+                        ? layout?.panelDimensions[0]
+                        : partsWidth
+                }
+                height={
+                    layout?.panelDimensions[1] !== 0
+                        ? layout?.panelDimensions[1]
+                        : partsHeight
+                }
+                className="overflow-visible"
+            >
                 <PanelSvg layout={layout} />
                 {layout?.parts?.map((part, index) => (
                     <PartSvg

@@ -1,5 +1,6 @@
 import React from 'react'
 import { partTable } from '../../data/parts.table'
+import BufferedInput from '../elements/BufferedInput'
 
 const ComponentMenu = ({
     layout,
@@ -8,6 +9,10 @@ const ComponentMenu = ({
     onSelect,
     onHover,
 }) => {
+    const updatePanelSize = (dimensions) => {
+        onLayoutChange({ ...layout, panelDimensions: dimensions })
+    }
+
     return (
         <div className="flex flex-col gap-1 absolute left-[10px] top-[50%] max-h-[50%] max-w-[300px] p-2 translate-y-[-50%] bg-slate-400">
             <h2 className="text-center text-[1rem] font-bold">
@@ -21,6 +26,19 @@ const ComponentMenu = ({
                     onChange={({ target: { value } }) => {
                         onLayoutChange({ ...layout, name: value })
                     }}
+                />
+                <h3>Panel:</h3>
+                <BufferedInput
+                    value={layout?.panelDimensions[0] || 0}
+                    onChange={(value) =>
+                        updatePanelSize([value, layout?.panelDimensions[1]])
+                    }
+                />
+                <BufferedInput
+                    value={layout?.panelDimensions[1] || 0}
+                    onChange={(value) =>
+                        updatePanelSize([layout?.panelDimensions[0], value])
+                    }
                 />
                 <h3>Parts:</h3>
                 {[...Object.keys(partTable), 'custom'].map((key) => (

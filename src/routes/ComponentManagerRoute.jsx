@@ -48,9 +48,12 @@ const ComponentManagerRoute = () => {
                 <h2 className="text-[1.8rem]">Panel Designs</h2>
                 <table>
                     {panelDesigns.map((project) => (
-                        <tr key={project.id}>
-                            <td>{project.name}</td>
-                            <td className="w-96">
+                        <tr
+                            key={project.id}
+                            className="border-b-2 border-black border-solid"
+                        >
+                            <td className="w-16">{project.name}</td>
+                            <td className="p-8">
                                 <LayoutDisplaySvg
                                     hideButton={true}
                                     layout={project.layout}
@@ -79,9 +82,12 @@ const ComponentManagerRoute = () => {
                 <h2 className="text-[1.8rem]">Custom Parts</h2>
                 <table>
                     {customParts.map((part) => (
-                        <tr key={part.id}>
+                        <tr
+                            key={part.id}
+                            className="border-b-2 border-black border-solid"
+                        >
                             <td>{part.name}</td>
-                            <td className="w-96">
+                            <td className="w-96 p-8">
                                 <LayoutDisplaySvg
                                     hideButton={true}
                                     layout={part.layout}
