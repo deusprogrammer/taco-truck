@@ -4,6 +4,8 @@ const PanelSvg = ({ layout, fill }) => (
     <rect
         x={0}
         y={0}
+        rx={layout?.cornerRadius || 0}
+        ry={layout?.cornerRadius || 0}
         width={layout?.panelDimensions?.[0]}
         height={layout?.panelDimensions?.[1]}
         stroke="black"

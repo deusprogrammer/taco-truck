@@ -14,6 +14,10 @@ const ComponentMenu = ({
         onLayoutChange({ ...layout, panelDimensions: dimensions })
     }
 
+    const updateCornerRadius = (radius) => {
+        onLayoutChange({ ...layout, cornerRadius: radius })
+    }
+
     const deleteComponent = (id) => {
         const updatedParts = layout.parts.filter((part) => part.id !== id)
         onLayoutChange({ ...layout, parts: updatedParts })
@@ -47,6 +51,18 @@ const ComponentMenu = ({
                     onChange={(value) =>
                         updatePanelSize([layout?.panelDimensions[0], value])
                     }
+                />
+                <label>Width:</label>
+                <BufferedInput
+                    value={layout?.panelDimensions[0] || 0}
+                    onChange={(value) =>
+                        updatePanelSize([value, layout?.panelDimensions[1]])
+                    }
+                />
+                <label>Corner Radius:</label>
+                <BufferedInput
+                    value={layout?.cornerRadius || 0}
+                    onChange={(value) => updateCornerRadius(value)}
                 />
                 <label>Parts:</label>
                 {[...Object.keys(partTable), 'custom'].map((key) => (
