@@ -70,6 +70,27 @@ const PartDetailsMenu = ({
                             ? `${selectedPart?.name}`
                             : 'Select'}
                     </button>
+                    {selectedPart.relativeTo ? (
+                        <button
+                            className={`h-8 min-w-20 p-1 ${onSecondarySelectPart ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black`}
+                            onClick={() => {
+                                const relativePosition =
+                                    calculateRelativePosition(
+                                        selectedPart,
+                                        layout.parts,
+                                        layout.panelDimensions[0],
+                                        layout.panelDimensions[1]
+                                    )
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: relativePosition,
+                                    relativeTo: null,
+                                })
+                            }}
+                        >
+                            Remove Relation
+                        </button>
+                    ) : null}
                 </div>
                 <div className="flex flex-col gap-1">
                     <label>rotation:</label>
