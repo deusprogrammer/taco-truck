@@ -35,24 +35,38 @@ const Part = ({
                 (selectedPartId === id || hoveredPartId === id) &&
                 (selectedPartId || hoveredPartId)
             ) {
-                g.beginFill(selectedPartId === id ? 0x00ff00 : 0x00ffff)
+                g.beginFill(selectedPartId === id ? 0x00ff00 : 0xff0000)
+            } else {
+                g.beginFill(0xffffff)
+            }
+
+            if (rim > 0) {
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
-                    renderScale * (radius + rim + 2)
+                    renderScale * (radius + rim)
                 )
+                g.beginFill(0x000000)
+                g.drawCircle(
+                    renderScale * x,
+                    renderScale * y,
+                    renderScale * radius
+                )
+                g.endFill()
+            } else {
+                g.drawCircle(
+                    renderScale * x,
+                    renderScale * y,
+                    renderScale * radius
+                )
+                g.beginFill(0x000000)
+                g.drawCircle(
+                    renderScale * x,
+                    renderScale * y,
+                    renderScale * radius - 2
+                )
+                g.endFill()
             }
-            g.beginFill(0xffffff)
-            g.drawCircle(
-                renderScale * x,
-                renderScale * y,
-                renderScale * (radius + rim)
-            )
-            g.beginFill(0x000000)
-            g.drawCircle(renderScale * x, renderScale * y, renderScale * radius)
-            g.beginFill(0xff0000)
-            g.drawCircle(renderScale * x, renderScale * y, renderScale * 2)
-            g.endFill()
         },
         [id, selectedPartId, hoveredPartId]
     )
