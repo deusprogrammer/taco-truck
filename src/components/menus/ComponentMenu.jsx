@@ -52,13 +52,6 @@ const ComponentMenu = ({
                         updatePanelSize([layout?.panelDimensions[0], value])
                     }
                 />
-                <label>Width:</label>
-                <BufferedInput
-                    value={layout?.panelDimensions[0] || 0}
-                    onChange={(value) =>
-                        updatePanelSize([value, layout?.panelDimensions[1]])
-                    }
-                />
                 <label>Corner Radius:</label>
                 <BufferedInput
                     value={layout?.cornerRadius || 0}
