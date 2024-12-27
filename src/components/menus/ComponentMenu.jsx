@@ -24,6 +24,17 @@ const ComponentMenu = ({
         onSelect(null)
     }
 
+    const handleFileChange = (event) => {
+        const file = event.target.files[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                onLayoutChange({ ...layout, artwork: reader.result })
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
     return (
         <div className="absolute left-[10px] top-[50%] flex max-h-[50%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
             <h2 className="text-center text-[1rem] font-bold">
@@ -57,6 +68,8 @@ const ComponentMenu = ({
                     value={layout?.cornerRadius || 0}
                     onChange={(value) => updateCornerRadius(value)}
                 />
+                <label>Artwork:</label>
+                <input type="file" onChange={handleFileChange} />
                 <label>Parts:</label>
                 {[...Object.keys(partTable), 'custom'].map((key) => (
                     <React.Fragment key={`part-type-${key}`}>
