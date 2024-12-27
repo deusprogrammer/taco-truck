@@ -44,14 +44,14 @@ const ComponentManagerRoute = () => {
                     ...project,
                     isLocal: true,
                 })),
-            ]
+            ].sort((a, b) => a.name.localeCompare(b.name))
             const combinedParts = [
                 ...cloudData.components,
                 ...localData.customParts.map((part) => ({
                     ...part,
                     isLocal: true,
                 })),
-            ]
+            ].sort((a, b) => a.name.localeCompare(b.name))
 
             setCombinedProjects(combinedProjects)
             setCombinedParts(combinedParts)
@@ -106,10 +106,14 @@ const ComponentManagerRoute = () => {
                             className={`border-b-2 border-solid border-black`}
                         >
                             <td
-                                className={`w-16 p-2 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                                className={`w-52 p-2 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
                             >
                                 {project.name}
                                 {project.isLocal ? '(Local)' : ''}
+                                <br />
+                                <br />
+                                {project.layout.panelDimensions?.[0]}mm X{' '}
+                                {project.layout.panelDimensions?.[1]}mm
                             </td>
                             <td className="p-8">
                                 <LayoutDisplaySvg
