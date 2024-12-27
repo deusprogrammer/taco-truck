@@ -44,7 +44,14 @@ const ComponentManagerRoute = () => {
                     ...project,
                     isLocal: true,
                 })),
-            ].sort((a, b) => a.name.localeCompare(b.name))
+            ].sort((a, b) => {
+                const areaA =
+                    a.layout.panelDimensions[0] * a.layout.panelDimensions[1]
+                const areaB =
+                    b.layout.panelDimensions[0] * b.layout.panelDimensions[1]
+                if (areaA !== areaB) return areaA - areaB
+                return a.name.localeCompare(b.name)
+            })
             const combinedParts = [
                 ...cloudData.components,
                 ...localData.customParts.map((part) => ({
