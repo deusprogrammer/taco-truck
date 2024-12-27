@@ -13,6 +13,7 @@ const PartMenu = ({ active, currentPart, onChange }) => {
                 return Object.keys(partTable[partType]).map((partId) => {
                     return (
                         <PartSelectionButton
+                            key={`part-menu-${partType}-${partId}`}
                             placingPart={currentPart}
                             partType={partType}
                             partId={partId}

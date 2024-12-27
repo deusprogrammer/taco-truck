@@ -34,7 +34,7 @@ const CustomPart = ({
             interactive={true}
         >
             {part.layout.parts.map((customPart, index) => (
-                <React.Fragment key={`part-${index}`}>
+                <React.Fragment key={`custom-part-${index}`}>
                     <Part
                         selectedPartId={selectedPartId}
                         hoveredPartId={hoveredPartId}

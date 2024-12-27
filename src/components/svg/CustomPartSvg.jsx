@@ -22,7 +22,7 @@ const CustomPartSvg = ({ part, parent }) => {
                 {part.layout.parts.map((customPart, index) => (
                     <>
                         <PartSvg
-                            key={`part-${index}`}
+                            key={`custom-partsvg-${customPart.id || index}`}
                             part={customPart}
                             parent={{
                                 ...part.layout,

@@ -17,6 +17,8 @@ import {
 } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
+import { useAtom } from 'jotai'
+import { renderMeasurementsAtom } from '../atoms/ViewOptions.atom'
 
 const SCALE_RATIO = 10
 
@@ -39,6 +41,9 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
+    const [showMeasurements, setShowMeasurements] = useAtom(
+        renderMeasurementsAtom
+    )
 
     const [selected, setSelected] = useState(null)
     const [hovered, setHovered] = useState(null)
@@ -207,6 +212,23 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
         onLayoutChange(updatedLayout)
         setAfterSelect(null)
     }
+
+    const onButtonDown = useCallback(
+        (e) => {
+            console.log('BUTTONS: ' + e.key)
+            if (e.key.includes('m')) {
+                setShowMeasurements(!showMeasurements)
+            }
+        },
+        [showMeasurements, setShowMeasurements]
+    )
+
+    useEffect(() => {
+        window.addEventListener('keydown', onButtonDown)
+        return () => {
+            window.removeEventListener('keydown', onButtonDown)
+        }
+    }, [onButtonDown])
 
     useEffect(() => {
         if (!containerRef?.current) {

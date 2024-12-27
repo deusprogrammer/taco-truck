@@ -3,8 +3,11 @@ import Home from './routes/Home'
 import PartDesignerRoute from './routes/PartDesignerRoute'
 import ComponentManagerRoute from './routes/ComponentManagerRoute'
 import './App.css'
+import { useEffect } from 'react'
 
 const App = () => {
+    useEffect(() => {}, [])
+
     return (
         <BrowserRouter>
             <Routes>

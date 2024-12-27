@@ -10,6 +10,7 @@
         "dxf-writer": "^1.18.4",
         "file-saver": "^2.0.5",
         "firebase": "^11.1.0",
+        "jotai": "^2.11.0",
         "pixi.js": "^7.4.2",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

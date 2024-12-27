@@ -59,7 +59,7 @@ const ComponentMenu = ({
                 />
                 <label>Parts:</label>
                 {[...Object.keys(partTable), 'custom'].map((key) => (
-                    <React.Fragment key={key}>
+                    <React.Fragment key={`part-type-${key}`}>
                         <h4 className="bg-slate-300">{key.toUpperCase()}</h4>
                         {layout?.parts
                             ?.filter(({ type }) => key === type)
@@ -69,7 +69,6 @@ const ComponentMenu = ({
                                     key={`part-${index}`}
                                 >
                                     <button
-                                        key={`element-${index}`}
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
                                         onClick={() => {
                                             onSelect(id)
@@ -84,7 +83,6 @@ const ComponentMenu = ({
                                         <b>{name}</b>({partId})
                                     </button>
                                     <button
-                                        key={`element-${index}`}
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
                                         onClick={() => {
                                             deleteComponent(id)

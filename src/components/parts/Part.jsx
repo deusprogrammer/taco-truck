@@ -8,6 +8,8 @@ import {
     calculateTextPositionAndRotation,
 } from '../utils'
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
+import { useAtom } from 'jotai'
+import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
 
 const Part = ({
     scale,
@@ -17,6 +19,7 @@ const Part = ({
     parent,
     onClick,
 }) => {
+    const [showMeasurements] = useAtom(renderMeasurementsAtom)
     const { partId, type, id, rotation } = part
 
     const { parts, panelDimensions } = parent
@@ -261,11 +264,15 @@ const Part = ({
     return (
         <>
             {component}
-            <Graphics
-                draw={(g) => drawLine(fixedX, fixedY, scale, g)}
-                zIndex={5}
-            />
-            {textComponents}
+            {showMeasurements ? (
+                <>
+                    <Graphics
+                        draw={(g) => drawLine(fixedX, fixedY, scale, g)}
+                        zIndex={5}
+                    />
+                    {textComponents}
+                </>
+            ) : null}
         </>
     )
 }

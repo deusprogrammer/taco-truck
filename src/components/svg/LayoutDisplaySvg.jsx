@@ -87,7 +87,7 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
                 <PanelSvg layout={layout} />
                 {layout?.parts?.map((part, index) => (
                     <PartSvg
-                        key={`part-${index}`}
+                        key={`partsvg-${part.id || index}`}
                         part={part}
                         parent={layout}
                     />
