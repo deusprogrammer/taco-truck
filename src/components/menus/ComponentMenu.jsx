@@ -25,7 +25,7 @@ const ComponentMenu = ({
     }
 
     return (
-        <div className="flex flex-col gap-1 absolute left-[10px] top-[50%] max-h-[50%] max-w-[300px] p-2 translate-y-[-50%] bg-slate-400">
+        <div className="absolute left-[10px] top-[50%] flex max-h-[50%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
             <h2 className="text-center text-[1rem] font-bold">
                 Component Details
             </h2>
@@ -77,7 +77,7 @@ const ComponentMenu = ({
                                 >
                                     <button
                                         key={`element-${index}`}
-                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} hover:bg-slate-600 hover:text-white border-solid border-2 border-black`}
+                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
                                         onClick={() => {
                                             onSelect(id)
                                         }}
@@ -92,7 +92,7 @@ const ComponentMenu = ({
                                     </button>
                                     <button
                                         key={`element-${index}`}
-                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} hover:bg-slate-600 hover:text-white border-solid border-2 border-black`}
+                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
                                         onClick={() => {
                                             deleteComponent(id)
                                         }}

@@ -8,16 +8,20 @@ import PartDetailsMenu from './menus/PartDetailsMenu'
 import SaveModal from './menus/SaveModal'
 import ImportModal from './menus/ImportModal'
 import { generateUUID, normalizePartPositionsToZero } from './utils'
+import { addDoc, collection, db, doc } from '../firebase.config'
 import {
     useButtonDown,
     useContainerSize,
     useMouseDrag,
     usePrevious,
 } from '../hooks/MouseHooks'
+import { useNavigate } from 'react-router'
+import { getDoc } from 'firebase/firestore'
 
 const SCALE_RATIO = 10
 
 const PartDesigner = ({ layout, onLayoutChange }) => {
+    const navigate = useNavigate()
     const [currentScale, setCurrentScale] = useState(2.0)
 
     const containerRef = createRef()
@@ -65,7 +69,48 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
         [currentScale, buttons]
     )
 
-    const completeSave = (name, type) => {
+    const completeSave = (name, type, isLocal) => {
+        if (isLocal) {
+            saveLocal(name, type)
+        } else {
+            saveCloud(name, type)
+        }
+    }
+
+    const saveCloud = async (name, type) => {
+        try {
+            // Normalize values to zero
+            const layoutCopy = {
+                ...layout,
+                name,
+                parts:
+                    type === 'customParts'
+                        ? normalizePartPositionsToZero([...layout.parts])
+                        : layout.parts,
+            }
+
+            const data = {
+                name,
+                layout: layoutCopy,
+            }
+
+            let docRef
+            if (type === 'customParts') {
+                docRef = await addDoc(collection(db, 'components'), data)
+            } else if (type === 'panelDesigns') {
+                docRef = await addDoc(collection(db, 'projects'), data)
+            }
+
+            console.log('Document successfully written!')
+            navigate(
+                `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${docRef.id}`
+            )
+        } catch (e) {
+            console.error('Error adding document: ', e)
+        }
+    }
+
+    const saveLocal = (name, type) => {
         if (!localStorage.getItem('taco-truck-data')) {
             localStorage.setItem(
                 'taco-truck-data',
@@ -87,27 +132,55 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
         }
 
         const data = JSON.parse(localStorage.getItem('taco-truck-data'))
-        data[type].push({
+        const newEntry = {
             id: generateUUID(),
             name,
             layout: layoutCopy,
-        })
+        }
+        data[type].push(newEntry)
 
         localStorage.setItem('taco-truck-data', JSON.stringify(data))
+        navigate(
+            `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${newEntry.id}?isLocal=true`
+        )
     }
 
-    const completeImport = (partIds) => {
+    const completeImport = async (partIds) => {
         const dataJSON = localStorage.getItem('taco-truck-data')
-        const data = JSON.parse(dataJSON)
+        const localData = JSON.parse(dataJSON)
 
-        const partsToImport = data.customParts
-            .filter(({ id }) => partIds.includes(id))
-            .map((part) => ({
-                type: 'custom',
-                position: [0, 0],
-                origin: [0, 0],
-                ...part,
-            }))
+        const partsToImport = await Promise.all(
+            partIds.map(async (partId) => {
+                if (partId.startsWith('local-')) {
+                    const localPartId = partId.replace('local-', '')
+                    const part = localData.customParts.find(
+                        ({ id }) => id === localPartId
+                    )
+                    return {
+                        type: 'custom',
+                        id: generateUUID(),
+                        position: [0, 0],
+                        origin: [0, 0],
+                        ...part,
+                    }
+                } else if (partId.startsWith('cloud-')) {
+                    const cloudPartId = partId.replace('cloud-', '')
+                    const docRef = doc(db, 'components', cloudPartId)
+                    const docSnap = await getDoc(docRef)
+                    if (docSnap.exists()) {
+                        const part = docSnap.data()
+                        return {
+                            type: 'custom',
+                            id: generateUUID(),
+                            position: [0, 0],
+                            origin: [0, 0],
+                            ...part,
+                        }
+                    }
+                }
+                return null
+            })
+        )
 
         onLayoutChange({
             ...layout,
@@ -173,11 +246,12 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
 
     return (
         <div
-            className="flex flex-col w-full h-screen"
+            className="flex h-screen w-full flex-col"
             style={{ overscrollBehavior: 'none' }}
         >
             <SaveModal
                 open={saveModalOpen}
+                name={layout.name}
                 onSaveComplete={completeSave}
                 onClose={() => setSaveModalOpen(false)}
             />
@@ -211,7 +285,7 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                 onLayoutChange={onLayoutChange}
             />
             {viewingSVG ? (
-                <div className="flex flex-grow flex-shrink h-0 w-full justify-center p-14">
+                <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
                     <LayoutDisplaySvg layout={layout} />
                 </div>
             ) : (

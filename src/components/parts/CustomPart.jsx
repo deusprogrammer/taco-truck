@@ -17,7 +17,7 @@ const CustomPart = ({
 
     const { parts, panelDimensions } = parent
     const [panelWidth, panelHeight] = panelDimensions || [0, 0]
-    const [fixedX, fixedY, anchorX, anchorY] = calculateRelativePosition(
+    const [fixedX, fixedY] = calculateRelativePosition(
         { ...part, dimensions: [width, height] },
         parts,
         panelWidth,

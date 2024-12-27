@@ -1,73 +1,110 @@
-import { useState } from "react";
+import { useState } from 'react'
+import { useNavigate } from 'react-router'
 
-export const ModeButton = ({mode, currentMode, onClick}) => (
-    <button 
-        className={`text-white w-64 h-20 ${currentMode === mode.toUpperCase() ? "bg-black" : "bg-slate-600"} border-solid border-2 border-black`} 
-        onClick={(e) => {onClick(e, mode.toUpperCase())}}
+export const NewButton = () => {
+    const navigate = useNavigate()
+
+    return (
+        <button
+            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+            onClick={() => {
+                navigate('/designer')
+            }}
+        >
+            New
+        </button>
+    )
+}
+
+export const OpenButton = () => {
+    const navigate = useNavigate()
+
+    return (
+        <button
+            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+            onClick={() => {
+                navigate('/manager')
+            }}
+        >
+            Open
+        </button>
+    )
+}
+
+export const ModeButton = ({ mode, currentMode, onClick }) => (
+    <button
+        className={`h-20 w-64 text-white ${currentMode === mode.toUpperCase() ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
+        onClick={(e) => {
+            onClick(e, mode.toUpperCase())
+        }}
     >
         {mode}
     </button>
-);
+)
 
-export const SaveButton = ({onClick}) => (
-    <button 
-        className={`text-white w-64 h-20 bg-slate-600 border-solid border-2 border-black`} 
+export const SaveButton = ({ onClick }) => (
+    <button
+        className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
         onClick={onClick}
     >
         Save
     </button>
-);
+)
 
-export const ImportButton = ({onClick}) => (
-    <button 
-        className={`text-white w-64 h-20 bg-slate-600 border-solid border-2 border-black`} 
+export const ImportButton = ({ onClick }) => (
+    <button
+        className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
         onClick={onClick}
     >
         Import
     </button>
-);
+)
 
-export const PartSelectionButton = ({name, partId, partType, placingPart, onClick}) => (
-    <button 
-        className={`text-white w-64 h-20 ${placingPart === partId ? "bg-black" : "bg-slate-600"} border-solid border-2 border-black`} 
+export const PartSelectionButton = ({
+    name,
+    partId,
+    partType,
+    placingPart,
+    onClick,
+}) => (
+    <button
+        className={`h-20 w-64 text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
         onClick={() => onClick(partType, partId)}
     >
         {name}
     </button>
-);
+)
 
-export const ZoomButton = ({currentZoom, onZoomChange}) => (
+export const ZoomButton = ({ currentZoom, onZoomChange }) => (
     <>
-        <button 
-            className={`text-white bg-slate-600 w-64 h-20 border-solid border-2 border-black`} 
+        <button
+            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
             disabled={currentZoom === 0.5}
             onClick={() => onZoomChange(-0.5)}
         >
             -
         </button>
-        <div>
-            {currentZoom * 100}%
-        </div>
-        <button 
-            className={`text-white bg-slate-600 w-64 h-20 border-solid border-2 border-black`} 
+        <div>{currentZoom * 100}%</div>
+        <button
+            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
             onClick={() => onZoomChange(0.5)}
         >
             +
         </button>
     </>
-);
+)
 
-export const ExportButton = ({onClick}) => {
-    const [toggle, setToggle] = useState(false);
+export const ExportButton = ({ onClick }) => {
+    const [toggle, setToggle] = useState(false)
     return (
-        <button 
-            className={`text-white w-64 h-20 bg-slate-600 border-solid border-2 border-black`} 
+        <button
+            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
             onClick={() => {
-                setToggle(!toggle);
-                onClick(!toggle);
+                setToggle(!toggle)
+                onClick(!toggle)
             }}
         >
-            {!toggle ? "Visual Mode" : "SVG Mode"}
+            {!toggle ? 'Visual Mode' : 'SVG Mode'}
         </button>
     )
 }

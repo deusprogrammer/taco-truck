@@ -1,58 +1,116 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import LayoutDisplaySvg from '../components/svg/LayoutDisplaySvg'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../firebase.config'
 
 const ComponentManagerRoute = () => {
-    const [customParts, setCustomParts] = useState([])
-    const [panelDesigns, setPanelDesigns] = useState([])
+    const [customParts] = useState([])
+    const [panelDesigns] = useState([])
+    const [combinedProjects, setCombinedProjects] = useState([])
+    const [combinedParts, setCombinedParts] = useState([])
 
     useEffect(() => {
-        let dataJSON = localStorage.getItem('taco-truck-data')
-
-        if (!dataJSON) {
-            return
+        const loadLocalData = () => {
+            let dataJSON = localStorage.getItem('taco-truck-data')
+            if (!dataJSON) {
+                return { customParts: [], panelDesigns: [] }
+            }
+            return JSON.parse(dataJSON)
         }
 
-        setCustomParts(JSON.parse(dataJSON).customParts)
-        setPanelDesigns(JSON.parse(dataJSON).panelDesigns)
+        const loadCloudData = async () => {
+            const projectsSnapshot = await getDocs(collection(db, 'projects'))
+            const componentsSnapshot = await getDocs(
+                collection(db, 'components')
+            )
+
+            const projects = projectsSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            const components = componentsSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+
+            return { projects, components }
+        }
+
+        const combineData = (localData, cloudData) => {
+            const combinedProjects = [
+                ...cloudData.projects,
+                ...localData.panelDesigns.map((project) => ({
+                    ...project,
+                    isLocal: true,
+                })),
+            ]
+            const combinedParts = [
+                ...cloudData.components,
+                ...localData.customParts.map((part) => ({
+                    ...part,
+                    isLocal: true,
+                })),
+            ]
+
+            setCombinedProjects(combinedProjects)
+            setCombinedParts(combinedParts)
+        }
+
+        const fetchData = async () => {
+            const localData = loadLocalData()
+            const cloudData = await loadCloudData()
+            combineData(localData, cloudData)
+        }
+
+        fetchData()
     }, [])
 
     const deleteProject = (idToDelete) => {
-        const filtered = [...panelDesigns.filter(({ id }) => id !== idToDelete)]
-        setPanelDesigns(filtered)
+        const filtered = [
+            ...combinedProjects.filter(({ id }) => id !== idToDelete),
+        ]
+        setCombinedProjects(filtered)
         localStorage.setItem(
             'taco-truck-data',
             JSON.stringify({
-                panelDesigns: filtered,
+                panelDesigns: filtered.filter((project) => project.isLocal),
                 customParts,
             })
         )
     }
 
     const deletePart = (idToDelete) => {
-        const filtered = [...customParts.filter(({ id }) => id !== idToDelete)]
-        setCustomParts(filtered)
+        const filtered = [
+            ...combinedParts.filter(({ id }) => id !== idToDelete),
+        ]
+        setCombinedParts(filtered)
         localStorage.setItem(
             'taco-truck-data',
             JSON.stringify({
                 panelDesigns,
-                customParts: filtered,
+                customParts: filtered.filter((part) => part.isLocal),
             })
         )
     }
 
     return (
-        <div className="h-screen w-screen flex flex-col items-center">
+        <div className="flex h-screen w-screen flex-col items-center">
             <h1 className="text-[2rem]">Component Manager</h1>
             <div>
                 <h2 className="text-[1.8rem]">Panel Designs</h2>
                 <table>
-                    {panelDesigns.map((project) => (
+                    {combinedProjects.map((project) => (
                         <tr
                             key={project.id}
-                            className="border-b-2 border-black border-solid"
+                            className={`border-b-2 border-solid border-black`}
                         >
-                            <td className="w-16">{project.name}</td>
+                            <td
+                                className={`w-16 p-2 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                            >
+                                {project.name}
+                                {project.isLocal ? '(Local)' : ''}
+                            </td>
                             <td className="p-8">
                                 <LayoutDisplaySvg
                                     hideButton={true}
@@ -60,19 +118,23 @@ const ComponentManagerRoute = () => {
                                 />
                             </td>
                             <td className="flex gap-4">
-                                <Link to={`/designer/projects/${project.id}`}>
-                                    <button className="bg-slate-500 text-white p-4">
+                                <Link
+                                    to={`/designer/projects/${project.id}${project.isLocal ? '?isLocal=true' : ''}`}
+                                >
+                                    <button className="bg-slate-500 p-4 text-white">
                                         Edit
                                     </button>
                                 </Link>
-                                <button
-                                    className="bg-slate-500 text-white p-4"
-                                    onClick={() => {
-                                        deleteProject(project.id)
-                                    }}
-                                >
-                                    Delete
-                                </button>
+                                {project.isLocal ? (
+                                    <button
+                                        className="bg-slate-500 p-4 text-white"
+                                        onClick={() => {
+                                            deleteProject(project.id)
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                ) : null}
                             </td>
                         </tr>
                     ))}
@@ -81,32 +143,41 @@ const ComponentManagerRoute = () => {
             <div>
                 <h2 className="text-[1.8rem]">Custom Parts</h2>
                 <table>
-                    {customParts.map((part) => (
+                    {combinedParts.map((part) => (
                         <tr
                             key={part.id}
-                            className="border-b-2 border-black border-solid"
+                            className={`border-b-2 border-solid border-black ${part.isLocal ? 'bg-lightblue' : ''}`}
                         >
-                            <td>{part.name}</td>
-                            <td className="w-96 p-8">
+                            <td
+                                className={`w-16 p-2 ${part.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                            >
+                                {part.name}
+                                {part.isLocal ? '(Local)' : ''}
+                            </td>
+                            <td className="p-8">
                                 <LayoutDisplaySvg
                                     hideButton={true}
                                     layout={part.layout}
                                 />
                             </td>
                             <td className="flex gap-4">
-                                <Link to={`/designer/parts/${part.id}`}>
-                                    <button className="bg-slate-500 text-white p-4">
+                                <Link
+                                    to={`/designer/parts/${part.id}${part.isLocal ? '?isLocal=true' : ''}`}
+                                >
+                                    <button className="bg-slate-500 p-4 text-white">
                                         Edit
                                     </button>
                                 </Link>
-                                <button
-                                    className="bg-slate-500 text-white p-4"
-                                    onClick={() => {
-                                        deletePart(part.id)
-                                    }}
-                                >
-                                    Delete
-                                </button>
+                                {part.isLocal ? (
+                                    <button
+                                        className="bg-slate-500 p-4 text-white"
+                                        onClick={() => {
+                                            deletePart(part.id)
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                ) : null}
                             </td>
                         </tr>
                     ))}

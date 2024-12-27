@@ -136,7 +136,7 @@ const LayoutDisplay = ({
     }
 
     return (
-        <div ref={workspaceRef} className="flex-grow flex-shrink h-0 w-full">
+        <div ref={workspaceRef} className="h-0 w-full flex-shrink flex-grow">
             <Stage
                 width={workspaceDimensions[0]}
                 height={workspaceDimensions[1]}

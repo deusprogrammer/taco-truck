@@ -3,12 +3,12 @@ import { Link } from 'react-router'
 
 const Home = () => {
     return (
-        <div className="flex flex-col gap-10 justify-center items-center">
+        <div className="flex flex-col items-center justify-center gap-10">
             <h1 className="text-[2rem]">Project Taco Truck</h1>
-            <Link className="text-[1.5rem] p-4" to={`/designer`}>
+            <Link className="p-4 text-[1.5rem]" to={`/designer`}>
                 Designer
             </Link>
-            <Link className="text-[1.5rem] p-4" to={`/manager`}>
+            <Link className="p-4 text-[1.5rem]" to={`/manager`}>
                 Manager
             </Link>
         </div>
