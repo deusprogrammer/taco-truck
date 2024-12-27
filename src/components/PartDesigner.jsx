@@ -105,7 +105,7 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                         layout.artwork,
                         layout.name + '_ART'
                     )
-                    layout.artwork = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
+                    layoutCopy.artwork = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
                 }
             }
 
