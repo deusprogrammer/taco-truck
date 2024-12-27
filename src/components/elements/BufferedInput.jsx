@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-const BufferedInput = ({ value, type, onChange }) => {
+const BufferedInput = ({ value, type, immediate, onChange }) => {
     const [buffer, setBuffer] = useState()
 
     const update = (newValue) => {
@@ -8,6 +8,11 @@ const BufferedInput = ({ value, type, onChange }) => {
             newValue = value
             setBuffer(newValue)
         }
+
+        if (type === 'number') {
+            newValue = parseFloat(value)
+        }
+
         onChange(newValue)
     }
 
@@ -29,6 +34,12 @@ const BufferedInput = ({ value, type, onChange }) => {
                 value={buffer}
                 onChange={({ target: { value } }) => {
                     setBuffer(value)
+                    if (immediate) {
+                        if (type === 'number') {
+                            value = parseFloat(value)
+                        }
+                        onChange(value)
+                    }
                 }}
                 onBlur={() => update(buffer)}
                 onKeyDown={onKeyDown}

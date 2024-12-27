@@ -1,6 +1,38 @@
 import { CIRCLE, partTable } from '../data/parts.table'
+import axios from 'axios';
 
 import Drawing from 'dxf-writer'
+
+export const extractDataUri = (dataUri) => {
+    const matches = dataUri.match(/^data:(.*?);base64,(.*)$/);
+    if (!matches) {
+        throw new Error('Invalid data URI');
+    }
+    const mimeType = matches[1];
+    const base64Payload = matches[2];
+    return [mimeType, base64Payload];
+};
+
+export const storeMedia = async (dataUri, title) => {
+    let url = `https://deusprogrammer.com/api/img-svc/media`;
+    let [mimeType, imagePayload] = extractDataUri(dataUri);
+
+    let res = await axios.post(url, {mimeType, imagePayload, title});
+
+    return res.data;
+}
+
+export const replaceUndefined = (obj) => {
+    if (Array.isArray(obj)) {
+        return obj.map(replaceUndefined);
+    } else if (obj !== null && typeof obj === 'object') {
+        return Object.keys(obj).reduce((acc, key) => {
+            acc[key] = obj[key] === undefined ? 0 : replaceUndefined(obj[key]);
+            return acc;
+        }, {});
+    }
+    return obj;
+};
 
 export const generateUUID = () => {
     let d = new Date().getTime()

@@ -123,10 +123,9 @@ const ComponentManagerRoute = () => {
                                 {project.layout.panelDimensions?.[1]}mm
                             </td>
                             <td className="p-8">
-                                <LayoutDisplaySvg
-                                    hideButton={true}
-                                    layout={project.layout}
-                                />
+                                <div className="flex w-full flex-shrink flex-grow justify-center p-14">
+                                    <LayoutDisplaySvg layout={project.layout} />
+                                </div>
                             </td>
                             <td className="flex gap-4">
                                 <Link
@@ -166,10 +165,9 @@ const ComponentManagerRoute = () => {
                                 {part.isLocal ? '(Local)' : ''}
                             </td>
                             <td className="p-8">
-                                <LayoutDisplaySvg
-                                    hideButton={true}
-                                    layout={part.layout}
-                                />
+                                <div className="flex w-full flex-shrink flex-grow justify-center p-14">
+                                    <LayoutDisplaySvg layout={part.layout} />
+                                </div>
                             </td>
                             <td className="flex gap-4">
                                 <Link

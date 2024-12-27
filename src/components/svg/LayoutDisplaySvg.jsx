@@ -82,7 +82,6 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
                         ? layout?.panelDimensions[1]
                         : partsHeight
                 }
-                className="overflow-visible"
             >
                 <PanelSvg layout={layout} />
                 {layout?.parts?.map((part, index) => (

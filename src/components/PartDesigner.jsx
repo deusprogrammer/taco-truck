@@ -7,7 +7,12 @@ import LayoutDisplaySvg from './svg/LayoutDisplaySvg'
 import PartDetailsMenu from './menus/PartDetailsMenu'
 import SaveModal from './menus/SaveModal'
 import ImportModal from './menus/ImportModal'
-import { generateUUID, normalizePartPositionsToZero } from './utils'
+import {
+    generateUUID,
+    normalizePartPositionsToZero,
+    replaceUndefined,
+    storeMedia,
+} from './utils'
 import { addDoc, collection, db, doc } from '../firebase.config'
 import {
     useButtonDown,
@@ -94,10 +99,22 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                         : layout.parts,
             }
 
+            if (layout.artwork) {
+                if (!layout.artwork.startsWith('https')) {
+                    let { _id: id } = await storeMedia(
+                        layout.artwork,
+                        layout.name + '_ART'
+                    )
+                    layout.artwork = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
+                }
+            }
+
             const data = {
                 name,
                 layout: layoutCopy,
             }
+
+            console.log('DATA: ' + JSON.stringify(data, null, 5))
 
             let docRef
             if (type === 'customParts') {

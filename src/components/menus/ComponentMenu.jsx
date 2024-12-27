@@ -36,7 +36,7 @@ const ComponentMenu = ({
     }
 
     return (
-        <div className="absolute left-[10px] top-[50%] flex max-h-[50%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
+        <div className="absolute left-[10px] top-[50%] flex max-h-[75%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
             <h2 className="text-center text-[1rem] font-bold">
                 Component Details
             </h2>
@@ -70,6 +70,45 @@ const ComponentMenu = ({
                 />
                 <label>Artwork:</label>
                 <input type="file" onChange={handleFileChange} />
+                <label>Artwork Zoom:</label>
+                <BufferedInput
+                    type="number"
+                    immediate={true}
+                    value={layout.artworkZoom * 100 || 100}
+                    onChange={(value) => {
+                        onLayoutChange({ ...layout, artworkZoom: value / 100 })
+                    }}
+                />
+                <label>Artwork X Offset:</label>
+                <BufferedInput
+                    type="number"
+                    immediate={true}
+                    value={layout.artworkOffset?.[0] || '0'}
+                    onChange={(value) => {
+                        onLayoutChange({
+                            ...layout,
+                            artworkOffset: [
+                                value,
+                                layout.artworkOffset?.[1] || '0',
+                            ],
+                        })
+                    }}
+                />
+                <label>Artwork Y Offset:</label>
+                <BufferedInput
+                    type="number"
+                    immediate={true}
+                    value={layout.artworkOffset?.[1] || '0'}
+                    onChange={(value) => {
+                        onLayoutChange({
+                            ...layout,
+                            artworkOffset: [
+                                layout.artworkOffset?.[0] || '0',
+                                value,
+                            ],
+                        })
+                    }}
+                />
                 <label>Parts:</label>
                 {[...Object.keys(partTable), 'custom'].map((key) => (
                     <React.Fragment key={`part-type-${key}`}>
