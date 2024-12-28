@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
+import { getImageDimensions } from '../utils'
 
 const ComponentMenu = ({
     layout,
@@ -28,42 +29,27 @@ const ComponentMenu = ({
         const file = event.target.files[0]
         if (file) {
             const reader = new FileReader()
-            reader.onloadend = (e) => {
-                const img = new Image()
-                img.onload = () => {
-                    const width = img.width
-                    const height = img.height
-                    console.log(`Image width: ${width}, height: ${height}`)
-                    // You can now use the width and height as needed
-                    onLayoutChange({
-                        ...layout,
-                        artwork: e.target.result,
-                        artworkWidth: width,
-                        artworkHeight: height,
-                    })
-                }
-                img.src = e.target.result
+            reader.onloadend = () => {
+                onLayoutChange({ ...layout, artwork: reader.result })
             }
             reader.readAsDataURL(file)
         }
     }
 
+    const loadImageDimensions = useCallback(async () => {
+        const [width, height] = await getImageDimensions(layout.artwork)
+        onLayoutChange({
+            ...layout,
+            artworkWidth: width,
+            artworkHeight: height,
+        })
+    }, [layout, onLayoutChange])
+
     useEffect(() => {
         if (layout.artwork && (!layout.artworkWidth || !layout.artworkHeight)) {
-            const img = new Image()
-            img.onload = () => {
-                const width = img.width
-                const height = img.height
-                // You can now use the width and height as needed
-                onLayoutChange({
-                    ...layout,
-                    artworkWidth: width,
-                    artworkHeight: height,
-                })
-            }
-            img.src = layout.artwork
+            loadImageDimensions()
         }
-    }, [layout, onLayoutChange])
+    }, [layout, loadImageDimensions])
 
     return (
         <div className="absolute left-[10px] top-[50%] flex max-h-[75%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">

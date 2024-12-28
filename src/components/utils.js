@@ -3,6 +3,18 @@ import axios from 'axios';
 
 import Drawing from 'dxf-writer'
 
+export const getImageDimensions = (imageUrl) => {
+    return new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+            const width = img.width
+            const height = img.height
+            resolve([width, height])
+        }
+        img.src = imageUrl
+    })
+}
+
 export const extractDataUri = (dataUri) => {
     const matches = dataUri.match(/^data:(.*?);base64,(.*)$/);
     if (!matches) {
