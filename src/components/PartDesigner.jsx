@@ -7,12 +7,7 @@ import LayoutDisplaySvg from './svg/LayoutDisplaySvg'
 import PartDetailsMenu from './menus/PartDetailsMenu'
 import SaveModal from './menus/SaveModal'
 import ImportModal from './menus/ImportModal'
-import {
-    generateUUID,
-    normalizePartPositionsToZero,
-    replaceUndefined,
-    storeMedia,
-} from './utils'
+import { generateUUID, normalizePartPositionsToZero, storeMedia } from './utils'
 import { addDoc, collection, db, doc } from '../firebase.config'
 import {
     useButtonDown,
@@ -24,6 +19,7 @@ import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
 import { useAtom } from 'jotai'
 import { renderMeasurementsAtom } from '../atoms/ViewOptions.atom'
+import OptionsModal from './menus/OptionsModal'
 
 const SCALE_RATIO = 10
 
@@ -56,6 +52,7 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
 
     const [saveModalOpen, setSaveModalOpen] = useState(false)
     const [importModalOpen, setImportModalOpen] = useState(false)
+    const [optionsModalOpen, setOptionsModalOpen] = useState(false)
 
     const saveComponent = () => {
         setSaveModalOpen(true)
@@ -299,6 +296,10 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                 onImportComplete={completeImport}
                 onClose={() => setImportModalOpen(false)}
             />
+            <OptionsModal
+                open={optionsModalOpen}
+                onClose={() => setOptionsModalOpen(false)}
+            />
 
             <ModeSelect
                 currentMode={mode}
@@ -306,6 +307,7 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                 onModeChange={setMode}
                 onSave={saveComponent}
                 onImport={importCustomPart}
+                onOptions={setOptionsModalOpen}
                 onExport={setViewingSVG}
                 onZoomChange={(zoomChange) =>
                     setCurrentScale(currentScale + zoomChange)

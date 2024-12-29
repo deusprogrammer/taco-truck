@@ -60,6 +60,15 @@ export const ImportButton = ({ onClick }) => (
     </button>
 )
 
+export const OptionsButton = ({ onClick }) => (
+    <button
+        className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+        onClick={onClick}
+    >
+        Options
+    </button>
+)
+
 export const PartSelectionButton = ({
     name,
     partId,

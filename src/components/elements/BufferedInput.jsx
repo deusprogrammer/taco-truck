@@ -10,8 +10,10 @@ const BufferedInput = ({ value, type, immediate, onChange }) => {
         }
 
         if (type === 'number') {
-            newValue = parseFloat(value)
+            newValue = parseFloat(newValue)
         }
+
+        console.log('UPDATE: ' + newValue)
 
         onChange(newValue)
     }
@@ -38,6 +40,7 @@ const BufferedInput = ({ value, type, immediate, onChange }) => {
                         if (type === 'number') {
                             value = parseFloat(value)
                         }
+                        console.log('IMMEDIATE')
                         onChange(value)
                     }
                 }}

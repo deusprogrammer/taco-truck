@@ -4,6 +4,7 @@ import {
     ModeButton,
     NewButton,
     OpenButton,
+    OptionsButton,
     SaveButton,
 } from './Buttons'
 
@@ -17,6 +18,7 @@ const ModeSelect = ({
     onSave,
     onImport,
     onExport,
+    onOptions,
 }) => {
     const onClick = (e, value) => {
         onModeChange(value)
@@ -38,6 +40,7 @@ const ModeSelect = ({
             <ImportButton onClick={onImport} />
             <ExportButton onClick={onExport} />
             <SaveButton onClick={onSave} />
+            <OptionsButton onClick={onOptions} />
         </div>
     )
 }
