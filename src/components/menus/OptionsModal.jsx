@@ -140,6 +140,8 @@ const OptionsModal = ({ open, onClose }) => {
                         className="bg-slate-500 p-2"
                         onClick={() => {
                             onSave()
+                            onClose()
+                            window.location.reload()
                         }}
                     >
                         Save
