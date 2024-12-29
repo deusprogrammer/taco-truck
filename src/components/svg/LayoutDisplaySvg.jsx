@@ -68,28 +68,29 @@ const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
         saveAs(blob, `${layout.name}.svg`)
     }
 
+    const svgWidth =
+        layout?.panelDimensions[0] !== 0
+            ? layout?.panelDimensions[0]
+            : partsWidth
+    const svgHeight =
+        layout?.panelDimensions[1] !== 0
+            ? layout?.panelDimensions[1]
+            : partsHeight
+
     return (
         <div className="flex flex-col items-center gap-4">
             <svg
                 ref={svgRef}
-                width={
-                    layout?.panelDimensions[0] !== 0
-                        ? layout?.panelDimensions[0]
-                        : partsWidth
-                }
-                height={
-                    layout?.panelDimensions[1] !== 0
-                        ? layout?.panelDimensions[1]
-                        : partsHeight
-                }
-                transform={`scale(${scale || 1}) translate(0, ${layout.panelDimensions?.[1]})`}
+                width={svgWidth * scale}
+                height={svgHeight * scale}
             >
-                <PanelSvg layout={layout} />
+                <PanelSvg layout={layout} scale={scale} />
                 {layout?.parts?.map((part, index) => (
                     <PartSvg
                         key={`partsvg-${part.id || index}`}
                         part={part}
                         parent={layout}
+                        scale={scale}
                     />
                 ))}
             </svg>

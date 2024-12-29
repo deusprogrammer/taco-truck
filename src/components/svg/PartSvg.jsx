@@ -3,7 +3,7 @@ import { calculateRelativePosition } from '../utils'
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import CustomPartSvg from './CustomPartSvg'
 
-const PartSvg = ({ part, parent }) => {
+const PartSvg = ({ part, parent, scale }) => {
     const { partId, type, rotation } = part
 
     const { parts, panelDimensions } = parent
@@ -16,7 +16,7 @@ const PartSvg = ({ part, parent }) => {
     )
 
     if (type === 'custom') {
-        return <CustomPartSvg part={part} parent={parent} />
+        return <CustomPartSvg part={part} parent={parent} scale={scale} />
     }
 
     if (!partTable[type]?.[partId]) {
@@ -29,10 +29,10 @@ const PartSvg = ({ part, parent }) => {
         case SQUARE:
             component = (
                 <rect
-                    x={fixedX - size[0] / 2}
-                    y={fixedY - size[1] / 2}
-                    width={size[0]}
-                    height={size[1]}
+                    x={(fixedX - size[0] / 2) * scale}
+                    y={(fixedY - size[1] / 2) * scale}
+                    width={size[0] * scale}
+                    height={size[1] * scale}
                     rotate={rotation || 0}
                     fill="white"
                     stroke="black"
@@ -45,17 +45,17 @@ const PartSvg = ({ part, parent }) => {
             component = (
                 <>
                     <circle
-                        cx={fixedX}
-                        cy={fixedY}
-                        r={size / 2}
+                        cx={fixedX * scale}
+                        cy={fixedY * scale}
+                        r={(size / 2) * scale}
                         fill="white"
                         stroke="black"
                         strokeWidth={1}
                     />
                     <circle
-                        cx={fixedX}
-                        cy={fixedY}
-                        r={1}
+                        cx={fixedX * scale}
+                        cy={fixedY * scale}
+                        r={1 * scale}
                         fill="white"
                         stroke="black"
                         strokeWidth={1}

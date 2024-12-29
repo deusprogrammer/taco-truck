@@ -18,8 +18,6 @@ import {
 } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
-import { useAtom } from 'jotai'
-import { renderMeasurementsAtom } from '../atoms/ViewOptions.atom'
 import OptionsModal from './menus/OptionsModal'
 
 const SCALE_RATIO = 10
@@ -243,6 +241,10 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     // }, [onButtonDown])
 
     useEffect(() => {
+        if (!preview) {
+            return () => {}
+        }
+
         setOptionsModalOpen(false)
         if (!realSizeRatio) {
             setOptionsModalOpen(true)
@@ -250,7 +252,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
         }
 
         setCurrentScale(realSizeRatio)
-    }, [realSizeRatio, setOptionsModalOpen])
+    }, [preview, realSizeRatio, setOptionsModalOpen])
 
     useEffect(() => {
         if (!containerRef?.current) {
@@ -365,7 +367,11 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                             hideButton={true}
                         />
                     ) : (
-                        <LayoutDisplaySvg layout={layout} />
+                        <LayoutDisplaySvg
+                            layout={layout}
+                            scale={2}
+                            hideButton={true}
+                        />
                     )}
                 </div>
             ) : (

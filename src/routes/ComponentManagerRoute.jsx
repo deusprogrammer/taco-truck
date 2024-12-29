@@ -124,7 +124,10 @@ const ComponentManagerRoute = () => {
                             </td>
                             <td className="p-8">
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
-                                    <LayoutDisplaySvg layout={project.layout} />
+                                    <LayoutDisplaySvg
+                                        layout={project.layout}
+                                        scale={2}
+                                    />
                                 </div>
                             </td>
                             <td className="flex gap-4">
@@ -166,7 +169,10 @@ const ComponentManagerRoute = () => {
                             </td>
                             <td className="p-8">
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
-                                    <LayoutDisplaySvg layout={part.layout} />
+                                    <LayoutDisplaySvg
+                                        layout={part.layout}
+                                        scale={2}
+                                    />
                                 </div>
                             </td>
                             <td className="flex gap-4">
