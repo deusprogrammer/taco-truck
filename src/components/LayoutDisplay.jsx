@@ -5,8 +5,10 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useRef,
     useState,
 } from 'react'
+import { w3cwebsocket as W3CWebSocket } from 'websocket'
 import { generateUUID } from './utils'
 import {
     useMouseDrag,
@@ -40,11 +42,14 @@ const LayoutDisplay = ({
     workspaceRef,
     placingPartId,
     placingPartType,
+    preview,
     onSelectPart,
     onSecondarySelectPart,
     onLayoutChange,
 }) => {
     const componentRef = createRef()
+    const websocket = useRef()
+    const controllerId = useRef()
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
     const [deltaX, deltaY, isDragging, reset] = useMouseDrag(
         workspaceRef,
@@ -52,6 +57,34 @@ const LayoutDisplay = ({
     )
     const previousIsDragging = usePrevious(isDragging)
     const [buttonsPressed, setButtonsPressed] = useState([])
+
+    const [websocketIp, setWebsocketIp] = useState('localhost:3001')
+    const [connected, setConnected] = useState(false)
+
+    const connect = () => {
+        const ws = new W3CWebSocket(`ws://${websocketIp}`)
+        controllerId.current = generateUUID()
+
+        //Register player
+        ws.onopen = () => {
+            websocket.current = ws
+            setConnected(true)
+        }
+
+        ws.onmessage = (message) => {}
+
+        ws.onclose = (e) => {}
+
+        ws.onerror = (err) => {}
+    }
+
+    const updateRemoteButtons = (buttons) => {
+        const message = {
+            controllerId: controllerId.current,
+            buttons: buttons.map(({ id, mapping }) => ({ id, mapping })),
+        }
+        websocket.current.send(JSON.stringify(message))
+    }
 
     const addPart = useCallback(
         (evt) => {
@@ -157,6 +190,25 @@ const LayoutDisplay = ({
 
     return (
         <div ref={workspaceRef} className="h-0 w-full flex-shrink flex-grow">
+            {preview ? (
+                <div className="absolute right-0 top-0">
+                    <input
+                        className="h-8 disabled:bg-gray-600"
+                        value={websocketIp}
+                        disabled={connected}
+                        onChange={({ target: { value } }) =>
+                            setWebsocketIp(value)
+                        }
+                    />
+                    <button
+                        className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1 disabled:bg-gray-600`}
+                        onClick={connect}
+                        disabled={connected}
+                    >
+                        Connect
+                    </button>
+                </div>
+            ) : null}
             <Stage
                 width={workspaceDimensions[0]}
                 height={workspaceDimensions[1]}
@@ -207,13 +259,13 @@ const LayoutDisplay = ({
                                         ) {
                                             old = [...buttonsPressed, part]
                                         }
-                                        setButtonsPressed(old)
                                     } else if (action === 'UP') {
                                         old = [...buttonsPressed].filter(
                                             ({ id }) => id !== part.id
                                         )
-                                        setButtonsPressed(old)
                                     }
+                                    setButtonsPressed(old)
+                                    updateRemoteButtons(old)
                                 }}
                             />
                         ))}

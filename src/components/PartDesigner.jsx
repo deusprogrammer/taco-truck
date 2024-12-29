@@ -390,6 +390,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                     workspacePosition={[screenX, screenY]}
                     placingPartId={placingPartId}
                     placingPartType={placingPartType}
+                    preview={preview}
                     onSelectPart={selectPart}
                     onSecondarySelectPart={afterSelect}
                     onClickPart={setLastClicked}
