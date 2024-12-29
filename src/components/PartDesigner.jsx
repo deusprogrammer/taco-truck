@@ -279,10 +279,14 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
 
     useEffect(() => {
         setWorkspacePosition([
-            width / 2 - (partsWidth / 2) * currentScale,
-            height / 2 - (partsHeight / 2) * currentScale,
+            width / 2 -
+                (Math.min(partsWidth, layout.panelDimensions[0]) / 2) *
+                    currentScale,
+            height / 2 -
+                (Math.min(partsHeight, layout.panelDimensions[1]) / 2) *
+                    currentScale,
         ])
-    }, [width, height, currentScale, partsWidth, partsHeight])
+    }, [width, height, currentScale, partsWidth, partsHeight, layout])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
