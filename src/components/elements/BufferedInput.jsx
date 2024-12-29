@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-const BufferedInput = ({ value, type, immediate, onChange }) => {
+const BufferedInput = ({ value, className, type, immediate, onChange }) => {
     const [buffer, setBuffer] = useState()
 
     const update = (newValue) => {
@@ -33,6 +33,7 @@ const BufferedInput = ({ value, type, immediate, onChange }) => {
         <>
             <input
                 type={type}
+                className={className}
                 value={buffer}
                 onChange={({ target: { value } }) => {
                     setBuffer(value)

@@ -14,6 +14,8 @@ const PartDesignerRoute = () => {
         parts: [],
     })
 
+    const [preview, setPreview] = useState(false)
+
     const loadLocal = (type, id) => {
         let dataJSON = localStorage.getItem('taco-truck-data')
 
@@ -78,11 +80,19 @@ const PartDesignerRoute = () => {
         } else {
             loadCloud(type, id)
         }
+
+        if (searchParams.has('preview')) {
+            setPreview(true)
+        }
     }, [type, id, searchParams])
 
     return (
         <div className="flex-column flex h-screen w-screen items-center justify-center">
-            <PartDesigner layout={layout} onLayoutChange={setLayout} />
+            <PartDesigner
+                layout={layout}
+                onLayoutChange={setLayout}
+                preview={preview}
+            />
         </div>
     )
 }

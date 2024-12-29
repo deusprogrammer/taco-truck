@@ -215,3 +215,24 @@ export const usePixiContainerSize = (ref) => {
 
     return [dimensions.width, dimensions.height]
 }
+
+export const useRealScaleRatio = () => {
+    const [screenHeight, setScreenHeight] = useState(0);
+    const vRes = window.screen.availHeight
+
+    useEffect(() => {
+        let dataJSON = localStorage.getItem('screen-metrics')
+
+        if (!dataJSON) {
+            return () => {}
+        }
+
+        setScreenHeight(JSON.parse(dataJSON).screenHeight)
+    }, [])
+
+    if (!screenHeight) {
+        return 0;
+    }
+
+    return vRes / screenHeight;
+}

@@ -5,15 +5,15 @@ const OptionsModal = ({ open, onClose }) => {
     const [screenHeight, setScreenHeight] = useState(0)
     const vRes = window.screen.availHeight
 
-    // useEffect(() => {
-    //     let dataJSON = localStorage.getItem('screen-metrics')
+    useEffect(() => {
+        let dataJSON = localStorage.getItem('screen-metrics')
 
-    //     if (!dataJSON) {
-    //         return () => {}
-    //     }
+        if (!dataJSON) {
+            return () => {}
+        }
 
-    //     setScreenHeight(JSON.parse(dataJSON).screenHeight)
-    // }, [open])
+        setScreenHeight(JSON.parse(dataJSON).screenHeight)
+    }, [open])
 
     const onSave = () => {
         localStorage.setItem(
@@ -42,39 +42,47 @@ const OptionsModal = ({ open, onClose }) => {
                 <span>Height (mm): {screenHeight}</span>
                 <span>Height (px): {vRes}</span>
                 <span>Ratio: {vRes / screenHeight} pixels/mm</span>
-                <label>Screen Height in mm</label>
+                <h3 className="text-[1.5rem]">Real Size Button Preview</h3>
                 <div className="flex flex-row gap-1">
-                    <svg style={{ overflow: 'visible' }}>
+                    <svg
+                        width={50 * (vRes / screenHeight)}
+                        height={50 * (vRes / screenHeight)}
+                        style={{ overflow: 'visible' }}
+                    >
                         <circle
                             r={(26 / 2) * (vRes / screenHeight)}
-                            cx={26 / 2}
-                            cy={26 / 2}
+                            cx={50}
+                            cy={50}
                             fill="#32CD32"
                             stroke="black"
                             strokeWidth={1}
                         />
                         <circle
                             r={(19 / 2) * (vRes / screenHeight)}
-                            cx={26 / 2}
-                            cy={26 / 2}
+                            cx={50}
+                            cy={50}
                             stroke="black"
                             strokeWidth={1}
                             fill="#32CD32"
                         />
                     </svg>
-                    <svg style={{ overflow: 'visible' }}>
+                    <svg
+                        width={50 * (vRes / screenHeight)}
+                        height={50 * (vRes / screenHeight)}
+                        style={{ overflow: 'visible' }}
+                    >
                         <circle
                             r={(32 / 2) * (vRes / screenHeight)}
-                            cx={32 / 2}
-                            cy={32 / 2}
+                            cx={50}
+                            cy={50}
                             fill="#32CD32"
                             stroke="black"
                             strokeWidth={1}
                         />
                         <circle
                             r={(24 / 2) * (vRes / screenHeight)}
-                            cx={32 / 2}
-                            cy={32 / 2}
+                            cx={50}
+                            cy={50}
                             fill="#32CD32"
                             stroke="black"
                             strokeWidth={1}

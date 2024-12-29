@@ -4,7 +4,7 @@ import PanelSvg from './PanelSvg'
 import { saveAs } from 'file-saver'
 import { calculateSizeOfPart } from '../utils'
 
-const LayoutDisplaySvg = ({ layout, hideButton }) => {
+const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
     const svgRef = createRef()
     const [partsWidth, partsHeight] = calculateSizeOfPart({
         type: 'custom',
@@ -82,6 +82,7 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
                         ? layout?.panelDimensions[1]
                         : partsHeight
                 }
+                transform={`scale(${scale || 1}) translate(0, ${layout.panelDimensions?.[1]})`}
             >
                 <PanelSvg layout={layout} />
                 {layout?.parts?.map((part, index) => (

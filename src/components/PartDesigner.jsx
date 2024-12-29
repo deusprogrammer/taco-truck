@@ -14,6 +14,7 @@ import {
     useContainerSize,
     useMouseDrag,
     usePrevious,
+    useRealScaleRatio,
 } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
@@ -23,8 +24,9 @@ import OptionsModal from './menus/OptionsModal'
 
 const SCALE_RATIO = 10
 
-const PartDesigner = ({ layout, onLayoutChange }) => {
+const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     const navigate = useNavigate()
+    const realSizeRatio = useRealScaleRatio()
     const [currentScale, setCurrentScale] = useState(2.0)
 
     const containerRef = createRef()
@@ -42,9 +44,6 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
-    const [showMeasurements, setShowMeasurements] = useAtom(
-        renderMeasurementsAtom
-    )
 
     const [selected, setSelected] = useState(null)
     const [hovered, setHovered] = useState(null)
@@ -64,7 +63,7 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
 
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
-            if (buttons.includes('Shift')) {
+            if (buttons.includes('Shift') && !preview) {
                 setCurrentScale(
                     Math.max(1, currentScale - deltaY / SCALE_RATIO)
                 )
@@ -73,7 +72,7 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
 
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
         },
-        [currentScale, buttons]
+        [currentScale, buttons, preview]
     )
 
     const completeSave = (name, type, isLocal) => {
@@ -227,22 +226,31 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
         setAfterSelect(null)
     }
 
-    const onButtonDown = useCallback(
-        (e) => {
-            console.log('BUTTONS: ' + e.key)
-            if (e.key.includes('m')) {
-                setShowMeasurements(!showMeasurements)
-            }
-        },
-        [showMeasurements, setShowMeasurements]
-    )
+    // const onButtonDown = useCallback(
+    //     (e) => {
+    //         if (e.key.includes('m')) {
+    //             setShowMeasurements(!showMeasurements)
+    //         }
+    //     },
+    //     [showMeasurements, setShowMeasurements]
+    // )
+
+    // useEffect(() => {
+    //     window.addEventListener('keydown', onButtonDown)
+    //     return () => {
+    //         window.removeEventListener('keydown', onButtonDown)
+    //     }
+    // }, [onButtonDown])
 
     useEffect(() => {
-        window.addEventListener('keydown', onButtonDown)
-        return () => {
-            window.removeEventListener('keydown', onButtonDown)
+        setOptionsModalOpen(false)
+        if (!realSizeRatio) {
+            setOptionsModalOpen(true)
+            return
         }
-    }, [onButtonDown])
+
+        setCurrentScale(realSizeRatio)
+    }, [realSizeRatio, setOptionsModalOpen])
 
     useEffect(() => {
         if (!containerRef?.current) {
@@ -285,6 +293,20 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
             className="flex h-screen w-full flex-col"
             style={{ overscrollBehavior: 'none' }}
         >
+            {preview ? (
+                <div className="absolute left-0 top-0">
+                    <div>
+                        Scale: {Math.trunc(currentScale * 100)}% (
+                        {realSizeRatio} pixels/mm )
+                    </div>
+                    <div>Name: {layout.name}</div>
+                    <div>
+                        Panel: {layout.panelDimensions[0]}mm X{' '}
+                        {layout.panelDimensions[1]}mm
+                    </div>
+                </div>
+            ) : null}
+
             <SaveModal
                 open={saveModalOpen}
                 name={layout.name}
@@ -301,33 +323,50 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                 onClose={() => setOptionsModalOpen(false)}
             />
 
-            <ModeSelect
-                currentMode={mode}
-                currentZoom={currentScale}
-                onModeChange={setMode}
-                onSave={saveComponent}
-                onImport={importCustomPart}
-                onOptions={setOptionsModalOpen}
-                onExport={setViewingSVG}
-                onZoomChange={(zoomChange) =>
-                    setCurrentScale(currentScale + zoomChange)
-                }
-            />
-            <PartMenu
-                currentPart={placingPartId}
-                active={mode === ADD}
-                onChange={selectPlacingPart}
-            />
-            <ComponentMenu
-                layout={layout}
-                selectedPartId={selected}
-                onSelect={setSelected}
-                onHover={setHovered}
-                onLayoutChange={onLayoutChange}
-            />
-            {viewingSVG ? (
+            {!preview ? (
+                <>
+                    <ModeSelect
+                        currentMode={mode}
+                        currentZoom={currentScale}
+                        onModeChange={setMode}
+                        onSave={saveComponent}
+                        onImport={importCustomPart}
+                        onOptions={setOptionsModalOpen}
+                        onExport={setViewingSVG}
+                    />
+                    <PartMenu
+                        currentPart={placingPartId}
+                        active={mode === ADD}
+                        onChange={selectPlacingPart}
+                    />
+                    <ComponentMenu
+                        layout={layout}
+                        selectedPartId={selected}
+                        onSelect={setSelected}
+                        onHover={setHovered}
+                        onLayoutChange={onLayoutChange}
+                    />
+                    <PartDetailsMenu
+                        layout={layout}
+                        selectedPart={selectedPart}
+                        onUpdatePart={updatePart}
+                        onSecondarySelectPart={afterSelect}
+                        onSetSecondarySelect={setAfterSelect}
+                    />
+                </>
+            ) : null}
+
+            {viewingSVG || preview ? (
                 <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
-                    <LayoutDisplaySvg layout={layout} />
+                    {preview ? (
+                        <LayoutDisplaySvg
+                            layout={layout}
+                            scale={currentScale}
+                            hideButton={true}
+                        />
+                    ) : (
+                        <LayoutDisplaySvg layout={layout} />
+                    )}
                 </div>
             ) : (
                 <LayoutDisplay
@@ -346,13 +385,6 @@ const PartDesigner = ({ layout, onLayoutChange }) => {
                     onLayoutChange={onLayoutChange}
                 />
             )}
-            <PartDetailsMenu
-                layout={layout}
-                selectedPart={selectedPart}
-                onUpdatePart={updatePart}
-                onSecondarySelectPart={afterSelect}
-                onSetSecondarySelect={setAfterSelect}
-            />
         </div>
     )
 }
