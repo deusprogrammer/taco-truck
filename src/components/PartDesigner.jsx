@@ -18,6 +18,8 @@ import {
 } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
+import { useAtom } from 'jotai'
+import { renderMeasurementsAtom } from '../atoms/ViewOptions.atom'
 import OptionsModal from './menus/OptionsModal'
 
 const SCALE_RATIO = 10
@@ -241,10 +243,6 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     // }, [onButtonDown])
 
     useEffect(() => {
-        if (!preview) {
-            return () => {}
-        }
-
         setOptionsModalOpen(false)
         if (!realSizeRatio) {
             setOptionsModalOpen(true)
@@ -252,7 +250,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
         }
 
         setCurrentScale(realSizeRatio)
-    }, [preview, realSizeRatio, setOptionsModalOpen])
+    }, [realSizeRatio, setOptionsModalOpen])
 
     useEffect(() => {
         if (!containerRef?.current) {
@@ -358,21 +356,9 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                 </>
             ) : null}
 
-            {viewingSVG || preview ? (
+            {viewingSVG ? (
                 <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
-                    {preview ? (
-                        <LayoutDisplaySvg
-                            layout={layout}
-                            scale={currentScale}
-                            hideButton={true}
-                        />
-                    ) : (
-                        <LayoutDisplaySvg
-                            layout={layout}
-                            scale={2}
-                            hideButton={true}
-                        />
-                    )}
+                    <LayoutDisplaySvg layout={layout} />
                 </div>
             ) : (
                 <LayoutDisplay
