@@ -10,6 +10,7 @@ import {
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import { useAtom } from 'jotai'
 import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
+import { useButtonStatus } from '../LayoutDisplay'
 
 const Part = ({
     scale,
@@ -21,6 +22,7 @@ const Part = ({
     onClickPart,
 }) => {
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
+    const buttonPressed = useButtonStatus(part)
     const { partId, type, id, rotation } = part
 
     const { parts, panelDimensions } = parent
@@ -50,7 +52,7 @@ const Part = ({
                     renderScale * y,
                     renderScale * (radius + rim)
                 )
-                g.beginFill(0x000000)
+                g.beginFill(buttonPressed ? 0x00ff00 : 0x000000)
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
@@ -63,7 +65,7 @@ const Part = ({
                     renderScale * y,
                     renderScale * radius
                 )
-                g.beginFill(0x000000)
+                g.beginFill(buttonPressed ? 0x00ff00 : 0x000000)
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
@@ -72,7 +74,7 @@ const Part = ({
                 g.endFill()
             }
         },
-        [id, selectedPartId, hoveredPartId]
+        [id, selectedPartId, hoveredPartId, buttonPressed]
     )
 
     const drawRectangle = useCallback(
@@ -99,7 +101,7 @@ const Part = ({
                 renderScale * (size[0] + 2 * rim),
                 renderScale * (size[1] + 2 * rim)
             )
-            g.beginFill(0x000000)
+            g.beginFill(buttonPressed ? 0x00ff00 : 0x000000)
             g.drawRect(
                 renderScale * x,
                 renderScale * y,
@@ -107,14 +109,8 @@ const Part = ({
                 renderScale * size[1]
             )
             g.beginFill(0xff0000)
-            g.drawCircle(
-                renderScale * (x + size[0] / 2),
-                renderScale * (y + size[1] / 2),
-                renderScale * 2
-            )
-            g.endFill()
         },
-        [id, selectedPartId, hoveredPartId]
+        [id, selectedPartId, hoveredPartId, buttonPressed]
     )
 
     const drawLine = useCallback(
@@ -241,7 +237,12 @@ const Part = ({
                     interactive={true}
                     onclick={() => {
                         onClick(part)
-                        onClickPart(part)
+                    }}
+                    onpointerdown={() => {
+                        onClickPart(part, 'DOWN')
+                    }}
+                    onpointerup={() => {
+                        onClickPart(part, 'UP')
                     }}
                 />
             )
@@ -258,7 +259,12 @@ const Part = ({
                     interactive={true}
                     onclick={() => {
                         onClick(part)
-                        onClickPart(part)
+                    }}
+                    onpointerdown={() => {
+                        onClickPart(part, 'DOWN')
+                    }}
+                    onpointerup={() => {
+                        onClickPart(part, 'UP')
                     }}
                 />
             )

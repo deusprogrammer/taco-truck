@@ -225,6 +225,9 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     }
 
     const selectPart = (selectedPart) => {
+        if (mode !== SELECT) {
+            return
+        }
         setSelected(selectedPart.id)
     }
 

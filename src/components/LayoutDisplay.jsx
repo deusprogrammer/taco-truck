@@ -1,5 +1,12 @@
 import { Container, Stage } from '@pixi/react'
-import React, { createRef, useCallback, useEffect } from 'react'
+import React, {
+    createContext,
+    createRef,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from 'react'
 import { generateUUID } from './utils'
 import {
     useMouseDrag,
@@ -9,6 +16,18 @@ import {
 import { ADD, SELECT } from './elements/ModeSelect'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
+
+export const ButtonStatusContext = createContext()
+
+export const useButtonStatus = (part) => {
+    const buttonsPressed = useContext(ButtonStatusContext)
+
+    if (part.type !== 'button') {
+        return false
+    }
+
+    return buttonsPressed.find(({ id }) => id === part.id)
+}
 
 const LayoutDisplay = ({
     layout,
@@ -23,7 +42,6 @@ const LayoutDisplay = ({
     placingPartType,
     onSelectPart,
     onSecondarySelectPart,
-    onClickPart,
     onLayoutChange,
 }) => {
     const componentRef = createRef()
@@ -33,6 +51,7 @@ const LayoutDisplay = ({
         'left'
     )
     const previousIsDragging = usePrevious(isDragging)
+    const [buttonsPressed, setButtonsPressed] = useState([])
 
     const addPart = useCallback(
         (evt) => {
@@ -156,30 +175,49 @@ const LayoutDisplay = ({
                         fill="#000000"
                     />
                     {component}
-                    {layout?.parts?.map((part, index) => (
-                        <Part
-                            key={`part-${part.id || index}`}
-                            selectedPartId={selected}
-                            hoveredPartId={hovered}
-                            scale={currentScale}
-                            part={{
-                                ...part,
-                                position:
-                                    selected === part.id &&
-                                    isDragging &&
-                                    mode === SELECT
-                                        ? [
-                                              part.position[0] - deltaX,
-                                              part.position[1] - deltaY,
-                                          ]
-                                        : part.position,
-                            }}
-                            index={index}
-                            parent={layout}
-                            onClick={onSecondarySelectPart || onSelectPart}
-                            onClickPart={onClickPart}
-                        />
-                    ))}
+                    <ButtonStatusContext.Provider value={buttonsPressed}>
+                        {layout?.parts?.map((part, index) => (
+                            <Part
+                                key={`part-${part.id || index}`}
+                                selectedPartId={selected}
+                                hoveredPartId={hovered}
+                                scale={currentScale}
+                                part={{
+                                    ...part,
+                                    position:
+                                        selected === part.id &&
+                                        isDragging &&
+                                        mode === SELECT
+                                            ? [
+                                                  part.position[0] - deltaX,
+                                                  part.position[1] - deltaY,
+                                              ]
+                                            : part.position,
+                                }}
+                                index={index}
+                                parent={layout}
+                                onClick={onSecondarySelectPart || onSelectPart}
+                                onClickPart={(part, action) => {
+                                    let old = [...buttonsPressed]
+                                    if (action === 'DOWN') {
+                                        if (
+                                            !old.find(
+                                                ({ id }) => id === part.id
+                                            )
+                                        ) {
+                                            old = [...buttonsPressed, part]
+                                        }
+                                        setButtonsPressed(old)
+                                    } else if (action === 'UP') {
+                                        old = [...buttonsPressed].filter(
+                                            ({ id }) => id !== part.id
+                                        )
+                                        setButtonsPressed(old)
+                                    }
+                                }}
+                            />
+                        ))}
+                    </ButtonStatusContext.Provider>
                 </Container>
             </Stage>
         </div>

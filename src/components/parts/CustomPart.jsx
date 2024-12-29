@@ -1,7 +1,7 @@
 import React, { createRef } from 'react'
 import '@pixi/events'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
-import { Container, Graphics } from '@pixi/react'
+import { Container } from '@pixi/react'
 import Part from './Part'
 
 const CustomPart = ({
