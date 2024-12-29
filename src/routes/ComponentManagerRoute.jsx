@@ -138,6 +138,13 @@ const ComponentManagerRoute = () => {
                                         Edit
                                     </button>
                                 </Link>
+                                <Link
+                                    to={`/designer/projects/${project.id}?preview${project.isLocal ? '&isLocal=true' : ''}`}
+                                >
+                                    <button className="bg-slate-500 p-4 text-white">
+                                        Test
+                                    </button>
+                                </Link>
                                 {project.isLocal ? (
                                     <button
                                         className="bg-slate-500 p-4 text-white"
@@ -177,10 +184,17 @@ const ComponentManagerRoute = () => {
                             </td>
                             <td className="flex gap-4">
                                 <Link
-                                    to={`/designer/parts/${part.id}${part.isLocal ? '?isLocal=true' : ''}`}
+                                    to={`/designer/parts/${part.id}${part.isLocal ? '?isLocal' : ''}`}
                                 >
                                     <button className="bg-slate-500 p-4 text-white">
                                         Edit
+                                    </button>
+                                </Link>
+                                <Link
+                                    to={`/designer/parts/${part.id}?preview${part.isLocal ? '&isLocal' : ''}`}
+                                >
+                                    <button className="bg-slate-500 p-4 text-white">
+                                        Test
                                     </button>
                                 </Link>
                                 {part.isLocal ? (
