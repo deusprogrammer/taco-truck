@@ -18,6 +18,7 @@ const Part = ({
     hoveredPartId,
     parent,
     onClick,
+    onClickPart,
 }) => {
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
     const { partId, type, id, rotation } = part
@@ -156,6 +157,7 @@ const Part = ({
                 hoveredPartId={hoveredPartId}
                 parent={parent}
                 onClick={onClick}
+                onClickPart={onClickPart}
             />
         )
     }
@@ -239,6 +241,7 @@ const Part = ({
                     interactive={true}
                     onclick={() => {
                         onClick(part)
+                        onClickPart(part)
                     }}
                 />
             )
@@ -255,6 +258,7 @@ const Part = ({
                     interactive={true}
                     onclick={() => {
                         onClick(part)
+                        onClickPart(part)
                     }}
                 />
             )

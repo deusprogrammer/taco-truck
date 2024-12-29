@@ -23,6 +23,7 @@ const LayoutDisplay = ({
     placingPartType,
     onSelectPart,
     onSecondarySelectPart,
+    onClickPart,
     onLayoutChange,
 }) => {
     const componentRef = createRef()
@@ -176,6 +177,7 @@ const LayoutDisplay = ({
                             index={index}
                             parent={layout}
                             onClick={onSecondarySelectPart || onSelectPart}
+                            onClickPart={onClickPart}
                         />
                     ))}
                 </Container>

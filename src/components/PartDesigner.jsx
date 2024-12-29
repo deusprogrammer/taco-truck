@@ -18,8 +18,6 @@ import {
 } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
-import { useAtom } from 'jotai'
-import { renderMeasurementsAtom } from '../atoms/ViewOptions.atom'
 import OptionsModal from './menus/OptionsModal'
 
 const SCALE_RATIO = 10
@@ -45,6 +43,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
 
+    const [lastClicked, setLastClicked] = useState(null)
     const [selected, setSelected] = useState(null)
     const [hovered, setHovered] = useState(null)
     const [viewingSVG, setViewingSVG] = useState(false)
@@ -243,14 +242,19 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     // }, [onButtonDown])
 
     useEffect(() => {
+        if (!preview) {
+            return () => {}
+        }
+
         setOptionsModalOpen(false)
+        setMode('NONE')
         if (!realSizeRatio) {
             setOptionsModalOpen(true)
             return
         }
 
         setCurrentScale(realSizeRatio)
-    }, [realSizeRatio, setOptionsModalOpen])
+    }, [realSizeRatio, preview, setOptionsModalOpen])
 
     useEffect(() => {
         if (!containerRef?.current) {
@@ -293,20 +297,6 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
             className="flex h-screen w-full flex-col"
             style={{ overscrollBehavior: 'none' }}
         >
-            {preview ? (
-                <div className="absolute left-0 top-0">
-                    <div>
-                        Scale: {Math.trunc(currentScale * 100)}% (
-                        {realSizeRatio} pixels/mm )
-                    </div>
-                    <div>Name: {layout.name}</div>
-                    <div>
-                        Panel: {layout.panelDimensions[0]}mm X{' '}
-                        {layout.panelDimensions[1]}mm
-                    </div>
-                </div>
-            ) : null}
-
             <SaveModal
                 open={saveModalOpen}
                 name={layout.name}
@@ -356,6 +346,24 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                 </>
             ) : null}
 
+            {preview ? (
+                <div className="absolute left-0 top-0 text-white">
+                    <div>
+                        Scale: {Math.trunc(currentScale * 100)}% (
+                        {realSizeRatio} pixels/mm )
+                    </div>
+                    <div>Name: {layout.name}</div>
+                    <div>
+                        Panel: {layout.panelDimensions[0]}mm X{' '}
+                        {layout.panelDimensions[1]}mm
+                    </div>
+                    <div>
+                        Last Clicked: {lastClicked?.name || 'None'}[
+                        {lastClicked?.id}]
+                    </div>
+                </div>
+            ) : null}
+
             {viewingSVG ? (
                 <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
                     <LayoutDisplaySvg layout={layout} />
@@ -374,6 +382,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                     placingPartType={placingPartType}
                     onSelectPart={selectPart}
                     onSecondarySelectPart={afterSelect}
+                    onClickPart={setLastClicked}
                     onLayoutChange={onLayoutChange}
                 />
             )}

@@ -11,6 +11,7 @@ const CustomPart = ({
     hoveredPartId,
     parent,
     onClick,
+    onClickPart,
 }) => {
     const containerRef = createRef()
     const [width, height] = calculateSizeOfPart(part)
@@ -46,6 +47,7 @@ const CustomPart = ({
                             panelDimensions: [width, height],
                         }}
                         onClick={onClick}
+                        onClickPart={onClickPart}
                     />
                 </React.Fragment>
             ))}
