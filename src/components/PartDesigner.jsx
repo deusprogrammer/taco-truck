@@ -7,7 +7,12 @@ import LayoutDisplaySvg from './svg/LayoutDisplaySvg'
 import PartDetailsMenu from './menus/PartDetailsMenu'
 import SaveModal from './menus/SaveModal'
 import ImportModal from './menus/ImportModal'
-import { generateUUID, normalizePartPositionsToZero, storeMedia } from './utils'
+import {
+    calculateSizeOfPart,
+    generateUUID,
+    normalizePartPositionsToZero,
+    storeMedia,
+} from './utils'
 import { addDoc, collection, db, doc } from '../firebase.config'
 import {
     useButtonDown,
@@ -23,6 +28,11 @@ import OptionsModal from './menus/OptionsModal'
 const SCALE_RATIO = 10
 
 const PartDesigner = ({ layout, preview, onLayoutChange }) => {
+    const [partsWidth, partsHeight] = calculateSizeOfPart({
+        type: 'custom',
+        layout: layout,
+    })
+
     const navigate = useNavigate()
     const realSizeRatio = useRealScaleRatio()
     const [currentScale, setCurrentScale] = useState(2.0)
@@ -62,7 +72,11 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
 
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
-            if (buttons.includes('Shift') && !preview) {
+            if (preview) {
+                return
+            }
+
+            if (buttons.includes('Shift')) {
                 setCurrentScale(
                     Math.max(1, currentScale - deltaY / SCALE_RATIO)
                 )
@@ -225,22 +239,6 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
         setAfterSelect(null)
     }
 
-    // const onButtonDown = useCallback(
-    //     (e) => {
-    //         if (e.key.includes('m')) {
-    //             setShowMeasurements(!showMeasurements)
-    //         }
-    //     },
-    //     [showMeasurements, setShowMeasurements]
-    // )
-
-    // useEffect(() => {
-    //     window.addEventListener('keydown', onButtonDown)
-    //     return () => {
-    //         window.removeEventListener('keydown', onButtonDown)
-    //     }
-    // }, [onButtonDown])
-
     useEffect(() => {
         if (!preview) {
             return () => {}
@@ -266,10 +264,10 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
         return () => {
             element.removeEventListener('wheel', onScroll)
         }
-    }, [onScroll, containerRef])
+    }, [onScroll, containerRef, preview])
 
     useEffect(() => {
-        if (previousIsDragging === isDragging) {
+        if (previousIsDragging === isDragging || preview) {
             return () => {}
         }
 
@@ -277,20 +275,25 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
             reset()
         }
-    }, [isDragging, previousIsDragging, deltaX, deltaY, reset])
+    }, [isDragging, previousIsDragging, deltaX, deltaY, reset, preview])
 
     useEffect(() => {
-        setWorkspacePosition([width / 2, height / 2])
-    }, [width, height])
+        setWorkspacePosition([
+            width / 2 - (partsWidth / 2) * currentScale,
+            height / 2 - (partsHeight / 2) * currentScale,
+        ])
+    }, [width, height, currentScale, partsWidth, partsHeight])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
-    const screenX = isDragging
-        ? workspacePosition[0] - deltaX
-        : workspacePosition[0]
-    const screenY = isDragging
-        ? workspacePosition[1] - deltaY
-        : workspacePosition[1]
+    const screenX =
+        isDragging && !preview
+            ? workspacePosition[0] - deltaX
+            : workspacePosition[0]
+    const screenY =
+        isDragging && !preview
+            ? workspacePosition[1] - deltaY
+            : workspacePosition[1]
 
     return (
         <div
