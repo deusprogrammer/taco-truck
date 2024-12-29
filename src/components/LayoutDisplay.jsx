@@ -79,6 +79,10 @@ const LayoutDisplay = ({
     }
 
     const updateRemoteButtons = (buttons) => {
+        if (!websocket.current) {
+            return
+        }
+
         const message = {
             controllerId: controllerId.current,
             buttons: buttons.map(({ id, mapping }) => ({ id, mapping })),
