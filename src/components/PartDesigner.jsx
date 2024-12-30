@@ -45,6 +45,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     const buttons = useButtonDown()
     const previousIsDragging = usePrevious(isDragging)
     const [width, height] = useContainerSize(containerRef)
+    const [initialLoad, setInitialLoad] = useState(true)
 
     const [workspacePosition, setWorkspacePosition] = useState([
         width / 2,
@@ -284,7 +285,18 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     }, [isDragging, previousIsDragging, deltaX, deltaY, reset, preview])
 
     useEffect(() => {
-        if (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) {
+        if (!initialLoad) {
+            return () => {}
+        }
+
+        if (partsWidth > 0 && partsHeight > 0) {
+            setInitialLoad(false)
+        }
+
+        if (
+            (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) ||
+            layout.parts.length > 0
+        ) {
             setWorkspacePosition([
                 width / 2 -
                     (Math.min(
@@ -302,7 +314,16 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                         currentScale,
             ])
         }
-    }, [width, height, currentScale, partsWidth, partsHeight, layout, preview])
+    }, [
+        width,
+        height,
+        currentScale,
+        partsWidth,
+        partsHeight,
+        layout,
+        preview,
+        initialLoad,
+    ])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
