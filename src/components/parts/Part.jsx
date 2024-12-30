@@ -236,13 +236,13 @@ const Part = ({
                     zIndex={0}
                     interactive={true}
                     onclick={() => {
-                        onClick(part)
+                        onClick && onClick(part)
                     }}
                     onpointerdown={() => {
-                        onClickPart(part, 'DOWN')
+                        onClickPart && onClickPart(part, 'DOWN')
                     }}
                     onpointerup={() => {
-                        onClickPart(part, 'UP')
+                        onClickPart && onClickPart(part, 'UP')
                     }}
                 />
             )
@@ -258,13 +258,13 @@ const Part = ({
                     zIndex={0}
                     interactive={true}
                     onclick={() => {
-                        onClick(part)
+                        onClick && onClick(part)
                     }}
                     onpointerdown={() => {
-                        onClickPart(part, 'DOWN')
+                        onClickPart && onClickPart(part, 'DOWN')
                     }}
                     onpointerup={() => {
-                        onClickPart(part, 'UP')
+                        onClickPart && onClickPart(part, 'UP')
                     }}
                 />
             )

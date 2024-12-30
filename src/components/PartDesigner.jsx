@@ -281,20 +281,25 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     }, [isDragging, previousIsDragging, deltaX, deltaY, reset, preview])
 
     useEffect(() => {
-        setWorkspacePosition([
-            width / 2 -
-                (Math.min(partsWidth, layout.panelDimensions[0] || partsWidth) /
-                    2) *
-                    currentScale,
-            height / 2 -
-                (Math.min(
-                    partsHeight,
-                    layout.panelDimensions[1] || partsHeight
-                ) /
-                    2) *
-                    currentScale,
-        ])
-    }, [width, height, currentScale, partsWidth, partsHeight, layout])
+        if (preview) {
+            setWorkspacePosition([
+                width / 2 -
+                    (Math.min(
+                        partsWidth,
+                        layout.panelDimensions[0] || partsWidth
+                    ) /
+                        2) *
+                        currentScale,
+                height / 2 -
+                    (Math.min(
+                        partsHeight,
+                        layout.panelDimensions[1] || partsHeight
+                    ) /
+                        2) *
+                        currentScale,
+            ])
+        }
+    }, [width, height, currentScale, partsWidth, partsHeight, layout, preview])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
