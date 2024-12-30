@@ -10,6 +10,7 @@ const CustomPart = ({
     selectedPartId,
     hoveredPartId,
     parent,
+    onHoverPart,
     onClick,
     onClickPart,
 }) => {
@@ -26,48 +27,89 @@ const CustomPart = ({
     )
 
     return (
-        <Container
-            ref={containerRef}
-            x={fixedX * scale}
-            y={fixedY * scale}
-            angle={part.rotation || 0}
-            onclick={() => onClick(part)}
-            interactive={true}
-        >
-            {selectedPartId === part.id ? (
+        <>
+            <Container
+                ref={containerRef}
+                x={fixedX * scale}
+                y={fixedY * scale}
+                angle={part.rotation || 0}
+                onclick={() => onClick && onClick(part)}
+                onmouseover={() => onHoverPart && onHoverPart(part)}
+                onmouseout={() => onHoverPart && onHoverPart(null)}
+                onpointerdown={() => {
+                    onClick && onClick(part)
+                    onClickPart && onClickPart(part, 'DOWN')
+                }}
+                onpointerup={() => {
+                    onClick && onClick(null)
+                    onClickPart && onClickPart(part, 'UP')
+                }}
+                interactive={true}
+            >
                 <Graphics
+                    alpha={0}
+                    onclick={() => onClick && onClick(part)}
+                    onmouseover={() => onHoverPart && onHoverPart(part)}
+                    onmouseout={() => onHoverPart && onHoverPart(null)}
+                    onpointerdown={() => {
+                        onClick && onClick(part)
+                        onClickPart && onClickPart(part, 'DOWN')
+                    }}
+                    onpointerup={() => {
+                        onClick && onClick(null)
+                        onClickPart && onClickPart(part, 'UP')
+                    }}
+                    interactive={true}
                     draw={(g) => {
                         g.clear()
+                        g.beginFill('green')
                         g.lineStyle({ width: 2, color: 'green' })
                         g.drawRoundedRect(
-                            0,
-                            0,
-                            width * scale,
-                            height * scale,
+                            -10,
+                            -10,
+                            (width + 10) * scale,
+                            (height + 10) * scale,
                             0
                         )
                         g.endFill()
                     }}
                 />
-            ) : null}
-            {part.layout.parts.map((customPart, index) => (
-                <React.Fragment key={`custom-part-${index}`}>
-                    <Part
-                        selectedPartId={selectedPartId}
-                        hoveredPartId={hoveredPartId}
-                        scale={scale}
-                        part={customPart}
-                        index={index}
-                        parent={{
-                            ...part.layout,
-                            panelDimensions: [width, height],
+                {selectedPartId === part.id || hoveredPartId === part.id ? (
+                    <Graphics
+                        draw={(g) => {
+                            g.clear()
+                            g.lineStyle({ width: 2, color: 'green' })
+                            g.drawRoundedRect(
+                                -10,
+                                -10,
+                                (width + 10) * scale,
+                                (height + 10) * scale,
+                                0
+                            )
+                            g.endFill()
                         }}
-                        onClick={onClick}
-                        onClickPart={onClickPart}
                     />
-                </React.Fragment>
-            ))}
-        </Container>
+                ) : null}
+                {part.layout.parts.map((customPart, index) => (
+                    <React.Fragment key={`custom-part-${index}`}>
+                        <Part
+                            selectedPartId={selectedPartId}
+                            hoveredPartId={hoveredPartId}
+                            scale={scale}
+                            part={customPart}
+                            index={index}
+                            parent={{
+                                ...part.layout,
+                                panelDimensions: [width, height],
+                            }}
+                            onHoverPart={() => {}}
+                            onClick={onClick}
+                            onClickPart={onClickPart}
+                        />
+                    </React.Fragment>
+                ))}
+            </Container>
+        </>
     )
 }
 

@@ -21,6 +21,7 @@ const Part = ({
     selectedPartId,
     hoveredPartId,
     parent,
+    onHoverPart,
     onClick,
     onClickPart,
 }) => {
@@ -156,6 +157,7 @@ const Part = ({
                 selectedPartId={selectedPartId}
                 hoveredPartId={hoveredPartId}
                 parent={parent}
+                onHoverPart={onHoverPart}
                 onClick={onClick}
                 onClickPart={onClickPart}
             />
@@ -240,6 +242,8 @@ const Part = ({
                     angle={rotation || 0}
                     zIndex={0}
                     interactive={true}
+                    onmouseover={() => onHoverPart && onHoverPart(part)}
+                    onmouseout={() => onHoverPart && onHoverPart(null)}
                     onclick={() => {
                         onClick && onClick(part)
                     }}
@@ -263,6 +267,8 @@ const Part = ({
                     angle={rotation || 0}
                     zIndex={0}
                     interactive={true}
+                    onmouseover={() => onHoverPart && onHoverPart(part)}
+                    onmouseout={() => onHoverPart && onHoverPart(null)}
                     onclick={() => {
                         onClick && onClick(part)
                     }}

@@ -232,7 +232,14 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
         if (mode !== SELECT) {
             return
         }
-        setSelected(selectedPart.id)
+        setSelected(selectedPart?.id)
+    }
+
+    const hoverPart = (hoveredPart) => {
+        if (mode !== SELECT) {
+            return
+        }
+        setHovered(hoveredPart?.id)
     }
 
     const updatePart = (partId, newPart) => {
@@ -410,7 +417,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
 
             {viewingSVG ? (
                 <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
-                    <LayoutDisplaySvg layout={layout} />
+                    <LayoutDisplaySvg layout={layout} scale={2} />
                 </div>
             ) : (
                 <LayoutDisplay
@@ -425,6 +432,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
                     placingPartId={placingPartId}
                     placingPartType={placingPartType}
                     preview={preview}
+                    onHoverPart={hoverPart}
                     onSelectPart={selectPart}
                     onSecondarySelectPart={afterSelect}
                     onClickPart={setLastClicked}

@@ -67,6 +67,7 @@ const ComponentMenu = ({
                 />
                 <label>Width:</label>
                 <BufferedInput
+                    type="number"
                     value={layout?.panelDimensions[0] || 0}
                     onChange={(value) =>
                         updatePanelSize([value, layout?.panelDimensions[1]])
@@ -74,6 +75,7 @@ const ComponentMenu = ({
                 />
                 <label>Height:</label>
                 <BufferedInput
+                    type="number"
                     value={layout?.panelDimensions[1] || 0}
                     onChange={(value) =>
                         updatePanelSize([layout?.panelDimensions[0], value])
@@ -81,6 +83,7 @@ const ComponentMenu = ({
                 />
                 <label>Corner Radius:</label>
                 <BufferedInput
+                    type="number"
                     value={layout?.cornerRadius || 0}
                     onChange={(value) => updateCornerRadius(value)}
                 />
