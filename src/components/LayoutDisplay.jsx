@@ -51,7 +51,10 @@ const LayoutDisplay = ({
     const websocket = useRef()
     const controllerId = useRef()
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
-    const [, , isDragging, reset] = useMouseDrag(workspaceRef, 'left')
+    const [deltaX, deltaY, isDragging, reset] = useMouseDrag(
+        workspaceRef,
+        'left'
+    )
     const previousIsDragging = usePrevious(isDragging)
     const [buttonsPressed, setButtonsPressed] = useState([])
 
@@ -140,16 +143,22 @@ const LayoutDisplay = ({
             const index = updatedParts.findIndex(({ id }) => id === selected)
 
             const updatedPart = updatedParts[index]
-            updatedParts[index] = {
-                ...updatedPart,
-                position: [
-                    (mouseX - workspacePosition[0]) / currentScale,
-                    (mouseY - workspacePosition[1]) / currentScale,
-                ],
-            }
-            const updatedLayout = { ...layout, parts: updatedParts }
 
-            onLayoutChange(updatedLayout)
+            if (!updatedPart.relativeTo) {
+                updatedParts[index] = {
+                    ...updatedPart,
+                    position: [
+                        (mouseX - workspacePosition[0]) / currentScale,
+                        (mouseY - workspacePosition[1]) / currentScale,
+                    ],
+                    origin: [0, 0],
+                    anchor: [0, 0],
+                }
+                const updatedLayout = { ...layout, parts: updatedParts }
+
+                onLayoutChange(updatedLayout)
+            }
+
             reset()
         }
     }, [
@@ -157,10 +166,10 @@ const LayoutDisplay = ({
         layout,
         mode,
         onLayoutChange,
-        currentScale,
         mouseX,
         mouseY,
         workspacePosition,
+        currentScale,
         isDragging,
         previousIsDragging,
         reset,
@@ -242,6 +251,7 @@ const LayoutDisplay = ({
                                 part={{
                                     ...part,
                                     position:
+                                        !part.relativeTo &&
                                         selected === part.id &&
                                         isDragging &&
                                         mode === SELECT
@@ -259,6 +269,9 @@ const LayoutDisplay = ({
                                 parent={layout}
                                 onClick={onSecondarySelectPart || onSelectPart}
                                 onClickPart={(part, action) => {
+                                    if (!preview) {
+                                        return
+                                    }
                                     let old = [...buttonsPressed]
                                     if (action === 'DOWN') {
                                         if (

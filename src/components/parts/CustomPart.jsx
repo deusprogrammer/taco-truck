@@ -1,7 +1,7 @@
 import React, { createRef } from 'react'
 import '@pixi/events'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
-import { Container } from '@pixi/react'
+import { Container, Graphics } from '@pixi/react'
 import Part from './Part'
 
 const CustomPart = ({
@@ -34,6 +34,22 @@ const CustomPart = ({
             onclick={() => onClick(part)}
             interactive={true}
         >
+            {selectedPartId === part.id ? (
+                <Graphics
+                    draw={(g) => {
+                        g.clear()
+                        g.lineStyle({ width: 2, color: 'green' })
+                        g.drawRoundedRect(
+                            0,
+                            0,
+                            width * scale,
+                            height * scale,
+                            0
+                        )
+                        g.endFill()
+                    }}
+                />
+            ) : null}
             {part.layout.parts.map((customPart, index) => (
                 <React.Fragment key={`custom-part-${index}`}>
                     <Part
