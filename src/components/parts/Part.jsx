@@ -9,7 +9,10 @@ import {
 } from '../utils'
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import { useAtom } from 'jotai'
-import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
+import {
+    buttonOpacityAtom,
+    renderMeasurementsAtom,
+} from '../../atoms/ViewOptions.atom'
 import { useButtonStatus } from '../LayoutDisplay'
 
 const Part = ({
@@ -22,6 +25,7 @@ const Part = ({
     onClickPart,
 }) => {
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
+    const [buttonOpacity] = useAtom(buttonOpacityAtom)
     const buttonPressed = useButtonStatus(part)
     const { partId, type, id, rotation } = part
 
@@ -232,6 +236,7 @@ const Part = ({
                     draw={(g) => {
                         drawRectangle(fixedX, fixedY, size, rim, scale, g)
                     }}
+                    alpha={buttonOpacity}
                     angle={rotation || 0}
                     zIndex={0}
                     interactive={true}
@@ -254,6 +259,7 @@ const Part = ({
                     draw={(g) => {
                         drawCircle(fixedX, fixedY, size / 2, rim, scale, g)
                     }}
+                    alpha={buttonOpacity}
                     angle={rotation || 0}
                     zIndex={0}
                     interactive={true}

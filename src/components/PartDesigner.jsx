@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
 
-const SCALE_RATIO = 10
+const SCALE_RATIO = 1000
 
 const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     const [partsWidth, partsHeight] = calculateSizeOfPart({
@@ -82,7 +82,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
 
             if (buttons.includes('Shift')) {
                 setCurrentScale(
-                    Math.max(1, currentScale - deltaY / SCALE_RATIO)
+                    Math.max(1, currentScale - (deltaY || deltaX) / SCALE_RATIO)
                 )
                 return
             }

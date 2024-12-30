@@ -85,7 +85,18 @@ const ComponentMenu = ({
                     onChange={(value) => updateCornerRadius(value)}
                 />
                 <label>Artwork:</label>
-                <input type="file" onChange={handleFileChange} />
+                {layout?.artwork ? (
+                    <button
+                        className={`border-2 border-solid border-black bg-white p-3 hover:bg-slate-600 hover:text-white`}
+                        onClick={() =>
+                            onLayoutChange({ ...layout, artwork: null })
+                        }
+                    >
+                        Clear Artwork
+                    </button>
+                ) : (
+                    <input type="file" onChange={handleFileChange} />
+                )}
                 <label>Artwork Dimensions:</label>
                 {layout.artworkWidth}px X {layout.artworkHeight}px
                 <label>Artwork Zoom:</label>

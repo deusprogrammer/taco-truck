@@ -51,10 +51,7 @@ const LayoutDisplay = ({
     const websocket = useRef()
     const controllerId = useRef()
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
-    const [deltaX, deltaY, isDragging, reset] = useMouseDrag(
-        workspaceRef,
-        'left'
-    )
+    const [, , isDragging, reset] = useMouseDrag(workspaceRef, 'left')
     const previousIsDragging = usePrevious(isDragging)
     const [buttonsPressed, setButtonsPressed] = useState([])
 
@@ -146,8 +143,8 @@ const LayoutDisplay = ({
             updatedParts[index] = {
                 ...updatedPart,
                 position: [
-                    updatedPart.position[0] - deltaX,
-                    updatedPart.position[1] - deltaY,
+                    (mouseX - workspacePosition[0]) / currentScale,
+                    (mouseY - workspacePosition[1]) / currentScale,
                 ],
             }
             const updatedLayout = { ...layout, parts: updatedParts }
@@ -160,10 +157,12 @@ const LayoutDisplay = ({
         layout,
         mode,
         onLayoutChange,
+        currentScale,
+        mouseX,
+        mouseY,
+        workspacePosition,
         isDragging,
         previousIsDragging,
-        deltaX,
-        deltaY,
         reset,
     ])
 
@@ -247,8 +246,12 @@ const LayoutDisplay = ({
                                         isDragging &&
                                         mode === SELECT
                                             ? [
-                                                  part.position[0] - deltaX,
-                                                  part.position[1] - deltaY,
+                                                  (mouseX -
+                                                      workspacePosition[0]) /
+                                                      currentScale,
+                                                  (mouseY -
+                                                      workspacePosition[1]) /
+                                                      currentScale,
                                               ]
                                             : part.position,
                                 }}
