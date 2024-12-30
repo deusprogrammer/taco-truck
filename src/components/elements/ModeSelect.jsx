@@ -10,6 +10,7 @@ import {
 
 export const ADD = 'ADD'
 export const SELECT = 'SELECT'
+export const EDIT = 'EDIT'
 export const PAN = 'PAN'
 
 const ModeSelect = ({
@@ -29,6 +30,11 @@ const ModeSelect = ({
             <OpenButton />
             <ModeButton
                 mode="Select"
+                currentMode={currentMode}
+                onClick={onClick}
+            />
+            <ModeButton
+                mode="Edit"
                 currentMode={currentMode}
                 onClick={onClick}
             />

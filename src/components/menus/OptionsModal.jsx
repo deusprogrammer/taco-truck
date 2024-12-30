@@ -38,6 +38,13 @@ const OptionsModal = ({ open, onClose }) => {
                 screenHeight,
             })
         )
+        localStorage.setItem(
+            'taco-truck-options',
+            JSON.stringify({
+                showMeasurements,
+                buttonOpacity,
+            })
+        )
     }
 
     if (!open) {
