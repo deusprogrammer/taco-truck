@@ -15,6 +15,7 @@ const PartDesignerRoute = () => {
     })
 
     const [preview, setPreview] = useState(false)
+    const [isNew, setIsNew] = useState(false)
 
     const loadLocal = (type, id) => {
         let dataJSON = localStorage.getItem('taco-truck-data')
@@ -72,6 +73,7 @@ const PartDesignerRoute = () => {
                 panelDimensions: [0, 0],
                 parts: [],
             })
+            setIsNew(true)
             return
         }
 
@@ -90,6 +92,7 @@ const PartDesignerRoute = () => {
         <div className="flex-column flex h-screen w-screen items-center justify-center">
             <PartDesigner
                 layout={layout}
+                isNew={isNew}
                 onLayoutChange={setLayout}
                 preview={preview}
             />

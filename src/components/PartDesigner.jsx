@@ -27,7 +27,7 @@ import OptionsModal from './menus/OptionsModal'
 
 const SCALE_RATIO = 1000
 
-const PartDesigner = ({ layout, preview, onLayoutChange }) => {
+const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     const [partsWidth, partsHeight] = calculateSizeOfPart({
         type: 'custom',
         layout: layout,
@@ -296,7 +296,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
             return () => {}
         }
 
-        if (partsWidth > 0 && partsHeight > 0) {
+        if (isNew || (partsWidth > 0 && partsHeight > 0)) {
             setInitialLoad(false)
         }
 
@@ -322,6 +322,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
             ])
         }
     }, [
+        isNew,
         width,
         height,
         currentScale,
