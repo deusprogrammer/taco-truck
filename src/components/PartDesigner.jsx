@@ -310,7 +310,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     return (
         <div
             className="flex h-screen w-full flex-col"
-            style={{ overscrollBehavior: 'none' }}
+            style={{ overscrollBehavior: 'none', userSelect: 'none' }}
         >
             <SaveModal
                 open={saveModalOpen}
