@@ -18,7 +18,7 @@ import {
 import { ADD, SELECT } from './elements/ModeSelect'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
-import { CIRCLE, CUSTOM, partTable } from '../data/parts.table'
+import { CIRCLE, partTable } from '../data/parts.table'
 
 export const ButtonStatusContext = createContext()
 
@@ -53,6 +53,7 @@ const LayoutDisplay = ({
     const websocket = useRef()
     const controllerId = useRef()
     const [dragging, setDragging] = useState(null)
+    const previouslyDragged = usePrevious(dragging)
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
     const [, , isDragging, reset] = useMouseDrag(workspaceRef, 'left')
     const previousIsDragging = usePrevious(isDragging)
@@ -174,7 +175,11 @@ const LayoutDisplay = ({
                 onClick={onSecondarySelectPart || onSelectPart}
                 onClickPart={(part, action) => {
                     if (!preview) {
-                        setDragging(part.id)
+                        if (action === 'DOWN') {
+                            setDragging(part.id)
+                        } else {
+                            setDragging(null)
+                        }
                         return
                     }
 
@@ -211,17 +216,21 @@ const LayoutDisplay = ({
     }, [addPart, workspaceRef])
 
     useEffect(() => {
-        if (previousIsDragging === isDragging) {
+        if (previouslyDragged === dragging) {
             return () => {}
         }
 
-        if (!isDragging && dragging && mode === SELECT) {
+        if (mode === SELECT) {
             const updatedParts = [...layout.parts]
-            const index = updatedParts.findIndex(({ id }) => id === dragging)
+            const index = updatedParts.findIndex(
+                ({ id }) => id === previouslyDragged
+            )
 
             const updatedPart = updatedParts[index]
 
-            if (!updatedPart?.relativeTo) {
+            console.log(JSON.stringify(updatedPart, null, 5))
+
+            if (updatedPart && !updatedPart?.relativeTo) {
                 if (
                     !partTable[updatedPart.type] ||
                     partTable[updatedPart.type][
@@ -274,6 +283,7 @@ const LayoutDisplay = ({
         currentScale,
         isDragging,
         previousIsDragging,
+        previouslyDragged,
         reset,
     ])
 
