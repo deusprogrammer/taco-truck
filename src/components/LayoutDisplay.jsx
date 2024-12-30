@@ -28,7 +28,7 @@ export const useButtonStatus = (part) => {
         return false
     }
 
-    return buttonsPressed.find(({ id }) => id === part.id)
+    return buttonsPressed?.find(({ id }) => id === part.id)
 }
 
 const LayoutDisplay = ({
