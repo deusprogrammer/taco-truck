@@ -46,7 +46,10 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     const previousIsDragging = usePrevious(isDragging)
     const [width, height] = useContainerSize(containerRef)
 
-    const [workspacePosition, setWorkspacePosition] = useState([0, 0])
+    const [workspacePosition, setWorkspacePosition] = useState([
+        width / 2,
+        height / 2,
+    ])
 
     const [mode, setMode] = useState(SELECT)
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
@@ -281,7 +284,7 @@ const PartDesigner = ({ layout, preview, onLayoutChange }) => {
     }, [isDragging, previousIsDragging, deltaX, deltaY, reset, preview])
 
     useEffect(() => {
-        if (preview) {
+        if (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) {
             setWorkspacePosition([
                 width / 2 -
                     (Math.min(
