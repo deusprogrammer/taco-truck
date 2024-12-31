@@ -39,9 +39,10 @@ const PartDetailsMenu = ({
                 </div>
                 <div className="flex flex-col gap-1">
                     <label>name:</label>
-                    <input
+                    <BufferedInput
+                        id={`${selectedPart?.id}-part-name`}
                         value={selectedPart?.name}
-                        onChange={({ target: { value } }) => {
+                        onChange={(value) => {
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
                                 name: value,
@@ -95,7 +96,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>rotation:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-rotation`}
+                        id={`${selectedPart.id}-rotation`}
                         type="number"
                         value={selectedPart?.rotation || 0}
                         onChange={(value) => {
@@ -109,7 +110,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>x:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-x`}
+                        id={`${selectedPart.id}-x`}
                         type="number"
                         value={selectedPart?.position[0]}
                         onChange={(value) => {
@@ -126,7 +127,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>y:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-y`}
+                        id={`${selectedPart.id}-y`}
                         type="number"
                         value={selectedPart?.position[1]}
                         onChange={(value) => {
@@ -143,7 +144,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>origin x:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-origin-x`}
+                        id={`${selectedPart.id}-origin-x`}
                         type="number"
                         value={selectedPart?.origin[0]}
                         onChange={(value) => {
@@ -160,7 +161,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>origin y:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-origin-y`}
+                        id={`${selectedPart.id}-origin-y`}
                         type="number"
                         value={selectedPart?.origin[1]}
                         onChange={(value) => {
@@ -177,7 +178,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>anchor x:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-anchor-x`}
+                        id={`${selectedPart.id}-anchor-x`}
                         type="number"
                         value={selectedPart?.anchor?.[0] || 0}
                         onChange={(value) => {
@@ -194,7 +195,7 @@ const PartDetailsMenu = ({
                 <div className="flex flex-col gap-1">
                     <label>anchor y:</label>
                     <BufferedInput
-                        id={`${selectedPart.name}-anchor-y`}
+                        id={`${selectedPart.id}-anchor-y`}
                         type="number"
                         value={selectedPart?.anchor?.[1] || 0}
                         onChange={(value) => {

@@ -19,8 +19,6 @@ const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
             return
         }
 
-        console.log('UPDATE ' + id + ': ' + newValue)
-
         onChange(newValue)
     }
 
@@ -29,6 +27,8 @@ const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
             update(buffer)
             event.preventDefault()
         }
+
+        event.stopPropagation()
     }
 
     useEffect(() => {
@@ -48,7 +48,6 @@ const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
                         if (type === 'number') {
                             value = parseFloat(value)
                         }
-                        console.log('IMMEDIATE')
                         onChange(value)
                     }
                 }}

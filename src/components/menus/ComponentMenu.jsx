@@ -50,7 +50,6 @@ const ComponentMenu = ({
 
     const onKeyDown = useCallback(
         (evt) => {
-            console.log('EVENT: ' + evt.key)
             if (evt.key === 'Backspace' || evt.key === 'Delete') {
                 deleteComponent(selectedPartId)
             }
@@ -78,10 +77,11 @@ const ComponentMenu = ({
             </h2>
             <div className="flex flex-col gap-1 overflow-y-auto">
                 <label>Name:</label>
-                <input
+                <BufferedInput
+                    id={`panel-name`}
                     value={layout?.name || ''}
                     placeholder="part name"
-                    onChange={({ target: { value } }) => {
+                    onChange={(value) => {
                         onLayoutChange({ ...layout, name: value })
                     }}
                 />
