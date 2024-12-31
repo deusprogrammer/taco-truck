@@ -1,3 +1,4 @@
+import PartMenu from '../menus/PartMenu'
 import {
     ExportButton,
     ImportButton,
@@ -10,41 +11,52 @@ import {
 
 export const ADD = 'ADD'
 export const SELECT = 'SELECT'
-export const EDIT = 'EDIT'
-export const PAN = 'PAN'
+export const EXPORT = 'EXPORT'
 
 const ModeSelect = ({
     currentMode,
-    locked,
+    currentPart,
     onModeChange,
-    onRealSizeZoom,
     onSave,
     onImport,
-    onExport,
-    onLockToggle,
     onOptions,
+    onChangeAddPart,
 }) => {
     const onClick = (e, value) => {
         onModeChange(value)
     }
+
     return (
-        <div className="absolute left-0 top-0 flex w-screen flex-row items-center justify-around gap-10 bg-slate-400 p-2">
-            <NewButton />
-            <OpenButton />
-            <ModeButton
-                mode="Select"
-                currentMode={currentMode}
-                onClick={onClick}
-            />
-            <ModeButton
-                mode="Add"
-                currentMode={currentMode}
-                onClick={onClick}
-            />
-            <ImportButton onClick={onImport} />
-            <ExportButton onClick={onExport} />
-            <SaveButton onClick={onSave} />
-            <OptionsButton onClick={onOptions} />
+        <div className="absolute left-0 top-0 flex w-screen flex-col">
+            <div className="flex w-screen flex-row items-center justify-around gap-10 bg-slate-400 p-2">
+                <NewButton />
+                <OpenButton />
+                <ModeButton
+                    mode="Select"
+                    currentMode={currentMode}
+                    onClick={onClick}
+                />
+                <ModeButton
+                    mode="Add"
+                    currentMode={currentMode}
+                    onClick={onClick}
+                />
+                <ModeButton
+                    mode="Export"
+                    currentMode={currentMode}
+                    onClick={onClick}
+                />
+                <ImportButton onClick={onImport} />
+                <SaveButton onClick={onSave} />
+                <OptionsButton onClick={onOptions} />
+            </div>
+            <div className="flex w-screen flex-row items-center justify-around gap-10 bg-slate-400 p-2">
+                <PartMenu
+                    active={currentMode === ADD}
+                    currentPart={currentPart}
+                    onChange={onChangeAddPart}
+                />
+            </div>
         </div>
     )
 }

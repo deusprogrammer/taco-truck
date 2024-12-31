@@ -1,6 +1,6 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
 import { useGesture } from '@use-gesture/react'
-import ModeSelect, { ADD, SELECT } from './elements/ModeSelect'
+import ModeSelect, { ADD, EXPORT, SELECT } from './elements/ModeSelect'
 import PartMenu from './menus/PartMenu'
 import ComponentMenu from './menus/ComponentMenu'
 import LayoutDisplay from './LayoutDisplay'
@@ -70,7 +70,6 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     const [lastClicked, setLastClicked] = useState(null)
     const [selected, setSelected] = useState(null)
     const [hovered, setHovered] = useState(null)
-    const [viewingSVG, setViewingSVG] = useState(false)
 
     const [saveModalOpen, setSaveModalOpen] = useState(false)
     const [importModalOpen, setImportModalOpen] = useState(false)
@@ -392,7 +391,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
 
     return (
         <div
-            className="flex h-screen w-full flex-col"
+            className="flex h-screen w-full flex-col bg-[#1099bb]"
             style={{ overscrollBehavior: 'none', userSelect: 'none' }}
         >
             <SaveModal
@@ -415,20 +414,12 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                 <>
                     <ModeSelect
                         currentMode={mode}
-                        currentZoom={currentScale}
-                        locked={locked}
+                        currentPart={placingPartId}
                         onModeChange={setMode}
                         onSave={saveComponent}
                         onImport={importCustomPart}
                         onOptions={setOptionsModalOpen}
-                        onExport={setViewingSVG}
-                        onLockToggle={setLocked}
-                        onRealSizeZoom={setRealSizeZoom}
-                    />
-                    <PartMenu
-                        currentPart={placingPartId}
-                        active={mode === ADD}
-                        onChange={selectPlacingPart}
+                        onChangeAddPart={selectPlacingPart}
                     />
                     <ComponentMenu
                         layout={layout}
@@ -494,7 +485,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                 </div>
             ) : null}
 
-            {viewingSVG ? (
+            {mode === EXPORT ? (
                 <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
                     <LayoutDisplaySvg layout={layout} scale={2} />
                 </div>

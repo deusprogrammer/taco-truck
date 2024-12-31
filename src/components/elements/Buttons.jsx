@@ -113,7 +113,7 @@ export const ExportButton = ({ onClick }) => {
                 onClick(!toggle)
             }}
         >
-            {!toggle ? 'Design Mode' : 'SVG Mode'}
+            {!toggle ? 'Export SVG' : 'Back'}
         </button>
     )
 }
