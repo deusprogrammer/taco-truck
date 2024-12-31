@@ -105,8 +105,8 @@ const LayoutDisplay = ({
                 type: placingPartType,
                 partId: placingPartId,
                 position: [
-                    (mouseX - workspacePosition[0]) / currentScale,
-                    (mouseY - workspacePosition[1]) / currentScale,
+                    (evt.offsetX - workspacePosition[0]) / currentScale,
+                    (evt.offsetY - workspacePosition[1]) / currentScale,
                 ],
                 origin: [0, 0],
             })
@@ -117,8 +117,6 @@ const LayoutDisplay = ({
             layout,
             onLayoutChange,
             mode,
-            mouseX,
-            mouseY,
             currentScale,
             placingPartId,
             placingPartType,
@@ -278,6 +276,7 @@ const LayoutDisplay = ({
         dragging,
         layout,
         mode,
+        locked,
         onLayoutChange,
         mouseX,
         mouseY,

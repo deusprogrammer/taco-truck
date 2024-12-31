@@ -31,7 +31,7 @@ const ModeSelect = ({
         <div className="flex w-full flex-row items-center justify-around gap-10 bg-slate-400 p-2">
             <NewButton />
             <OpenButton />
-            <div>
+            <div className="flex flex-row">
                 <ModeButton
                     mode="Select"
                     currentMode={currentMode}

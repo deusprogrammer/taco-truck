@@ -115,13 +115,13 @@ const ComponentManagerRoute = () => {
                     Project Taco Truck v{config.version}
                 </h1>
             </div>
-            <div>
+            <div className="mx-auto flex w-[90%] flex-col justify-center">
                 <h2 className="text-[1.8rem]">Panel Designs</h2>
-                <table>
+                <table className="flex flex-col justify-center">
                     {combinedProjects.map((project) => (
                         <tr
                             key={project.id}
-                            className={`border-b-2 border-solid border-black`}
+                            className={`flex flex-col justify-center border-b-2 border-solid border-black lg:flex-row`}
                         >
                             <td
                                 className={`w-52 p-2 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
@@ -137,7 +137,7 @@ const ComponentManagerRoute = () => {
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
                                     <LayoutDisplaySvg
                                         layout={project.layout}
-                                        scale={2}
+                                        scale={1}
                                     />
                                 </div>
                             </td>
@@ -177,7 +177,7 @@ const ComponentManagerRoute = () => {
                     {combinedParts.map((part) => (
                         <tr
                             key={part.id}
-                            className={`border-b-2 border-solid border-black ${part.isLocal ? 'bg-lightblue' : ''}`}
+                            className={`flex flex-col border-b-2 border-solid border-black ${part.isLocal ? 'bg-lightblue' : ''}`}
                         >
                             <td
                                 className={`w-16 p-2 ${part.isLocal ? 'bg-teal-500 text-white' : ''}`}
@@ -189,7 +189,7 @@ const ComponentManagerRoute = () => {
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
                                     <LayoutDisplaySvg
                                         layout={part.layout}
-                                        scale={2}
+                                        scale={1}
                                     />
                                 </div>
                             </td>
