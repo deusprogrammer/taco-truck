@@ -53,6 +53,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     ])
 
     const [mode, setMode] = useState(SELECT)
+    const [locked, setLocked] = useState('false')
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
@@ -375,6 +376,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                         onImport={importCustomPart}
                         onOptions={setOptionsModalOpen}
                         onExport={setViewingSVG}
+                        onLockToggle={setLocked}
                     />
                     <PartMenu
                         currentPart={placingPartId}
@@ -428,6 +430,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                     selected={selected}
                     hovered={hovered}
                     mode={mode}
+                    locked={locked}
                     workspaceDimensions={[width, height]}
                     workspacePosition={[screenX, screenY]}
                     placingPartId={placingPartId}

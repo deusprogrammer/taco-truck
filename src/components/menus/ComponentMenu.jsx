@@ -19,11 +19,14 @@ const ComponentMenu = ({
         onLayoutChange({ ...layout, cornerRadius: radius })
     }
 
-    const deleteComponent = (id) => {
-        const updatedParts = layout.parts.filter((part) => part.id !== id)
-        onLayoutChange({ ...layout, parts: updatedParts })
-        onSelect(null)
-    }
+    const deleteComponent = useCallback(
+        (id) => {
+            const updatedParts = layout.parts.filter((part) => part.id !== id)
+            onLayoutChange({ ...layout, parts: updatedParts })
+            onSelect(null)
+        },
+        [onLayoutChange, onSelect, layout]
+    )
 
     const handleFileChange = (event) => {
         const file = event.target.files[0]
@@ -45,11 +48,28 @@ const ComponentMenu = ({
         })
     }, [layout, onLayoutChange])
 
+    const onKeyDown = useCallback(
+        (evt) => {
+            console.log('EVENT: ' + evt.key)
+            if (evt.key === 'Backspace' || evt.key === 'Delete') {
+                deleteComponent(selectedPartId)
+            }
+        },
+        [selectedPartId, deleteComponent]
+    )
+
     useEffect(() => {
         if (layout.artwork && (!layout.artworkWidth || !layout.artworkHeight)) {
             loadImageDimensions()
         }
     }, [layout, loadImageDimensions])
+
+    useEffect(() => {
+        window.addEventListener('keydown', onKeyDown)
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+        }
+    }, [onKeyDown])
 
     return (
         <div className="absolute left-[10px] top-[50%] flex max-h-[75%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
@@ -67,6 +87,7 @@ const ComponentMenu = ({
                 />
                 <label>Width:</label>
                 <BufferedInput
+                    id={`panel-dimension-w`}
                     type="number"
                     value={layout?.panelDimensions[0] || 0}
                     onChange={(value) =>
@@ -75,6 +96,7 @@ const ComponentMenu = ({
                 />
                 <label>Height:</label>
                 <BufferedInput
+                    id={`panel-dimension-h`}
                     type="number"
                     value={layout?.panelDimensions[1] || 0}
                     onChange={(value) =>
@@ -83,6 +105,7 @@ const ComponentMenu = ({
                 />
                 <label>Corner Radius:</label>
                 <BufferedInput
+                    id={`panel-corner-radius`}
                     type="number"
                     value={layout?.cornerRadius || 0}
                     onChange={(value) => updateCornerRadius(value)}
@@ -104,6 +127,7 @@ const ComponentMenu = ({
                 {layout.artworkWidth}px X {layout.artworkHeight}px
                 <label>Artwork Zoom:</label>
                 <BufferedInput
+                    id={`panel-art-zoom`}
                     type="number"
                     immediate={true}
                     value={layout.artworkZoom * 100 || 100}
@@ -113,6 +137,7 @@ const ComponentMenu = ({
                 />
                 <label>Artwork X Offset:</label>
                 <BufferedInput
+                    id={`panel-art-x`}
                     type="number"
                     immediate={true}
                     value={layout.artworkOffset?.[0] || '0'}
@@ -128,6 +153,7 @@ const ComponentMenu = ({
                 />
                 <label>Artwork Y Offset:</label>
                 <BufferedInput
+                    id={`panel-art-y`}
                     type="number"
                     immediate={true}
                     value={layout.artworkOffset?.[1] || '0'}

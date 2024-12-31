@@ -1,6 +1,7 @@
 import {
     ExportButton,
     ImportButton,
+    LockToggleButton,
     ModeButton,
     NewButton,
     OpenButton,
@@ -15,10 +16,12 @@ export const PAN = 'PAN'
 
 const ModeSelect = ({
     currentMode,
+    locked,
     onModeChange,
     onSave,
     onImport,
     onExport,
+    onLockToggle,
     onOptions,
 }) => {
     const onClick = (e, value) => {
@@ -28,16 +31,14 @@ const ModeSelect = ({
         <div className="flex w-full flex-row items-center justify-around gap-10 bg-slate-400 p-2">
             <NewButton />
             <OpenButton />
-            <ModeButton
-                mode="Select"
-                currentMode={currentMode}
-                onClick={onClick}
-            />
-            <ModeButton
-                mode="Edit"
-                currentMode={currentMode}
-                onClick={onClick}
-            />
+            <div>
+                <ModeButton
+                    mode="Select"
+                    currentMode={currentMode}
+                    onClick={onClick}
+                />
+                <LockToggleButton locked={locked} onClick={onLockToggle} />
+            </div>
             <ModeButton
                 mode="Add"
                 currentMode={currentMode}

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
+import { usePrevious } from '../../hooks/MouseHooks'
 
-const BufferedInput = ({ value, className, type, immediate, onChange }) => {
+const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
     const [buffer, setBuffer] = useState()
+    const previousId = usePrevious(id)
 
     const update = (newValue) => {
         if (type === 'number' && (newValue === '' || isNaN(Number(newValue)))) {
@@ -13,7 +15,11 @@ const BufferedInput = ({ value, className, type, immediate, onChange }) => {
             newValue = parseFloat(newValue)
         }
 
-        console.log('UPDATE: ' + newValue)
+        if (previousId !== id) {
+            return
+        }
+
+        console.log('UPDATE ' + id + ': ' + newValue)
 
         onChange(newValue)
     }
@@ -27,11 +33,12 @@ const BufferedInput = ({ value, className, type, immediate, onChange }) => {
 
     useEffect(() => {
         setBuffer(value)
-    }, [value])
+    }, [value, id])
 
     return (
         <>
             <input
+                id={id}
                 type={type}
                 className={className}
                 value={buffer}

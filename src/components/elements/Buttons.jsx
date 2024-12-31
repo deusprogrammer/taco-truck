@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 export const NewButton = () => {
@@ -114,6 +114,23 @@ export const ExportButton = ({ onClick }) => {
             }}
         >
             {!toggle ? 'Design Mode' : 'SVG Mode'}
+        </button>
+    )
+}
+
+export const LockToggleButton = ({ onClick }) => {
+    const [toggle, setToggle] = useState(false)
+
+    return (
+        <button
+            className={`h-20 w-20 border-2 border-solid border-black ${toggle ? 'bg-black' : 'bg-slate-600'} text-white`}
+            title="Lock the current configuration so it does not move during select"
+            onClick={() => {
+                setToggle(!toggle)
+                onClick(!toggle)
+            }}
+        >
+            {!toggle ? '🔓' : '🔒'}
         </button>
     )
 }

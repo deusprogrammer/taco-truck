@@ -15,7 +15,7 @@ import {
     useMousePosition,
     usePrevious,
 } from '../hooks/MouseHooks'
-import { ADD, EDIT, SELECT } from './elements/ModeSelect'
+import { ADD, SELECT } from './elements/ModeSelect'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
 import { CIRCLE, partTable } from '../data/parts.table'
@@ -38,6 +38,7 @@ const LayoutDisplay = ({
     selected,
     hovered,
     mode,
+    locked,
     workspaceDimensions,
     workspacePosition,
     workspaceRef,
@@ -132,7 +133,8 @@ const LayoutDisplay = ({
             !part.relativeTo &&
             dragging === part.id &&
             isDragging &&
-            mode === EDIT
+            mode === SELECT &&
+            !locked
         ) {
             if (
                 !partTable[modifiedPart.type] ||
@@ -209,9 +211,9 @@ const LayoutDisplay = ({
     useEffect(() => {
         const ele = workspaceRef.current
 
-        ele.addEventListener('click', addPart)
+        ele.addEventListener('pointerdown', addPart)
         return () => {
-            ele.removeEventListener('click', addPart)
+            ele.removeEventListener('pointerdown', addPart)
         }
     }, [addPart, workspaceRef])
 
@@ -220,7 +222,7 @@ const LayoutDisplay = ({
             return () => {}
         }
 
-        if (mode === EDIT) {
+        if (mode === SELECT && !locked) {
             const updatedParts = [...layout.parts]
             const index = updatedParts.findIndex(
                 ({ id }) => id === previouslyDragged
