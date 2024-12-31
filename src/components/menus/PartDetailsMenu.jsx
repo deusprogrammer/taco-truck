@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { calculateRelativePosition } from '../utils'
 import BufferedInput from '../elements/BufferedInput'
 
@@ -9,6 +9,52 @@ const PartDetailsMenu = ({
     onSecondarySelectPart,
     onSetSecondarySelect,
 }) => {
+    const onKeyDown = useCallback(
+        (evt) => {
+            if (evt.key === 'ArrowUp') {
+                onUpdatePart(selectedPart.id, {
+                    ...selectedPart,
+                    position: [
+                        selectedPart.position[0],
+                        selectedPart.position[1] - 1,
+                    ],
+                })
+            } else if (evt.key === 'ArrowDown') {
+                onUpdatePart(selectedPart.id, {
+                    ...selectedPart,
+                    position: [
+                        selectedPart.position[0],
+                        selectedPart.position[1] + 1,
+                    ],
+                })
+            } else if (evt.key === 'ArrowLeft') {
+                onUpdatePart(selectedPart.id, {
+                    ...selectedPart,
+                    position: [
+                        selectedPart.position[0] - 1,
+                        selectedPart.position[1],
+                    ],
+                })
+            } else if (evt.key === 'ArrowRight') {
+                onUpdatePart(selectedPart.id, {
+                    ...selectedPart,
+                    position: [
+                        selectedPart.position[0] + 1,
+                        selectedPart.position[1],
+                    ],
+                })
+            }
+        },
+        [selectedPart, onUpdatePart]
+    )
+
+    useEffect(() => {
+        window.addEventListener('keydown', onKeyDown)
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+        }
+    }, [onKeyDown])
+
     if (!selectedPart) {
         return null
     }
