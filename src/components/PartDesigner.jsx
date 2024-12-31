@@ -24,6 +24,8 @@ import {
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
+import { lockComponentAtom } from '../atoms/ViewOptions.atom'
+import { useAtom } from 'jotai'
 
 const SCALE_RATIO = 1000
 
@@ -53,7 +55,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     ])
 
     const [mode, setMode] = useState(SELECT)
-    const [locked, setLocked] = useState('false')
+    const [locked, setLocked] = useAtom(lockComponentAtom)
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
@@ -371,6 +373,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                     <ModeSelect
                         currentMode={mode}
                         currentZoom={currentScale}
+                        locked={locked}
                         onModeChange={setMode}
                         onSave={saveComponent}
                         onImport={importCustomPart}

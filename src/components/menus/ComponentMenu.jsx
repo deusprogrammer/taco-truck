@@ -2,6 +2,11 @@ import React, { useCallback, useEffect } from 'react'
 import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { getImageDimensions } from '../utils'
+import { useAtom } from 'jotai'
+import {
+    lockComponentAtom,
+    renderMeasurementsAtom,
+} from '../../atoms/ViewOptions.atom'
 
 const ComponentMenu = ({
     layout,
@@ -11,6 +16,11 @@ const ComponentMenu = ({
     onHover,
     onDelete,
 }) => {
+    const [renderMeasurements, setRenderMeasurements] = useAtom(
+        renderMeasurementsAtom
+    )
+    const [lockComponent, setLockComponent] = useAtom(lockComponentAtom)
+
     const updatePanelSize = (dimensions) => {
         onLayoutChange({ ...layout, panelDimensions: dimensions })
     }
@@ -52,9 +62,20 @@ const ComponentMenu = ({
         (evt) => {
             if (evt.key === 'Backspace' || evt.key === 'Delete') {
                 deleteComponent(selectedPartId)
+            } else if (evt.key === 'm') {
+                setRenderMeasurements(!renderMeasurements)
+            } else if (evt.key === 'l') {
+                setLockComponent(!lockComponent)
             }
         },
-        [selectedPartId, deleteComponent]
+        [
+            selectedPartId,
+            renderMeasurements,
+            lockComponent,
+            deleteComponent,
+            setRenderMeasurements,
+            setLockComponent,
+        ]
     )
 
     useEffect(() => {

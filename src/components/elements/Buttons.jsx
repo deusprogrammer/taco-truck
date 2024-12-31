@@ -118,19 +118,16 @@ export const ExportButton = ({ onClick }) => {
     )
 }
 
-export const LockToggleButton = ({ onClick }) => {
-    const [toggle, setToggle] = useState(false)
-
+export const LockToggleButton = ({ onClick, locked }) => {
     return (
         <button
-            className={`h-20 w-20 border-2 border-solid border-black ${toggle ? 'bg-black' : 'bg-slate-600'} text-white`}
+            className={`h-20 w-20 border-2 border-solid border-black ${locked ? 'bg-black' : 'bg-slate-600'} text-white`}
             title="Lock the current configuration so it does not move during select"
             onClick={() => {
-                setToggle(!toggle)
-                onClick(!toggle)
+                onClick(!locked)
             }}
         >
-            {!toggle ? '🔓' : '🔒'}
+            {!locked ? '🔓' : '🔒'}
         </button>
     )
 }
