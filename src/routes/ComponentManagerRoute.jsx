@@ -124,7 +124,7 @@ const ComponentManagerRoute = () => {
                             className={`flex flex-col justify-center border-b-2 border-solid border-black lg:flex-row`}
                         >
                             <td
-                                className={`w-52 p-2 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                                className={`w-full p-2 lg:w-52 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
                             >
                                 {project.name}
                                 {project.isLocal ? '(Local)' : ''}
@@ -177,10 +177,10 @@ const ComponentManagerRoute = () => {
                     {combinedParts.map((part) => (
                         <tr
                             key={part.id}
-                            className={`flex flex-col border-b-2 border-solid border-black ${part.isLocal ? 'bg-lightblue' : ''}`}
+                            className={`flex flex-col border-b-2 border-solid border-black lg:flex-row ${part.isLocal ? 'bg-lightblue' : ''}`}
                         >
                             <td
-                                className={`w-16 p-2 ${part.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                                className={`w-full p-2 lg:w-52 ${part.isLocal ? 'bg-teal-500 text-white' : ''}`}
                             >
                                 {part.name}
                                 {part.isLocal ? '(Local)' : ''}

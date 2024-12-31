@@ -1,4 +1,5 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
+import { useGesture } from '@use-gesture/react'
 import ModeSelect, { ADD, SELECT } from './elements/ModeSelect'
 import PartMenu from './menus/PartMenu'
 import ComponentMenu from './menus/ComponentMenu'
@@ -26,6 +27,11 @@ import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
 import { lockComponentAtom } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
+import {
+    LockToggleButton,
+    RealSizeZoomButton,
+    ZoomButton,
+} from './elements/Buttons'
 
 const SCALE_RATIO = 1000
 
@@ -56,6 +62,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
 
     const [mode, setMode] = useState(SELECT)
     const [locked, setLocked] = useAtom(lockComponentAtom)
+    const [scrollLocked, setScrollLocked] = useState(false)
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
@@ -79,7 +86,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
 
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
-            if (preview) {
+            if (scrollLocked) {
                 return
             }
 
@@ -92,7 +99,34 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
 
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
         },
-        [currentScale, buttons, preview]
+        [currentScale, buttons, scrollLocked]
+    )
+
+    const bind = useGesture(
+        {
+            onDrag: ({ event, offset: [x, y], memo }) => {
+                if (scrollLocked) {
+                    return
+                }
+                if (event.touches && event.touches.length === 2) {
+                    if (!memo) {
+                        memo = {
+                            initialX: workspacePosition[0],
+                            initialY: workspacePosition[1],
+                        }
+                    }
+                    setWorkspacePosition([memo.initialX + x, memo.initialY + y])
+                    return memo
+                }
+            },
+        },
+        {
+            drag: {
+                pointer: {
+                    touch: true,
+                },
+            },
+        }
     )
 
     const completeSave = (name, type, isLocal) => {
@@ -256,6 +290,15 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
         setAfterSelect(null)
     }
 
+    const setRealSizeZoom = () => {
+        if (!realSizeRatio) {
+            setOptionsModalOpen(true)
+            return
+        }
+
+        setCurrentScale(realSizeRatio)
+    }
+
     useEffect(() => {
         if (!preview) {
             return () => {}
@@ -284,7 +327,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     }, [onScroll, containerRef, preview])
 
     useEffect(() => {
-        if (previousIsDragging === isDragging || preview) {
+        if (previousIsDragging === isDragging || scrollLocked) {
             return () => {}
         }
 
@@ -292,7 +335,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
             reset()
         }
-    }, [isDragging, previousIsDragging, deltaX, deltaY, reset, preview])
+    }, [isDragging, previousIsDragging, deltaX, deltaY, reset, scrollLocked])
 
     useEffect(() => {
         if (!initialLoad) {
@@ -339,11 +382,11 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
     const screenX =
-        isDragging && !preview
+        isDragging && !scrollLocked
             ? workspacePosition[0] - deltaX
             : workspacePosition[0]
     const screenY =
-        isDragging && !preview
+        isDragging && !scrollLocked
             ? workspacePosition[1] - deltaY
             : workspacePosition[1]
 
@@ -380,6 +423,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                         onOptions={setOptionsModalOpen}
                         onExport={setViewingSVG}
                         onLockToggle={setLocked}
+                        onRealSizeZoom={setRealSizeZoom}
                     />
                     <PartMenu
                         currentPart={placingPartId}
@@ -400,8 +444,37 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                         onSecondarySelectPart={afterSelect}
                         onSetSecondarySelect={setAfterSelect}
                     />
+                    <div className="absolute bottom-0 left-0 flex w-screen flex-row items-center justify-center gap-9">
+                        <ZoomButton
+                            onZoomChange={(adj) =>
+                                setCurrentScale(currentScale + adj)
+                            }
+                            currentZoom={currentScale}
+                        />
+                        <RealSizeZoomButton onClick={setRealSizeZoom} />
+                        <LockToggleButton locked={locked} onClick={setLocked}>
+                            Edit
+                        </LockToggleButton>
+                        <LockToggleButton
+                            locked={scrollLocked}
+                            onClick={setScrollLocked}
+                        >
+                            Scroll
+                        </LockToggleButton>
+                    </div>
                 </>
-            ) : null}
+            ) : (
+                <>
+                    <div className="absolute bottom-0 left-0 flex w-screen flex-row items-center justify-center">
+                        <LockToggleButton
+                            locked={scrollLocked}
+                            onClick={setScrollLocked}
+                        >
+                            Scroll
+                        </LockToggleButton>
+                    </div>
+                </>
+            )}
 
             {preview ? (
                 <div className="absolute left-0 top-0 text-white">
@@ -426,25 +499,31 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                     <LayoutDisplaySvg layout={layout} scale={2} />
                 </div>
             ) : (
-                <LayoutDisplay
-                    workspaceRef={containerRef}
-                    layout={layout}
-                    currentScale={currentScale}
-                    selected={selected}
-                    hovered={hovered}
-                    mode={mode}
-                    locked={locked}
-                    workspaceDimensions={[width, height]}
-                    workspacePosition={[screenX, screenY]}
-                    placingPartId={placingPartId}
-                    placingPartType={placingPartType}
-                    preview={preview}
-                    onHoverPart={hoverPart}
-                    onSelectPart={selectPart}
-                    onSecondarySelectPart={afterSelect}
-                    onClickPart={setLastClicked}
-                    onLayoutChange={onLayoutChange}
-                />
+                <div
+                    ref={containerRef}
+                    className="flex h-0 w-full flex-shrink flex-grow justify-center"
+                    {...bind()}
+                >
+                    <LayoutDisplay
+                        workspaceRef={containerRef}
+                        layout={layout}
+                        currentScale={currentScale}
+                        selected={selected}
+                        hovered={hovered}
+                        mode={mode}
+                        locked={locked}
+                        workspaceDimensions={[width, height]}
+                        workspacePosition={[screenX, screenY]}
+                        placingPartId={placingPartId}
+                        placingPartType={placingPartType}
+                        preview={preview}
+                        onHoverPart={hoverPart}
+                        onSelectPart={selectPart}
+                        onSecondarySelectPart={afterSelect}
+                        onClickPart={setLastClicked}
+                        onLayoutChange={onLayoutChange}
+                    />
+                </div>
             )}
         </div>
     )

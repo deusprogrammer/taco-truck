@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
 export const NewButton = () => {
@@ -85,22 +85,22 @@ export const PartSelectionButton = ({
 )
 
 export const ZoomButton = ({ currentZoom, onZoomChange }) => (
-    <>
+    <div className="flex flex-row items-center justify-center">
         <button
-            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+            className={`h-20 w-20 border-2 border-solid border-black bg-slate-600 text-white`}
             disabled={currentZoom === 0.5}
-            onClick={() => onZoomChange(-0.5)}
+            onClick={() => onZoomChange(-0.1)}
         >
             -
         </button>
-        <div>{currentZoom * 100}%</div>
+        <div>{Math.trunc(currentZoom * 100)}%</div>
         <button
-            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
-            onClick={() => onZoomChange(0.5)}
+            className={`h-20 w-20 border-2 border-solid border-black bg-slate-600 text-white`}
+            onClick={() => onZoomChange(0.1)}
         >
             +
         </button>
-    </>
+    </div>
 )
 
 export const ExportButton = ({ onClick }) => {
@@ -118,7 +118,7 @@ export const ExportButton = ({ onClick }) => {
     )
 }
 
-export const LockToggleButton = ({ onClick, locked }) => {
+export const LockToggleButton = ({ onClick, locked, children }) => {
     return (
         <button
             className={`h-20 w-20 border-2 border-solid border-black ${locked ? 'bg-black' : 'bg-slate-600'} text-white`}
@@ -127,7 +127,20 @@ export const LockToggleButton = ({ onClick, locked }) => {
                 onClick(!locked)
             }}
         >
+            {children}&nbsp;
             {!locked ? '🔓' : '🔒'}
+        </button>
+    )
+}
+
+export const RealSizeZoomButton = ({ onClick }) => {
+    return (
+        <button
+            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+            title="Lock the current configuration so it does not move during select"
+            onClick={onClick}
+        >
+            Real Size
         </button>
     )
 }

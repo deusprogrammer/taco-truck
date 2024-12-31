@@ -41,7 +41,6 @@ const CustomPart = ({
                     onClickPart && onClickPart(part, 'DOWN')
                 }}
                 onpointerup={() => {
-                    onClick && onClick(null)
                     onClickPart && onClickPart(part, 'UP')
                 }}
                 interactive={true}

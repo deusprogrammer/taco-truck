@@ -1,7 +1,6 @@
 import {
     ExportButton,
     ImportButton,
-    LockToggleButton,
     ModeButton,
     NewButton,
     OpenButton,
@@ -18,6 +17,7 @@ const ModeSelect = ({
     currentMode,
     locked,
     onModeChange,
+    onRealSizeZoom,
     onSave,
     onImport,
     onExport,
@@ -28,17 +28,14 @@ const ModeSelect = ({
         onModeChange(value)
     }
     return (
-        <div className="flex w-full flex-row items-center justify-around gap-10 bg-slate-400 p-2">
+        <div className="absolute left-0 top-0 flex w-screen flex-row items-center justify-around gap-10 bg-slate-400 p-2">
             <NewButton />
             <OpenButton />
-            <div className="flex flex-row">
-                <ModeButton
-                    mode="Select"
-                    currentMode={currentMode}
-                    onClick={onClick}
-                />
-                <LockToggleButton locked={locked} onClick={onLockToggle} />
-            </div>
+            <ModeButton
+                mode="Select"
+                currentMode={currentMode}
+                onClick={onClick}
+            />
             <ModeButton
                 mode="Add"
                 currentMode={currentMode}

@@ -63,6 +63,8 @@ const LayoutDisplay = ({
     const [websocketIp, setWebsocketIp] = useState('localhost:3001')
     const [connected, setConnected] = useState(false)
 
+    const isMoving = useRef(false)
+
     const connect = () => {
         const ws = new W3CWebSocket(`ws://${websocketIp}`)
         controllerId.current = generateUUID()
@@ -122,6 +124,23 @@ const LayoutDisplay = ({
             placingPartType,
             workspacePosition,
         ]
+    )
+
+    const handlePointerDown = useCallback((event) => {
+        isMoving.current = false
+    }, [])
+
+    const handlePointerMove = useCallback((event) => {
+        isMoving.current = true
+    }, [])
+
+    const handlePointerUp = useCallback(
+        (event) => {
+            if (!isMoving.current) {
+                addPart(event)
+            }
+        },
+        [addPart]
     )
 
     const renderPart = (part, index) => {
@@ -209,11 +228,21 @@ const LayoutDisplay = ({
     useEffect(() => {
         const ele = workspaceRef.current
 
-        ele.addEventListener('pointerdown', addPart)
+        ele.addEventListener('pointerdown', handlePointerDown)
+        ele.addEventListener('pointermove', handlePointerMove)
+        ele.addEventListener('pointerup', handlePointerUp)
         return () => {
-            ele.removeEventListener('pointerdown', addPart)
+            ele.removeEventListener('pointerdown', handlePointerDown)
+            ele.removeEventListener('pointermove', handlePointerMove)
+            ele.removeEventListener('pointerup', handlePointerUp)
         }
-    }, [addPart, workspaceRef])
+    }, [
+        addPart,
+        handlePointerDown,
+        handlePointerMove,
+        handlePointerUp,
+        workspaceRef,
+    ])
 
     useEffect(() => {
         if (previouslyDragged === dragging) {
@@ -227,8 +256,6 @@ const LayoutDisplay = ({
             )
 
             const updatedPart = updatedParts[index]
-
-            console.log(JSON.stringify(updatedPart, null, 5))
 
             if (updatedPart && !updatedPart?.relativeTo) {
                 if (
@@ -316,7 +343,7 @@ const LayoutDisplay = ({
     }
 
     return (
-        <div ref={workspaceRef} className="h-0 w-full flex-shrink flex-grow">
+        <>
             {preview ? (
                 <div className="absolute right-0 top-0">
                     <input
@@ -361,7 +388,7 @@ const LayoutDisplay = ({
                     </ButtonStatusContext.Provider>
                 </Container>
             </Stage>
-        </div>
+        </>
     )
 }
 
