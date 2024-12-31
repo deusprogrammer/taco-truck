@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { getImageDimensions } from '../utils'
@@ -20,6 +20,8 @@ const ComponentMenu = ({
         renderMeasurementsAtom
     )
     const [lockComponent, setLockComponent] = useAtom(lockComponentAtom)
+
+    const [toggleMenu, setToggleMenu] = useState(false)
 
     const updatePanelSize = (dimensions) => {
         onLayoutChange({ ...layout, panelDimensions: dimensions })
@@ -91,11 +93,20 @@ const ComponentMenu = ({
         }
     }, [onKeyDown])
 
-    return (
+    return !toggleMenu ? (
         <div className="absolute left-[10px] top-[50%] flex max-h-[75%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
-            <h2 className="text-center text-[1rem] font-bold">
-                Component Details
-            </h2>
+            <div className="flex flex-row items-center gap-1">
+                <button
+                    className="bg-slate-600 p-6 font-bold text-white"
+                    onClick={() => setToggleMenu(true)}
+                    onPointerDown={() => setToggleMenu(true)}
+                >
+                    ←
+                </button>
+                <h2 className="text-center text-[1rem] font-bold">
+                    Component Details
+                </h2>
+            </div>
             <div className="flex flex-col gap-1 overflow-y-auto">
                 <label>Name:</label>
                 <BufferedInput
@@ -226,6 +237,16 @@ const ComponentMenu = ({
                     </React.Fragment>
                 ))}
             </div>
+        </div>
+    ) : (
+        <div className="absolute left-0 top-0 flex h-[100vh] flex-col justify-center">
+            <button
+                onClick={() => setToggleMenu(false)}
+                onPointerDown={() => setToggleMenu(false)}
+                className="bg-slate-600 p-6 font-bold text-white"
+            >
+                →
+            </button>
         </div>
     )
 }
