@@ -25,7 +25,13 @@ import {
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
-import { lockComponentAtom } from '../atoms/ViewOptions.atom'
+import {
+    editLockComponentAtom,
+    scrollLockComponentAtom,
+    workspacePositionAtom,
+    zoomAtom,
+    zoomLockComponentAtom,
+} from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
 import {
     LockToggleButton,
@@ -43,7 +49,6 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
 
     const navigate = useNavigate()
     const realSizeRatio = useRealScaleRatio()
-    const [currentScale, setCurrentScale] = useState(2.0)
 
     const containerRef = createRef()
     const [deltaX, deltaY, isDragging, reset] = useMouseDrag(
@@ -55,14 +60,17 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     const [width, height] = useContainerSize(containerRef)
     const [initialLoad, setInitialLoad] = useState(true)
 
-    const [workspacePosition, setWorkspacePosition] = useState([
-        width / 2,
-        height / 2,
-    ])
+    const [workspacePosition, setWorkspacePosition] = useAtom(
+        workspacePositionAtom
+    )
+    const [currentScale, setCurrentScale] = useAtom(zoomAtom)
 
     const [mode, setMode] = useState(SELECT)
-    const [locked, setLocked] = useAtom(lockComponentAtom)
-    const [scrollLocked, setScrollLocked] = useState(false)
+
+    const [editLocked, setEditLocked] = useAtom(editLockComponentAtom)
+    const [scrollLocked, setScrollLocked] = useAtom(scrollLockComponentAtom)
+    const [zoomLocked, setZoomLocked] = useAtom(zoomLockComponentAtom)
+
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
@@ -98,7 +106,13 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
 
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
         },
-        [currentScale, buttons, scrollLocked]
+        [
+            currentScale,
+            buttons,
+            scrollLocked,
+            setCurrentScale,
+            setWorkspacePosition,
+        ]
     )
 
     const bind = useGesture(
@@ -118,9 +132,20 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                     return memo
                 }
             },
+            onPinch: ({ offset: [d] }) => {
+                if (zoomLocked) {
+                    return
+                }
+                setCurrentScale(d)
+            },
         },
         {
             drag: {
+                pointer: {
+                    touch: true,
+                },
+            },
+            pinch: {
                 pointer: {
                     touch: true,
                 },
@@ -298,6 +323,26 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
         setCurrentScale(realSizeRatio)
     }
 
+    const onKeyDown = useCallback(
+        (evt) => {
+            if (evt.key === 'Escape') {
+                if (mode === SELECT) {
+                    setSelected(null)
+                } else if (mode === ADD) {
+                    setMode(SELECT)
+                }
+            }
+        },
+        [mode]
+    )
+
+    useEffect(() => {
+        window.addEventListener('keydown', onKeyDown)
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+        }
+    }, [onKeyDown])
+
     useEffect(() => {
         if (!preview) {
             return () => {}
@@ -311,7 +356,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
         }
 
         setCurrentScale(realSizeRatio)
-    }, [realSizeRatio, preview, setOptionsModalOpen])
+    }, [realSizeRatio, preview, setOptionsModalOpen, setCurrentScale])
 
     useEffect(() => {
         if (!containerRef?.current) {
@@ -334,7 +379,15 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
             reset()
         }
-    }, [isDragging, previousIsDragging, deltaX, deltaY, reset, scrollLocked])
+    }, [
+        isDragging,
+        previousIsDragging,
+        deltaX,
+        deltaY,
+        reset,
+        scrollLocked,
+        setWorkspacePosition,
+    ])
 
     useEffect(() => {
         if (!initialLoad) {
@@ -376,6 +429,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
         layout,
         preview,
         initialLoad,
+        setWorkspacePosition,
     ])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
@@ -443,7 +497,10 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                             currentZoom={currentScale}
                         />
                         <RealSizeZoomButton onClick={setRealSizeZoom} />
-                        <LockToggleButton locked={locked} onClick={setLocked}>
+                        <LockToggleButton
+                            locked={editLocked}
+                            onClick={setEditLocked}
+                        >
                             Edit
                         </LockToggleButton>
                         <LockToggleButton
@@ -451,6 +508,12 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                             onClick={setScrollLocked}
                         >
                             Scroll
+                        </LockToggleButton>
+                        <LockToggleButton
+                            locked={zoomLocked}
+                            onClick={setZoomLocked}
+                        >
+                            Zoom
                         </LockToggleButton>
                     </div>
                 </>
@@ -502,7 +565,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                         selected={selected}
                         hovered={hovered}
                         mode={mode}
-                        locked={locked}
+                        locked={editLocked}
                         workspaceDimensions={[width, height]}
                         workspacePosition={[screenX, screenY]}
                         placingPartId={placingPartId}

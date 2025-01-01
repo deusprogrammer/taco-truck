@@ -4,9 +4,14 @@ import BufferedInput from '../elements/BufferedInput'
 import { getImageDimensions } from '../utils'
 import { useAtom } from 'jotai'
 import {
-    lockComponentAtom,
+    editLockComponentAtom,
     renderMeasurementsAtom,
+    scrollLockComponentAtom,
+    workspacePositionAtom,
+    zoomAtom,
+    zoomLockComponentAtom,
 } from '../../atoms/ViewOptions.atom'
+import { useRealScaleRatio } from '../../hooks/MouseHooks'
 
 const ComponentMenu = ({
     layout,
@@ -19,7 +24,15 @@ const ComponentMenu = ({
     const [renderMeasurements, setRenderMeasurements] = useAtom(
         renderMeasurementsAtom
     )
-    const [lockComponent, setLockComponent] = useAtom(lockComponentAtom)
+    const realSizeRatio = useRealScaleRatio()
+    const [editLock, setEditLock] = useAtom(editLockComponentAtom)
+    const [scrollLock, setScrollLock] = useAtom(scrollLockComponentAtom)
+    const [zoomLock, setZoomLock] = useAtom(zoomLockComponentAtom)
+
+    const [zoom, setZoom] = useAtom(zoomAtom)
+    const [workspacePosition, setWorkspacePosition] = useAtom(
+        workspacePositionAtom
+    )
 
     const [toggleMenu, setToggleMenu] = useState(false)
 
@@ -66,25 +79,62 @@ const ComponentMenu = ({
                 deleteComponent(selectedPartId)
             } else if (evt.key === 'm') {
                 setRenderMeasurements(!renderMeasurements)
-            } else if (evt.key === 'l') {
-                setLockComponent(!lockComponent)
+            } else if (evt.key === '1') {
+                setEditLock(!editLock)
+            } else if (evt.key === '2') {
+                setScrollLock(!scrollLock)
+            } else if (evt.key === '3') {
+                setZoomLock(!zoomLock)
+            } else if (evt.key === 'r') {
+                setZoom(realSizeRatio)
+            } else if (evt.key === 'q') {
+                !zoomLock && setZoom(Math.max(zoom - 0.2, 0.1))
+            } else if (evt.key === 'e') {
+                !zoomLock && setZoom(zoom + 0.2)
+            } else if (evt.key === 'w') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0],
+                        workspacePosition[1] - 8 * zoom,
+                    ])
+            } else if (evt.key === 's') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0],
+                        workspacePosition[1] + 8 * zoom,
+                    ])
+            } else if (evt.key === 'a') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0] - 8 * zoom,
+                        workspacePosition[1],
+                    ])
+            } else if (evt.key === 'd') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0] + 8 * zoom,
+                        workspacePosition[1],
+                    ])
             }
         },
         [
             selectedPartId,
             renderMeasurements,
-            lockComponent,
+            editLock,
+            scrollLock,
+            zoomLock,
+            realSizeRatio,
+            zoom,
+            workspacePosition,
             deleteComponent,
             setRenderMeasurements,
-            setLockComponent,
+            setEditLock,
+            setScrollLock,
+            setZoomLock,
+            setZoom,
+            setWorkspacePosition,
         ]
     )
-
-    useEffect(() => {
-        if (layout.artwork && (!layout.artworkWidth || !layout.artworkHeight)) {
-            loadImageDimensions()
-        }
-    }, [layout, loadImageDimensions])
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -92,6 +142,12 @@ const ComponentMenu = ({
             window.removeEventListener('keydown', onKeyDown)
         }
     }, [onKeyDown])
+
+    useEffect(() => {
+        if (layout.artwork && (!layout.artworkWidth || !layout.artworkHeight)) {
+            loadImageDimensions()
+        }
+    }, [layout, loadImageDimensions])
 
     return !toggleMenu ? (
         <div className="absolute left-[10px] top-[50%] flex max-h-[50%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">

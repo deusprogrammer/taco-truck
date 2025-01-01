@@ -136,7 +136,7 @@ const LayoutDisplay = ({
 
     const handlePointerUp = useCallback(
         (event) => {
-            if (!isMoving.current) {
+            if (!isMoving.current || event.pointerType === 'mouse') {
                 addPart(event)
             }
         },
