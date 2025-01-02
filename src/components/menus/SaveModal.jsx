@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import BufferedInput from '../elements/BufferedInput'
 
 const SaveModal = ({ open, name, onSaveComplete, onClose }) => {
     const [componentType, setComponentType] = useState('panelDesigns')
@@ -17,13 +18,11 @@ const SaveModal = ({ open, name, onSaveComplete, onClose }) => {
             <div className="flex flex-col gap-2 border-2 border-black bg-slate-800 p-10 text-white">
                 <h3 className="text-[1.5rem]">Save this Component?</h3>
                 <label>Name</label>
-                <input
+                <BufferedInput
                     className="p-2 text-black"
                     type="text"
                     value={componentName}
-                    onChange={({ target: { value } }) =>
-                        setComponentName(value)
-                    }
+                    onChange={(value) => setComponentName(value)}
                 />
                 <label>Type</label>
                 <select
