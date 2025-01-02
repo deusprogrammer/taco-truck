@@ -27,6 +27,7 @@ import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
 import {
     editLockComponentAtom,
+    previewAtom,
     scrollLockComponentAtom,
     workspacePositionAtom,
     zoomAtom,
@@ -41,7 +42,12 @@ import {
 
 const SCALE_RATIO = 1000
 
-const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
+const PartDesigner = ({
+    layout,
+    preview: previewOverride,
+    isNew,
+    onLayoutChange,
+}) => {
     const [partsWidth, partsHeight] = calculateSizeOfPart({
         type: 'custom',
         layout: layout,
@@ -70,6 +76,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
     const [editLocked, setEditLocked] = useAtom(editLockComponentAtom)
     const [scrollLocked, setScrollLocked] = useAtom(scrollLockComponentAtom)
     const [zoomLocked, setZoomLocked] = useAtom(zoomLockComponentAtom)
+    const [preview, setPreview] = useAtom(previewAtom)
 
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
@@ -133,7 +140,7 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                 }
             },
             onPinch: ({ offset: [d] }) => {
-                if (zoomLocked) {
+                if (zoomLocked || preview) {
                     return
                 }
                 setCurrentScale(d)
@@ -331,9 +338,11 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
                 } else if (mode === ADD) {
                     setMode(SELECT)
                 }
+            } else if (evt.key === 'p') {
+                setPreview(!preview)
             }
         },
-        [mode]
+        [mode, preview, setPreview]
     )
 
     useEffect(() => {
@@ -356,7 +365,17 @@ const PartDesigner = ({ layout, preview, isNew, onLayoutChange }) => {
         }
 
         setCurrentScale(realSizeRatio)
-    }, [realSizeRatio, preview, setOptionsModalOpen, setCurrentScale])
+    }, [
+        realSizeRatio,
+        preview,
+        previewOverride,
+        setOptionsModalOpen,
+        setCurrentScale,
+    ])
+
+    useEffect(() => {
+        setPreview(previewOverride)
+    }, [previewOverride, setPreview])
 
     useEffect(() => {
         if (!containerRef?.current) {
