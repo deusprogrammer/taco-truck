@@ -31,7 +31,7 @@ const OptionsModal = ({ open, onClose }) => {
 
     return (
         <div className="absolute left-0 top-0 flex h-screen w-screen flex-col items-center justify-center">
-            <div className="flex flex-col gap-2 border-2 border-black bg-slate-800 p-10 text-white">
+            <div className="z-50 flex h-full w-full flex-col items-center justify-center gap-2 border-2 border-black bg-slate-800 p-10 text-white">
                 <h3 className="text-[1.5rem]">Options</h3>
                 <label>Screen Height</label>
                 <BufferedInput
@@ -40,8 +40,6 @@ const OptionsModal = ({ open, onClose }) => {
                     value={screenHeight}
                     onChange={(value) => setScreenHeight(parseFloat(value))}
                 />
-                <span>Height (mm): {screenHeight}</span>
-                <span>Height (px): {vRes}</span>
                 <span>Ratio: {vRes / screenHeight} pixels/mm</span>
                 <h3 className="text-[1.5rem]">Real Size Button Preview</h3>
                 <div>
@@ -54,7 +52,88 @@ const OptionsModal = ({ open, onClose }) => {
                         }}
                     />
                 </div>
-                <div className="flex flex-row gap-1 text-[1rem]">
+                <div className="flex flex-row gap-1">
+                    {showRims ? (
+                        <>
+                            <svg
+                                width={50 * (vRes / screenHeight)}
+                                height={50 * (vRes / screenHeight)}
+                                style={{ overflow: 'visible' }}
+                            >
+                                <circle
+                                    r={(26 / 2) * (vRes / screenHeight)}
+                                    cx={100}
+                                    cy={100}
+                                    fill="#32CD32"
+                                    stroke="black"
+                                    strokeWidth={1}
+                                />
+                                <circle
+                                    r={(19 / 2) * (vRes / screenHeight)}
+                                    cx={100}
+                                    cy={100}
+                                    stroke="black"
+                                    strokeWidth={1}
+                                    fill="#32CD32"
+                                />
+                            </svg>
+                            <svg
+                                width={50 * (vRes / screenHeight)}
+                                height={50 * (vRes / screenHeight)}
+                                style={{ overflow: 'visible' }}
+                            >
+                                <circle
+                                    r={(32 / 2) * (vRes / screenHeight)}
+                                    cx={100}
+                                    cy={100}
+                                    fill="#32CD32"
+                                    stroke="black"
+                                    strokeWidth={1}
+                                />
+                                <circle
+                                    r={(24 / 2) * (vRes / screenHeight)}
+                                    cx={100}
+                                    cy={100}
+                                    fill="#32CD32"
+                                    stroke="black"
+                                    strokeWidth={1}
+                                />
+                            </svg>
+                        </>
+                    ) : (
+                        <>
+                            <svg
+                                width={50 * (vRes / screenHeight)}
+                                height={50 * (vRes / screenHeight)}
+                                style={{ overflow: 'visible' }}
+                            >
+                                <circle
+                                    r={(24 / 2) * (vRes / screenHeight)}
+                                    cx={100}
+                                    cy={100}
+                                    fill="#32CD32"
+                                    stroke="black"
+                                    strokeWidth={1}
+                                />
+                            </svg>
+                            <svg
+                                width={50 * (vRes / screenHeight)}
+                                height={50 * (vRes / screenHeight)}
+                                style={{ overflow: 'visible' }}
+                            >
+                                <circle
+                                    r={(32 / 2) * (vRes / screenHeight)}
+                                    cx={100}
+                                    cy={100}
+                                    fill="#32CD32"
+                                    stroke="black"
+                                    strokeWidth={1}
+                                />
+                            </svg>
+                        </>
+                    )}
+                </div>
+                <div className="flex flex-row justify-center gap-1 text-[1rem]">
                     <button
                         className="bg-slate-500 p-2"
                         onClick={() => {

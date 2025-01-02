@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useRealScaleRatio } from '../../hooks/MouseHooks'
 
