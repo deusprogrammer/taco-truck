@@ -19,6 +19,7 @@ const Home = () => {
             <Link className="p-4 text-[1.5rem]" to={`/manager`}>
                 Manager
             </Link>
+            <footer>© 2025 Michael C Main</footer>
         </div>
     )
 }

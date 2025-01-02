@@ -247,6 +247,7 @@ const ComponentManagerRoute = () => {
                     ))}
                 </table>
             </div>
+            <footer>© 2025 Michael C Main</footer>
         </div>
     )
 }

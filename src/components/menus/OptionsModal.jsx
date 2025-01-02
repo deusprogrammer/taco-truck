@@ -3,6 +3,8 @@ import BufferedInput from '../elements/BufferedInput'
 import { useAtom } from 'jotai'
 import { screenHeightAtom } from '../../atoms/ViewOptions.atom'
 
+import config from '../../../package.json'
+
 const OptionsModal = ({ open, onClose }) => {
     const [screenHeight, setScreenHeight] = useAtom(screenHeightAtom)
     const [showRims, setShowRims] = useState(true)
@@ -33,6 +35,12 @@ const OptionsModal = ({ open, onClose }) => {
         <div className="absolute left-0 top-0 flex h-screen w-screen flex-col items-center justify-center">
             <div className="z-50 flex h-full w-full flex-col items-center justify-center gap-10 border-2 border-black bg-slate-800 p-10 text-white">
                 <h3 className="text-[1.8rem]">Options</h3>
+                <div className="w-1/3 text-center">
+                    <h4 className="text-[1.3rem]">License Details</h4>
+                    <h5>Taco Truck v{config.version}</h5>
+                    <p>Offered under the GNU GPL V3 License</p>
+                    <p>© 2025 Michael C Main</p>
+                </div>
                 <div className="w-1/3 text-center">
                     <h4 className="text-[1.3rem]">About Taco Truck</h4>
                     <p className="text-left">
