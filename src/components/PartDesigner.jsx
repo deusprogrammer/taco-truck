@@ -34,6 +34,7 @@ import {
     ToggleButton,
     ZoomButton,
 } from './elements/Buttons'
+import AboutModal from './menus/About'
 
 const SCALE_RATIO = 1000
 
@@ -80,6 +81,7 @@ const PartDesigner = ({
     const [saveModalOpen, setSaveModalOpen] = useState(false)
     const [importModalOpen, setImportModalOpen] = useState(false)
     const [optionsModalOpen, setOptionsModalOpen] = useState(false)
+    const [aboutModalOpen, setAboutModalOpen] = useState(false)
 
     const bind = useGesture(
         {
@@ -493,6 +495,10 @@ const PartDesigner = ({
                 open={optionsModalOpen}
                 onClose={() => setOptionsModalOpen(false)}
             />
+            <AboutModal
+                open={aboutModalOpen}
+                onClose={() => setAboutModalOpen(false)}
+            />
 
             {!preview ? (
                 <>
@@ -504,6 +510,7 @@ const PartDesigner = ({
                         onImport={importCustomPart}
                         onOptions={setOptionsModalOpen}
                         onChangeAddPart={selectPlacingPart}
+                        onAbout={() => setAboutModalOpen(true)}
                     />
                     <ComponentMenu
                         layout={layout}

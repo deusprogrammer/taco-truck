@@ -6,6 +6,7 @@ import {
     OpenButton,
     OptionsButton,
     SaveButton,
+    ToggleButton,
 } from './Buttons'
 
 export const ADD = 'ADD'
@@ -19,6 +20,7 @@ const ModeSelect = ({
     onSave,
     onImport,
     onOptions,
+    onAbout,
     onChangeAddPart,
 }) => {
     const onClick = (e, value) => {
@@ -48,6 +50,7 @@ const ModeSelect = ({
                 <ImportButton onClick={onImport} />
                 <SaveButton onClick={onSave} />
                 <OptionsButton onClick={onOptions} />
+                <ToggleButton onClick={onAbout}>About</ToggleButton>
             </div>
             <PartMenu
                 active={currentMode === ADD}

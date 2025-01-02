@@ -3,6 +3,7 @@ import Home from './routes/Home'
 import PartDesignerRoute from './routes/PartDesignerRoute'
 import ComponentManagerRoute from './routes/ComponentManagerRoute'
 import './App.css'
+import Calibration from './routes/Calibration'
 
 const App = () => {
     return (
@@ -15,6 +16,7 @@ const App = () => {
                     element={<PartDesignerRoute />}
                 />
                 <Route path={`/manager`} element={<ComponentManagerRoute />} />
+                <Route path={`/calibration`} element={<Calibration />} />
             </Routes>
         </BrowserRouter>
     )
