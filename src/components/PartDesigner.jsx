@@ -17,7 +17,6 @@ import { addDoc, collection, db, doc } from '../firebase.config'
 import {
     useButtonDown,
     useContainerSize,
-    useMouseDrag,
     usePrevious,
     useRealScaleRatio,
 } from '../hooks/MouseHooks'
@@ -56,12 +55,11 @@ const PartDesigner = ({
     const realSizeRatio = useRealScaleRatio()
 
     const containerRef = createRef()
-    const [deltaX, deltaY, isDragging, reset] = useMouseDrag(
-        containerRef,
-        'middle'
-    )
-    const buttons = useButtonDown()
+    const [isDragging, setIsDragging] = useState(false)
+    const [[deltaX, deltaY], setDelta] = useState([0, 0])
+    const buttonsDown = useButtonDown()
     const previousIsDragging = usePrevious(isDragging)
+
     const [width, height] = useContainerSize(containerRef)
     const [initialLoad, setInitialLoad] = useState(true)
 
@@ -99,48 +97,48 @@ const PartDesigner = ({
 
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
-            if (scrollLock) {
+            if (zoomLock) {
                 return
             }
 
-            if (buttons.includes('Shift')) {
-                setZoom(Math.max(1, zoom - (deltaY || deltaX) / SCALE_RATIO))
-                return
-            }
-
-            setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
+            setZoom(Math.max(1, zoom - (deltaY || deltaX) / SCALE_RATIO))
         },
-        [zoom, buttons, scrollLock, setZoom, setWorkspacePosition]
+        [zoom, zoomLock, setZoom]
     )
 
     const bind = useGesture(
         {
-            onDrag: ({ event, offset: [x, y], memo, touches }) => {
-                if (scrollLock || touches !== 3) {
+            onDrag: ({ offset: [x, y], dragging, touches, buttons }) => {
+                if (scrollLock) {
                     return
                 }
-                if (!memo) {
-                    memo = {
-                        initialX: workspacePosition[0],
-                        initialY: workspacePosition[1],
-                    }
-                }
 
-                setWorkspacePosition([memo.initialX + x, memo.initialY + y])
-                return memo
+                if (
+                    touches === 2 ||
+                    (buttons === 1 && buttonsDown.includes('Shift'))
+                ) {
+                    setDelta([-x, -y])
+                    setIsDragging(dragging)
+                }
             },
-            onPinch: ({ offset: [d], touches }) => {
-                if (zoomLock || preview || touches !== 2) {
+            onPinch: ({ offset: [d], memo }) => {
+                if (zoomLock || preview) {
                     return
                 }
 
-                setZoom(d)
+                if (!memo) {
+                    memo = zoom // Store the initial zoom value
+                }
+
+                setZoom(Math.max(1, memo * d)) // Adjust the zoom incrementally
+                return memo
             },
         },
         {
             drag: {
                 pointer: {
                     touch: true,
+                    mouse: true,
                 },
             },
             pinch: {
@@ -185,8 +183,6 @@ const PartDesigner = ({
                 name,
                 layout: layoutCopy,
             }
-
-            console.log('DATA: ' + JSON.stringify(data, null, 5))
 
             let docRef
             if (type === 'customParts') {
@@ -432,14 +428,12 @@ const PartDesigner = ({
 
         if (!isDragging) {
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
-            reset()
         }
     }, [
         isDragging,
         previousIsDragging,
         deltaX,
         deltaY,
-        reset,
         scrollLock,
         setWorkspacePosition,
     ])
