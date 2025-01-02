@@ -115,25 +115,25 @@ const PartDesigner = ({
 
     const bind = useGesture(
         {
-            onDrag: ({ event, offset: [x, y], memo }) => {
-                if (scrollLock) {
+            onDrag: ({ event, offset: [x, y], memo, touches }) => {
+                if (scrollLock || touches !== 3) {
                     return
                 }
-                if (event.touches && event.touches.length === 2) {
-                    if (!memo) {
-                        memo = {
-                            initialX: workspacePosition[0],
-                            initialY: workspacePosition[1],
-                        }
+                if (!memo) {
+                    memo = {
+                        initialX: workspacePosition[0],
+                        initialY: workspacePosition[1],
                     }
-                    setWorkspacePosition([memo.initialX + x, memo.initialY + y])
-                    return memo
                 }
+
+                setWorkspacePosition([memo.initialX + x, memo.initialY + y])
+                return memo
             },
-            onPinch: ({ offset: [d] }) => {
-                if (zoomLock || preview) {
+            onPinch: ({ offset: [d], touches }) => {
+                if (zoomLock || preview || touches !== 2) {
                     return
                 }
+
                 setZoom(d)
             },
         },
