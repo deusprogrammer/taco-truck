@@ -1,7 +1,6 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
 import { useGesture } from '@use-gesture/react'
 import ModeSelect, { ADD, EXPORT, SELECT } from './elements/ModeSelect'
-import PartMenu from './menus/PartMenu'
 import ComponentMenu from './menus/ComponentMenu'
 import LayoutDisplay from './LayoutDisplay'
 import LayoutDisplaySvg from './svg/LayoutDisplaySvg'
@@ -69,13 +68,13 @@ const PartDesigner = ({
     const [workspacePosition, setWorkspacePosition] = useAtom(
         workspacePositionAtom
     )
-    const [currentScale, setCurrentScale] = useAtom(zoomAtom)
+    const [zoom, setZoom] = useAtom(zoomAtom)
 
     const [mode, setMode] = useState(SELECT)
 
-    const [editLocked, setEditLocked] = useAtom(editLockComponentAtom)
-    const [scrollLocked, setScrollLocked] = useAtom(scrollLockComponentAtom)
-    const [zoomLocked, setZoomLocked] = useAtom(zoomLockComponentAtom)
+    const [editLock, setEditLock] = useAtom(editLockComponentAtom)
+    const [scrollLock, setScrollLock] = useAtom(scrollLockComponentAtom)
+    const [zoomLock, setZoomLock] = useAtom(zoomLockComponentAtom)
     const [preview, setPreview] = useAtom(previewAtom)
 
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
@@ -100,32 +99,24 @@ const PartDesigner = ({
 
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
-            if (scrollLocked) {
+            if (scrollLock) {
                 return
             }
 
             if (buttons.includes('Shift')) {
-                setCurrentScale(
-                    Math.max(1, currentScale - (deltaY || deltaX) / SCALE_RATIO)
-                )
+                setZoom(Math.max(1, zoom - (deltaY || deltaX) / SCALE_RATIO))
                 return
             }
 
             setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
         },
-        [
-            currentScale,
-            buttons,
-            scrollLocked,
-            setCurrentScale,
-            setWorkspacePosition,
-        ]
+        [zoom, buttons, scrollLock, setZoom, setWorkspacePosition]
     )
 
     const bind = useGesture(
         {
             onDrag: ({ event, offset: [x, y], memo }) => {
-                if (scrollLocked) {
+                if (scrollLock) {
                     return
                 }
                 if (event.touches && event.touches.length === 2) {
@@ -140,10 +131,10 @@ const PartDesigner = ({
                 }
             },
             onPinch: ({ offset: [d] }) => {
-                if (zoomLocked || preview) {
+                if (zoomLock || preview) {
                     return
                 }
-                setCurrentScale(d)
+                setZoom(d)
             },
         },
         {
@@ -327,7 +318,7 @@ const PartDesigner = ({
             return
         }
 
-        setCurrentScale(realSizeRatio)
+        setZoom(realSizeRatio)
     }
 
     const onKeyDown = useCallback(
@@ -340,9 +331,60 @@ const PartDesigner = ({
                 }
             } else if (evt.key === 'p') {
                 setPreview(!preview)
+            } else if (evt.key === '1') {
+                setEditLock(!editLock)
+            } else if (evt.key === '2') {
+                setScrollLock(!scrollLock)
+            } else if (evt.key === '3') {
+                setZoomLock(!zoomLock)
+            } else if (evt.key === 'r') {
+                setZoom(realSizeRatio)
+            } else if (evt.key === 'q') {
+                !zoomLock && setZoom(Math.max(zoom - 0.2, 0.1))
+            } else if (evt.key === 'e') {
+                !zoomLock && setZoom(zoom + 0.2)
+            } else if (evt.key === 'w') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0],
+                        workspacePosition[1] - 8 * zoom,
+                    ])
+            } else if (evt.key === 's') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0],
+                        workspacePosition[1] + 8 * zoom,
+                    ])
+            } else if (evt.key === 'a') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0] - 8 * zoom,
+                        workspacePosition[1],
+                    ])
+            } else if (evt.key === 'd') {
+                !scrollLock &&
+                    setWorkspacePosition([
+                        workspacePosition[0] + 8 * zoom,
+                        workspacePosition[1],
+                    ])
             }
         },
-        [mode, preview, setPreview]
+        [
+            mode,
+            realSizeRatio,
+            zoomLock,
+            scrollLock,
+            editLock,
+            zoom,
+            workspacePosition,
+            preview,
+            setPreview,
+            setWorkspacePosition,
+            setZoom,
+            setZoomLock,
+            setScrollLock,
+            setEditLock,
+        ]
     )
 
     useEffect(() => {
@@ -364,14 +406,8 @@ const PartDesigner = ({
             return
         }
 
-        setCurrentScale(realSizeRatio)
-    }, [
-        realSizeRatio,
-        preview,
-        previewOverride,
-        setOptionsModalOpen,
-        setCurrentScale,
-    ])
+        setZoom(realSizeRatio)
+    }, [realSizeRatio, preview, previewOverride, setOptionsModalOpen, setZoom])
 
     useEffect(() => {
         setPreview(previewOverride)
@@ -390,7 +426,7 @@ const PartDesigner = ({
     }, [onScroll, containerRef, preview])
 
     useEffect(() => {
-        if (previousIsDragging === isDragging || scrollLocked) {
+        if (previousIsDragging === isDragging || scrollLock) {
             return () => {}
         }
 
@@ -404,7 +440,7 @@ const PartDesigner = ({
         deltaX,
         deltaY,
         reset,
-        scrollLocked,
+        scrollLock,
         setWorkspacePosition,
     ])
 
@@ -428,21 +464,21 @@ const PartDesigner = ({
                         layout.panelDimensions[0] || partsWidth
                     ) /
                         2) *
-                        currentScale,
+                        zoom,
                 height / 2 -
                     (Math.min(
                         partsHeight,
                         layout.panelDimensions[1] || partsHeight
                     ) /
                         2) *
-                        currentScale,
+                        zoom,
             ])
         }
     }, [
         isNew,
         width,
         height,
-        currentScale,
+        zoom,
         partsWidth,
         partsHeight,
         layout,
@@ -454,11 +490,11 @@ const PartDesigner = ({
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
     const screenX =
-        isDragging && !scrollLocked
+        isDragging && !scrollLock
             ? workspacePosition[0] - deltaX
             : workspacePosition[0]
     const screenY =
-        isDragging && !scrollLocked
+        isDragging && !scrollLock
             ? workspacePosition[1] - deltaY
             : workspacePosition[1]
 
@@ -510,27 +546,25 @@ const PartDesigner = ({
                     />
                     <div className="absolute bottom-0 left-0 flex w-screen flex-row items-center justify-center gap-9">
                         <ZoomButton
-                            onZoomChange={(adj) =>
-                                setCurrentScale(currentScale + adj)
-                            }
-                            currentZoom={currentScale}
+                            onZoomChange={(adj) => setZoom(zoom + adj)}
+                            currentZoom={zoom}
                         />
                         <RealSizeZoomButton onClick={setRealSizeZoom} />
                         <LockToggleButton
-                            locked={editLocked}
-                            onClick={setEditLocked}
+                            locked={editLock}
+                            onClick={setEditLock}
                         >
                             Edit
                         </LockToggleButton>
                         <LockToggleButton
-                            locked={scrollLocked}
-                            onClick={setScrollLocked}
+                            locked={scrollLock}
+                            onClick={setScrollLock}
                         >
                             Scroll
                         </LockToggleButton>
                         <LockToggleButton
-                            locked={zoomLocked}
-                            onClick={setZoomLocked}
+                            locked={zoomLock}
+                            onClick={setZoomLock}
                         >
                             Zoom
                         </LockToggleButton>
@@ -540,8 +574,8 @@ const PartDesigner = ({
                 <>
                     <div className="absolute bottom-0 left-0 flex w-screen flex-row items-center justify-center">
                         <LockToggleButton
-                            locked={scrollLocked}
-                            onClick={setScrollLocked}
+                            locked={scrollLock}
+                            onClick={setScrollLock}
                         >
                             Scroll
                         </LockToggleButton>
@@ -552,8 +586,8 @@ const PartDesigner = ({
             {preview ? (
                 <div className="absolute left-0 top-0 text-white">
                     <div>
-                        Scale: {Math.trunc(currentScale * 100)}% (
-                        {realSizeRatio} pixels/mm )
+                        Scale: {Math.trunc(zoom * 100)}% ({realSizeRatio}{' '}
+                        pixels/mm )
                     </div>
                     <div>Name: {layout.name}</div>
                     <div>
@@ -580,11 +614,11 @@ const PartDesigner = ({
                     <LayoutDisplay
                         workspaceRef={containerRef}
                         layout={layout}
-                        currentScale={currentScale}
+                        currentScale={zoom}
                         selected={selected}
                         hovered={hovered}
                         mode={mode}
-                        locked={editLocked}
+                        locked={editLock}
                         workspaceDimensions={[width, height]}
                         workspacePosition={[screenX, screenY]}
                         placingPartId={placingPartId}
