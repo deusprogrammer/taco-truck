@@ -64,12 +64,12 @@ const LayoutDisplay = ({
     const [isDragging, setIsDragging] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
     const bind = useDrag(
-        ({ xy, dragging, touches, buttons, shiftKey }) => {
+        ({ xy, dragging, touches, buttons, shiftKey, memo }) => {
             if (editLock) {
                 return
             }
 
-            if (!shiftKey && (touches === 1 || buttons === 1)) {
+            if (!shiftKey && dragging && (touches === 1 || buttons === 1)) {
                 setMouseXY(xy)
                 setIsDragging(dragging)
             }

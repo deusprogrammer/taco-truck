@@ -86,13 +86,15 @@ const PartDesigner = ({
                 touches,
                 buttons,
                 shiftKey,
-                memo,
             }) => {
                 if (scrollLock) {
                     return
                 }
 
-                if (touches === 2 || (buttons === 1 && shiftKey)) {
+                if (
+                    dragging &&
+                    (touches === 2 || (buttons === 1 && shiftKey))
+                ) {
                     setWorkspacePosition(([oldX, oldY]) => [oldX + x, oldY + y])
                 }
             },
