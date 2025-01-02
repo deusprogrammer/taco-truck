@@ -11,7 +11,11 @@ import React, {
 import { useDrag } from '@use-gesture/react'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
 import { calculateSizeOfPart, generateUUID } from './utils'
-import { useMousePosition, usePrevious } from '../hooks/MouseHooks'
+import {
+    useButtonDown,
+    useMousePosition,
+    usePrevious,
+} from '../hooks/MouseHooks'
 import { ADD, SELECT } from './elements/ModeSelect'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
@@ -50,6 +54,7 @@ const LayoutDisplay = ({
     const componentRef = createRef()
     const websocket = useRef()
     const controllerId = useRef()
+    const buttonsDown = useButtonDown()
     const [dragging, setDragging] = useState(null)
     const previouslyDragged = usePrevious(dragging)
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
@@ -57,11 +62,15 @@ const LayoutDisplay = ({
     const [isDragging, setIsDragging] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
     const bind = useDrag(
-        ({ event, xy, dragging }) => {
-            // if (event.pointerType === 'mouse' || event?.touches?.length === 1) {
-            setMouseXY(xy)
-            setIsDragging(dragging)
-            // }
+        ({ event, xy, dragging, touches, buttons, shiftKey }) => {
+            if (locked) {
+                return
+            }
+
+            if (!shiftKey && (touches === 1 || buttons === 1)) {
+                setMouseXY(xy)
+                setIsDragging(dragging)
+            }
         },
         {
             pointer: {
@@ -261,7 +270,7 @@ const LayoutDisplay = ({
     ])
 
     useEffect(() => {
-        if (previouslyDragged === dragging) {
+        if (previouslyDragged === dragging || buttonsDown.includes('Shift')) {
             return () => {}
         }
 

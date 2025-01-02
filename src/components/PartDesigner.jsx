@@ -108,15 +108,18 @@ const PartDesigner = ({
 
     const bind = useGesture(
         {
-            onDrag: ({ offset: [x, y], dragging, touches, buttons }) => {
+            onDrag: ({
+                offset: [x, y],
+                dragging,
+                touches,
+                buttons,
+                shiftKey,
+            }) => {
                 if (scrollLock) {
                     return
                 }
 
-                if (
-                    touches === 2 ||
-                    (buttons === 1 && buttonsDown.includes('Shift'))
-                ) {
+                if (touches === 2 || (buttons === 1 && shiftKey)) {
                     setDelta([-x, -y])
                     setIsDragging(dragging)
                 }
