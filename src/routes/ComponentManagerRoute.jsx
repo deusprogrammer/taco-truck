@@ -116,7 +116,7 @@ const ComponentManagerRoute = () => {
                 </h1>
             </div>
             <div className="mx-auto flex w-[90%] flex-col justify-center">
-                <h2 className="text-[1.8rem]">Panel Designs</h2>
+                <h2 className="text-center text-[1.8rem]">Panel Designs</h2>
                 <table className="flex flex-col justify-center">
                     {combinedProjects.map((project) => (
                         <tr
@@ -124,14 +124,16 @@ const ComponentManagerRoute = () => {
                             className={`flex flex-col justify-center border-b-2 border-solid border-black lg:flex-row`}
                         >
                             <td
-                                className={`w-full p-2 lg:w-52 ${project.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                                className={`flex w-full flex-col p-2 lg:w-52 ${project.isLocal ? 'bg-teal-500 text-white' : ''} items-center justify-center`}
                             >
-                                {project.name}
-                                {project.isLocal ? '(Local)' : ''}
-                                <br />
-                                <br />
-                                {project.layout.panelDimensions?.[0]}mm X{' '}
-                                {project.layout.panelDimensions?.[1]}mm
+                                <div>
+                                    {project.name}
+                                    {project.isLocal ? '(Local)' : ''}
+                                    <br />
+                                    <br />
+                                    {project.layout.panelDimensions?.[0]}mm X{' '}
+                                    {project.layout.panelDimensions?.[1]}mm
+                                </div>
                             </td>
                             <td className="p-8">
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
@@ -141,18 +143,28 @@ const ComponentManagerRoute = () => {
                                     />
                                 </div>
                             </td>
-                            <td className="flex gap-4">
+                            <td className="flex items-center justify-center gap-4">
                                 <Link
                                     to={`/designer/projects/${project.id}${project.isLocal ? '?isLocal=true' : ''}`}
                                 >
-                                    <button className="bg-slate-500 p-4 text-white">
+                                    <button className="h-20 bg-slate-500 p-4 text-white">
                                         Edit
                                     </button>
                                 </Link>
+                                <button
+                                    className="h-20 bg-slate-500 p-4 text-white"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(
+                                            `${window.location.origin}/designer/projects/${project.id}`
+                                        )
+                                    }}
+                                >
+                                    Share
+                                </button>
                                 <Link
                                     to={`/designer/projects/${project.id}?preview${project.isLocal ? '&isLocal=true' : ''}`}
                                 >
-                                    <button className="bg-slate-500 p-4 text-white">
+                                    <button className="h-20 bg-slate-500 p-4 text-white">
                                         Test
                                     </button>
                                 </Link>
@@ -172,20 +184,22 @@ const ComponentManagerRoute = () => {
                 </table>
             </div>
             <div>
-                <h2 className="text-[1.8rem]">Custom Parts</h2>
+                <h2 className="text-center text-[1.8rem]">Custom Parts</h2>
                 <table>
                     {combinedParts.map((part) => (
                         <tr
                             key={part.id}
-                            className={`flex flex-col border-b-2 border-solid border-black lg:flex-row ${part.isLocal ? 'bg-lightblue' : ''}`}
+                            className={`flex flex-col border-b-2 border-solid border-black lg:flex-row ${part.isLocal ? 'bg-lightblue' : ''} items-center justify-center`}
                         >
                             <td
-                                className={`w-full p-2 lg:w-52 ${part.isLocal ? 'bg-teal-500 text-white' : ''}`}
+                                className={`flex w-full flex-col p-2 lg:w-52 ${part.isLocal ? 'bg-teal-500 text-white' : ''} items-center justify-center`}
                             >
-                                {part.name}
-                                {part.isLocal ? '(Local)' : ''}
+                                <div>
+                                    {part.name}
+                                    {part.isLocal ? '(Local)' : ''}
+                                </div>
                             </td>
-                            <td className="p-8">
+                            <td className="items-center justify-center p-8">
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
                                     <LayoutDisplaySvg
                                         layout={part.layout}
@@ -193,24 +207,34 @@ const ComponentManagerRoute = () => {
                                     />
                                 </div>
                             </td>
-                            <td className="flex gap-4">
+                            <td className="flex items-center justify-center gap-4">
                                 <Link
                                     to={`/designer/parts/${part.id}${part.isLocal ? '?isLocal' : ''}`}
                                 >
-                                    <button className="bg-slate-500 p-4 text-white">
+                                    <button className="h-20 bg-slate-500 p-4 text-white">
                                         Edit
                                     </button>
                                 </Link>
+                                <button
+                                    className="h-20 bg-slate-500 p-4 text-white"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(
+                                            `${window.location.origin}/designer/parts/${part.id}`
+                                        )
+                                    }}
+                                >
+                                    Share
+                                </button>
                                 <Link
                                     to={`/designer/parts/${part.id}?preview${part.isLocal ? '&isLocal' : ''}`}
                                 >
-                                    <button className="bg-slate-500 p-4 text-white">
+                                    <button className="h-20 bg-slate-500 p-4 text-white">
                                         Test
                                     </button>
                                 </Link>
                                 {part.isLocal ? (
                                     <button
-                                        className="bg-slate-500 p-4 text-white"
+                                        className="h-20 bg-slate-500 p-4 text-white"
                                         onClick={() => {
                                             deletePart(part.id)
                                         }}
