@@ -14,12 +14,7 @@ import {
     storeMedia,
 } from './utils'
 import { addDoc, collection, db, doc } from '../firebase.config'
-import {
-    useButtonDown,
-    useContainerSize,
-    usePrevious,
-    useRealScaleRatio,
-} from '../hooks/MouseHooks'
+import { useContainerSize, useRealScaleRatio } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
@@ -55,10 +50,6 @@ const PartDesigner = ({
     const realSizeRatio = useRealScaleRatio()
 
     const containerRef = createRef()
-    const [isDragging, setIsDragging] = useState(false)
-    const [[deltaX, deltaY], setDelta] = useState([0, 0])
-    const buttonsDown = useButtonDown()
-    const previousIsDragging = usePrevious(isDragging)
 
     const [width, height] = useContainerSize(containerRef)
     const [initialLoad, setInitialLoad] = useState(true)
@@ -87,6 +78,52 @@ const PartDesigner = ({
     const [importModalOpen, setImportModalOpen] = useState(false)
     const [optionsModalOpen, setOptionsModalOpen] = useState(false)
 
+    const bind = useGesture(
+        {
+            onDrag: ({
+                delta: [x, y],
+                dragging,
+                touches,
+                buttons,
+                shiftKey,
+                memo,
+            }) => {
+                if (scrollLock) {
+                    return
+                }
+
+                if (touches === 2 || (buttons === 1 && shiftKey)) {
+                    setWorkspacePosition(([oldX, oldY]) => [oldX + x, oldY + y])
+                }
+            },
+            onPinch: ({ offset: [d], memo }) => {
+                if (zoomLock || preview) {
+                    return
+                }
+
+                if (!memo) {
+                    memo = zoom
+                }
+
+                setZoom(Math.max(1, memo * d))
+                return memo
+            },
+        },
+        {
+            drag: {
+                pointer: {
+                    touch: true,
+                    mouse: true,
+                },
+            },
+            pinch: {
+                pointer: {
+                    touch: true,
+                },
+            },
+        }
+    )
+
     const saveComponent = () => {
         setSaveModalOpen(true)
     }
@@ -104,52 +141,6 @@ const PartDesigner = ({
             setZoom(Math.max(1, zoom - (deltaY || deltaX) / SCALE_RATIO))
         },
         [zoom, zoomLock, setZoom]
-    )
-
-    const bind = useGesture(
-        {
-            onDrag: ({
-                offset: [x, y],
-                dragging,
-                touches,
-                buttons,
-                shiftKey,
-            }) => {
-                if (scrollLock) {
-                    return
-                }
-
-                if (touches === 2 || (buttons === 1 && shiftKey)) {
-                    setDelta([-x, -y])
-                    setIsDragging(dragging)
-                }
-            },
-            onPinch: ({ offset: [d], memo }) => {
-                if (zoomLock || preview) {
-                    return
-                }
-
-                if (!memo) {
-                    memo = zoom // Store the initial zoom value
-                }
-
-                setZoom(Math.max(1, memo * d)) // Adjust the zoom incrementally
-                return memo
-            },
-        },
-        {
-            drag: {
-                pointer: {
-                    touch: true,
-                    mouse: true,
-                },
-            },
-            pinch: {
-                pointer: {
-                    touch: true,
-                },
-            },
-        }
     )
 
     const completeSave = (name, type, isLocal) => {
@@ -425,23 +416,6 @@ const PartDesigner = ({
     }, [onScroll, containerRef, preview])
 
     useEffect(() => {
-        if (previousIsDragging === isDragging || scrollLock) {
-            return () => {}
-        }
-
-        if (!isDragging) {
-            setWorkspacePosition((old) => [old[0] - deltaX, old[1] - deltaY])
-        }
-    }, [
-        isDragging,
-        previousIsDragging,
-        deltaX,
-        deltaY,
-        scrollLock,
-        setWorkspacePosition,
-    ])
-
-    useEffect(() => {
         if (!initialLoad) {
             return () => {}
         }
@@ -486,20 +460,11 @@ const PartDesigner = ({
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
-    const screenX =
-        isDragging && !scrollLock
-            ? workspacePosition[0] - deltaX
-            : workspacePosition[0]
-    const screenY =
-        isDragging && !scrollLock
-            ? workspacePosition[1] - deltaY
-            : workspacePosition[1]
+    const screenX = workspacePosition[0]
+    const screenY = workspacePosition[1]
 
     return (
-        <div
-            className="flex h-screen w-full flex-col bg-[#1099bb]"
-            style={{ overscrollBehavior: 'none', userSelect: 'none' }}
-        >
+        <div className="bg-[#1099bb]">
             <SaveModal
                 open={saveModalOpen}
                 name={layout.name}
@@ -541,7 +506,7 @@ const PartDesigner = ({
                         onSecondarySelectPart={afterSelect}
                         onSetSecondarySelect={setAfterSelect}
                     />
-                    <div className="absolute bottom-0 left-0 flex w-screen flex-row items-center justify-center gap-9">
+                    <div className="absolute bottom-0 left-0 flex h-[80px] w-screen flex-row items-center justify-center gap-9">
                         <ZoomButton
                             onZoomChange={(adj) => setZoom(zoom + adj)}
                             currentZoom={zoom}
@@ -569,7 +534,7 @@ const PartDesigner = ({
                 </>
             ) : (
                 <>
-                    <div className="absolute bottom-0 left-0 flex w-screen flex-row items-center justify-center">
+                    <div className="absolute bottom-0 left-0 flex h-[80px] w-screen flex-row items-center justify-center">
                         <LockToggleButton
                             locked={scrollLock}
                             onClick={setScrollLock}
@@ -599,15 +564,11 @@ const PartDesigner = ({
             ) : null}
 
             {mode === EXPORT ? (
-                <div className="flex h-0 w-full flex-shrink flex-grow justify-center p-14">
+                <div className="flex justify-center p-14">
                     <LayoutDisplaySvg layout={layout} scale={2} />
                 </div>
             ) : (
-                <div
-                    ref={containerRef}
-                    className="flex h-0 w-full flex-shrink flex-grow justify-center"
-                    {...bind()}
-                >
+                <div ref={containerRef} {...bind()}>
                     <LayoutDisplay
                         workspaceRef={containerRef}
                         layout={layout}

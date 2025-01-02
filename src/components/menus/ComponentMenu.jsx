@@ -86,7 +86,10 @@ const ComponentMenu = ({
     }, [layout, loadImageDimensions])
 
     return !toggleMenu ? (
-        <div className="absolute left-[10px] top-[50%] flex max-h-[50%] max-w-[300px] translate-y-[-50%] flex-col gap-1 bg-slate-400 p-2">
+        <div
+            className="absolute left-[10px] top-[50%] max-w-[300px] translate-y-[-50%] overflow-y-auto bg-slate-400 p-2"
+            style={{ height: `${window.innerHeight - 480}px` }}
+        >
             <div className="flex flex-row items-center gap-1">
                 <button
                     className="bg-slate-600 p-6 font-bold text-white"

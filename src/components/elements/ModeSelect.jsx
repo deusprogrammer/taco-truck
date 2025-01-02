@@ -28,7 +28,7 @@ const ModeSelect = ({
 
     return (
         <div className="absolute left-0 top-0 flex w-screen flex-col">
-            <div className="flex w-screen flex-row items-center justify-around gap-10 bg-slate-400 p-2">
+            <div className="flex w-screen flex-row items-center justify-around gap-10 p-[10px]">
                 <NewButton />
                 <OpenButton />
                 <ModeButton
@@ -50,13 +50,11 @@ const ModeSelect = ({
                 <SaveButton onClick={onSave} />
                 <OptionsButton onClick={onOptions} />
             </div>
-            <div className="flex w-screen flex-row items-center justify-around gap-10 bg-slate-400 p-2">
-                <PartMenu
-                    active={currentMode === ADD}
-                    currentPart={currentPart}
-                    onChange={onChangeAddPart}
-                />
-            </div>
+            <PartMenu
+                active={currentMode === ADD}
+                currentPart={currentPart}
+                onChange={onChangeAddPart}
+            />
         </div>
     )
 }

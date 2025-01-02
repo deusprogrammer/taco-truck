@@ -76,7 +76,10 @@ const PartDetailsMenu = ({
     }
 
     return (
-        <div className="absolute right-[10px] top-[50%] flex max-h-[75%] max-w-[300px] translate-y-[-50%] flex-col gap-1 overflow-y-auto bg-slate-400 p-2">
+        <div
+            className="absolute right-[10px] top-[50%] flex max-w-[300px] translate-y-[-50%] flex-col gap-1 overflow-y-auto bg-slate-400 p-2"
+            style={{ height: `${window.innerHeight - 480}px` }}
+        >
             <h2 className="text-center text-[1rem] font-bold">Part Details</h2>
             <div className="flex flex-col gap-1 overflow-y-auto">
                 <div className="flex flex-col gap-1">

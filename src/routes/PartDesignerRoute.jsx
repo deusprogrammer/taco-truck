@@ -89,7 +89,7 @@ const PartDesignerRoute = () => {
     }, [type, id, searchParams])
 
     return (
-        <div className="flex-column flex h-screen w-screen items-center justify-center">
+        <div style={{ overscrollBehavior: 'none', userSelect: 'none' }}>
             <PartDesigner
                 layout={layout}
                 isNew={isNew}

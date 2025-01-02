@@ -20,6 +20,8 @@ import { ADD, SELECT } from './elements/ModeSelect'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
 import { CIRCLE, partTable } from '../data/parts.table'
+import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
+import { useAtom } from 'jotai'
 
 export const ButtonStatusContext = createContext()
 
@@ -39,7 +41,6 @@ const LayoutDisplay = ({
     selected,
     hovered,
     mode,
-    locked,
     workspaceDimensions,
     workspacePosition,
     workspaceRef,
@@ -52,6 +53,7 @@ const LayoutDisplay = ({
     onLayoutChange,
 }) => {
     const componentRef = createRef()
+    const [editLock] = useAtom(editLockComponentAtom)
     const websocket = useRef()
     const controllerId = useRef()
     const buttonsDown = useButtonDown()
@@ -62,8 +64,8 @@ const LayoutDisplay = ({
     const [isDragging, setIsDragging] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
     const bind = useDrag(
-        ({ event, xy, dragging, touches, buttons, shiftKey }) => {
-            if (locked) {
+        ({ xy, dragging, touches, buttons, shiftKey }) => {
+            if (editLock) {
                 return
             }
 
@@ -176,7 +178,7 @@ const LayoutDisplay = ({
             dragging === part.id &&
             isDragging &&
             mode === SELECT &&
-            !locked
+            !editLock
         ) {
             if (
                 !partTable[modifiedPart.type] ||
@@ -274,7 +276,7 @@ const LayoutDisplay = ({
             return () => {}
         }
 
-        if (mode === SELECT && !locked) {
+        if (mode === SELECT && !editLock) {
             const updatedParts = [...layout.parts]
             const index = updatedParts.findIndex(
                 ({ id }) => id === previouslyDragged
@@ -332,9 +334,10 @@ const LayoutDisplay = ({
         }
     }, [
         dragging,
+        buttonsDown,
         layout,
         mode,
-        locked,
+        editLock,
         onLayoutChange,
         dragX,
         dragY,
@@ -394,8 +397,8 @@ const LayoutDisplay = ({
                 </div>
             ) : null}
             <Stage
-                width={workspaceDimensions[0]}
-                height={workspaceDimensions[1]}
+                width={window.innerWidth}
+                height={window.innerHeight}
                 renderOnComponentChange={false}
                 options={{ background: 0x1099bb }}
                 {...bind()}
