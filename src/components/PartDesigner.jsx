@@ -86,6 +86,7 @@ const PartDesigner = ({
                 touches,
                 buttons,
                 shiftKey,
+                startTime,
             }) => {
                 if (scrollLock) {
                     return

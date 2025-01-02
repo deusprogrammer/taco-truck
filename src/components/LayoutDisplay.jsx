@@ -35,6 +35,8 @@ export const useButtonStatus = (part) => {
     return buttonsPressed?.find(({ id }) => id === part.id)
 }
 
+const timeThreshold = 100
+
 const LayoutDisplay = ({
     layout,
     currentScale,
@@ -58,20 +60,27 @@ const LayoutDisplay = ({
     const controllerId = useRef()
     const buttonsDown = useButtonDown()
     const [dragging, setDragging] = useState(null)
+    const [latch, setLatch] = useState(null)
     const previouslyDragged = usePrevious(dragging)
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
     const [[dragX, dragY], setMouseXY] = useState([0, 0])
     const [isDragging, setIsDragging] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
     const bind = useDrag(
-        ({ xy, dragging, touches, buttons, shiftKey, memo }) => {
+        ({ xy, dragging, touches, buttons, shiftKey, elapsedTime }) => {
             if (editLock) {
                 return
             }
 
-            if (!shiftKey && dragging && (touches === 1 || buttons === 1)) {
+            if (
+                elapsedTime > timeThreshold &&
+                !shiftKey &&
+                dragging &&
+                (touches === 1 || buttons === 1 || latch)
+            ) {
                 setMouseXY(xy)
                 setIsDragging(dragging)
+                setLatch(true)
             }
         },
         {
@@ -272,9 +281,15 @@ const LayoutDisplay = ({
     ])
 
     useEffect(() => {
-        if (previouslyDragged === dragging || buttonsDown.includes('Shift')) {
+        if (
+            previouslyDragged === dragging ||
+            buttonsDown.includes('Shift') ||
+            !latch
+        ) {
             return () => {}
         }
+
+        setLatch(false)
 
         if (mode === SELECT && !editLock) {
             const updatedParts = [...layout.parts]
@@ -334,6 +349,7 @@ const LayoutDisplay = ({
         }
     }, [
         dragging,
+        latch,
         buttonsDown,
         layout,
         mode,
