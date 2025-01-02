@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router'
 import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
 import {
+    buttonOpacityAtom,
     editLockComponentAtom,
     previewAtom,
     scrollLockComponentAtom,
@@ -30,6 +31,7 @@ import { useAtom } from 'jotai'
 import {
     LockToggleButton,
     RealSizeZoomButton,
+    ToggleButton,
     ZoomButton,
 } from './elements/Buttons'
 
@@ -65,6 +67,7 @@ const PartDesigner = ({
     const [scrollLock, setScrollLock] = useAtom(scrollLockComponentAtom)
     const [zoomLock, setZoomLock] = useAtom(zoomLockComponentAtom)
     const [preview, setPreview] = useAtom(previewAtom)
+    const [buttonOpacity, setButtonOpacity] = useAtom(buttonOpacityAtom)
 
     const [placingPartId, setPlacingPartId] = useState('SANWA-24mm')
     const [placingPartType, setPlacingPartType] = useState('button')
@@ -86,7 +89,6 @@ const PartDesigner = ({
                 touches,
                 buttons,
                 shiftKey,
-                startTime,
             }) => {
                 if (scrollLock) {
                     return
@@ -330,6 +332,12 @@ const PartDesigner = ({
                 setScrollLock(!scrollLock)
             } else if (evt.key === '3') {
                 setZoomLock(!zoomLock)
+            } else if (evt.key === '4') {
+                if (buttonOpacity === 0.5) {
+                    setButtonOpacity(1)
+                } else {
+                    setButtonOpacity(0.5)
+                }
             } else if (evt.key === 'r') {
                 setZoom(realSizeRatio)
             } else if (evt.key === 'q') {
@@ -371,6 +379,8 @@ const PartDesigner = ({
             zoom,
             workspacePosition,
             preview,
+            buttonOpacity,
+            setButtonOpacity,
             setPreview,
             setWorkspacePosition,
             setZoom,
@@ -514,7 +524,10 @@ const PartDesigner = ({
                             onZoomChange={(adj) => setZoom(zoom + adj)}
                             currentZoom={zoom}
                         />
-                        <RealSizeZoomButton onClick={setRealSizeZoom} />
+                        <RealSizeZoomButton
+                            zoomValue={zoom}
+                            onClick={setRealSizeZoom}
+                        />
                         <LockToggleButton
                             locked={editLock}
                             onClick={setEditLock}
@@ -533,6 +546,16 @@ const PartDesigner = ({
                         >
                             Zoom
                         </LockToggleButton>
+                        <ToggleButton
+                            toggle={buttonOpacity === 0.5}
+                            onClick={() =>
+                                buttonOpacity === 0.5
+                                    ? setButtonOpacity(1)
+                                    : setButtonOpacity(0.5)
+                            }
+                        >
+                            Transparent
+                        </ToggleButton>
                     </div>
                 </>
             ) : (

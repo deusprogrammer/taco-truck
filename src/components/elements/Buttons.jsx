@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useRealScaleRatio } from '../../hooks/MouseHooks'
 
 export const NewButton = () => {
     const navigate = useNavigate()
@@ -103,17 +104,15 @@ export const ZoomButton = ({ currentZoom, onZoomChange }) => (
     </div>
 )
 
-export const ExportButton = ({ onClick }) => {
-    const [toggle, setToggle] = useState(false)
+export const ToggleButton = ({ onClick, toggle, children }) => {
     return (
         <button
-            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+            className={`h-20 w-auto border-2 border-solid border-black ${toggle ? 'bg-black' : 'bg-slate-600'} p-2 text-white`}
             onClick={() => {
-                setToggle(!toggle)
                 onClick(!toggle)
             }}
         >
-            {!toggle ? 'Export SVG' : 'Back'}
+            {children}
         </button>
     )
 }
@@ -121,7 +120,7 @@ export const ExportButton = ({ onClick }) => {
 export const LockToggleButton = ({ onClick, locked, children }) => {
     return (
         <button
-            className={`h-20 w-20 border-2 border-solid border-black ${locked ? 'bg-black' : 'bg-slate-600'} text-white`}
+            className={`h-20 w-20 border-2 border-solid border-black ${locked ? 'bg-black' : 'bg-slate-600'} p-2 text-white`}
             title="Lock the current configuration so it does not move during select"
             onClick={() => {
                 onClick(!locked)
@@ -133,10 +132,12 @@ export const LockToggleButton = ({ onClick, locked, children }) => {
     )
 }
 
-export const RealSizeZoomButton = ({ onClick }) => {
+export const RealSizeZoomButton = ({ zoomValue, onClick }) => {
+    const realSizeRatio = useRealScaleRatio()
+
     return (
         <button
-            className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+            className={`h-20 w-auto border-2 border-solid border-black ${zoomValue === realSizeRatio ? 'bg-black' : 'bg-slate-600'} p-2 text-white`}
             title="Lock the current configuration so it does not move during select"
             onClick={onClick}
         >

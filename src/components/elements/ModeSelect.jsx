@@ -1,6 +1,5 @@
 import PartMenu from '../menus/PartMenu'
 import {
-    ExportButton,
     ImportButton,
     ModeButton,
     NewButton,
