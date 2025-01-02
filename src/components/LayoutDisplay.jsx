@@ -8,13 +8,10 @@ import React, {
     useRef,
     useState,
 } from 'react'
+import { useDrag } from '@use-gesture/react'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
 import { calculateSizeOfPart, generateUUID } from './utils'
-import {
-    useMouseDrag,
-    useMousePosition,
-    usePrevious,
-} from '../hooks/MouseHooks'
+import { useMousePosition, usePrevious } from '../hooks/MouseHooks'
 import { ADD, SELECT } from './elements/ModeSelect'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
@@ -56,8 +53,23 @@ const LayoutDisplay = ({
     const [dragging, setDragging] = useState(null)
     const previouslyDragged = usePrevious(dragging)
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
-    const [, , isDragging, reset] = useMouseDrag(workspaceRef, 'left')
+    const [[dragX, dragY], setMouseXY] = useState([0, 0])
+    const [isDragging, setIsDragging] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
+    const bind = useDrag(
+        ({ event, xy, dragging }) => {
+            // if (event.pointerType === 'mouse' || event?.touches?.length === 1) {
+            setMouseXY(xy)
+            setIsDragging(dragging)
+            // }
+        },
+        {
+            pointer: {
+                touch: true,
+                mouse: true,
+            },
+        }
+    )
     const [buttonsPressed, setButtonsPressed] = useState([])
 
     const [websocketIp, setWebsocketIp] = useState('localhost:3001')
@@ -107,8 +119,12 @@ const LayoutDisplay = ({
                 type: placingPartType,
                 partId: placingPartId,
                 position: [
-                    (evt.offsetX - workspacePosition[0]) / currentScale,
-                    (evt.offsetY - workspacePosition[1]) / currentScale,
+                    Math.trunc(
+                        (evt.offsetX - workspacePosition[0]) / currentScale
+                    ),
+                    Math.trunc(
+                        (evt.offsetY - workspacePosition[1]) / currentScale
+                    ),
                 ],
                 origin: [0, 0],
             })
@@ -160,12 +176,12 @@ const LayoutDisplay = ({
                 ].shape.toUpperCase() !== CIRCLE
             ) {
                 modifiedPart.position = [
-                    (mouseX -
+                    (dragX -
                         workspacePosition[0] -
                         (calculateSizeOfPart(modifiedPart)[0] * currentScale) /
                             2) /
                         currentScale,
-                    (mouseY -
+                    (dragY -
                         workspacePosition[1] -
                         (calculateSizeOfPart(modifiedPart)[1] * currentScale) /
                             2) /
@@ -175,8 +191,8 @@ const LayoutDisplay = ({
                 modifiedPart.anchor = [0, 0]
             } else {
                 modifiedPart.position = [
-                    (mouseX - workspacePosition[0]) / currentScale,
-                    (mouseY - workspacePosition[1]) / currentScale,
+                    (dragX - workspacePosition[0]) / currentScale,
+                    (dragY - workspacePosition[1]) / currentScale,
                 ]
             }
         }
@@ -267,18 +283,22 @@ const LayoutDisplay = ({
                     updatedParts[index] = {
                         ...updatedPart,
                         position: [
-                            (mouseX -
-                                workspacePosition[0] -
-                                (calculateSizeOfPart(updatedPart)[0] *
-                                    currentScale) /
-                                    2) /
-                                currentScale,
-                            (mouseY -
-                                workspacePosition[1] -
-                                (calculateSizeOfPart(updatedPart)[1] *
-                                    currentScale) /
-                                    2) /
-                                currentScale,
+                            Math.trunc(
+                                (dragX -
+                                    workspacePosition[0] -
+                                    (calculateSizeOfPart(updatedPart)[0] *
+                                        currentScale) /
+                                        2) /
+                                    currentScale
+                            ),
+                            Math.trunc(
+                                (dragY -
+                                    workspacePosition[1] -
+                                    (calculateSizeOfPart(updatedPart)[1] *
+                                        currentScale) /
+                                        2) /
+                                    currentScale
+                            ),
                         ],
                         origin: [0, 0],
                         anchor: [0, 0],
@@ -287,8 +307,12 @@ const LayoutDisplay = ({
                     updatedParts[index] = {
                         ...updatedPart,
                         position: [
-                            (mouseX - workspacePosition[0]) / currentScale,
-                            (mouseY - workspacePosition[1]) / currentScale,
+                            Math.trunc(
+                                (dragX - workspacePosition[0]) / currentScale
+                            ),
+                            Math.trunc(
+                                (dragY - workspacePosition[1]) / currentScale
+                            ),
                         ],
                     }
                 }
@@ -296,8 +320,6 @@ const LayoutDisplay = ({
 
                 onLayoutChange(updatedLayout)
             }
-
-            reset()
         }
     }, [
         dragging,
@@ -305,14 +327,13 @@ const LayoutDisplay = ({
         mode,
         locked,
         onLayoutChange,
-        mouseX,
-        mouseY,
+        dragX,
+        dragY,
         workspacePosition,
         currentScale,
         isDragging,
         previousIsDragging,
         previouslyDragged,
-        reset,
     ])
 
     let component
@@ -368,6 +389,7 @@ const LayoutDisplay = ({
                 height={workspaceDimensions[1]}
                 renderOnComponentChange={false}
                 options={{ background: 0x1099bb }}
+                {...bind()}
             >
                 <Container
                     ref={componentRef}

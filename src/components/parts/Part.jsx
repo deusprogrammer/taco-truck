@@ -244,10 +244,8 @@ const Part = ({
                     interactive={true}
                     onmouseover={() => onHoverPart && onHoverPart(part)}
                     onmouseout={() => onHoverPart && onHoverPart(null)}
-                    onclick={() => {
-                        onClick && onClick(part)
-                    }}
                     onpointerdown={() => {
+                        onClick && onClick(part)
                         onClickPart && onClickPart(part, 'DOWN')
                     }}
                     onpointerup={() => {
@@ -269,10 +267,8 @@ const Part = ({
                     interactive={true}
                     onmouseover={() => onHoverPart && onHoverPart(part)}
                     onmouseout={() => onHoverPart && onHoverPart(null)}
-                    onclick={() => {
-                        onClick && onClick(part)
-                    }}
                     onpointerdown={() => {
+                        onClick && onClick(part)
                         onClickPart && onClickPart(part, 'DOWN')
                     }}
                     onpointerup={() => {
