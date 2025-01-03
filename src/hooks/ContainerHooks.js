@@ -11,7 +11,7 @@ export const useResize = () => {
         const newMenuHeight =
             window.innerHeight - (top.clientHeight + bottom.clientHeight)
         const newMenuTop = top.clientTop + top.clientHeight
-        setHeight(newMenuHeight)
+        setHeight(newMenuHeight - 10)
         setTop(newMenuTop)
     }
 

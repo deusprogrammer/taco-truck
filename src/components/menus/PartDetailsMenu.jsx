@@ -80,7 +80,7 @@ const PartDetailsMenu = ({
 
     return (
         <div
-            className="absolute right-[10px] hidden max-w-[300px] flex-col gap-1 overflow-y-auto bg-slate-400 p-2 md:flex"
+            className="absolute right-[10px] hidden max-w-[300px] flex-col gap-1 overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:flex"
             {...bind()}
         >
             <h2 className="text-center text-[1rem] font-bold">Part Details</h2>

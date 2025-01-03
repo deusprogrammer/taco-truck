@@ -432,12 +432,20 @@ const PartDesigner = ({
                     about: <AboutModal />,
                 }}
             />
+            <header className="absolute left-0 top-0 w-screen p-2 text-center text-xl font-extrabold text-white lg:hidden">
+                <div>View Only Mode</div>
+                <div>{layout.name}</div>
+            </header>
+
+            <footer className="absolute bottom-0 left-0 w-screen p-2 text-center text-xl font-extrabold text-white lg:hidden">
+                © 2025 Michael C Main
+            </footer>
 
             {!preview ? (
                 <>
                     <div
                         id="menu-top"
-                        className="absolute left-0 top-0 hidden w-screen flex-col md:flex"
+                        className="absolute left-0 top-0 hidden w-screen flex-col lg:flex"
                     >
                         <div className="flex w-screen flex-row items-center justify-around gap-10 p-[10px]">
                             <NewButton />
@@ -481,7 +489,7 @@ const PartDesigner = ({
                     />
                     <div
                         id="menu-bottom"
-                        className="absolute bottom-0 left-0 hidden h-[80px] w-screen flex-row items-center justify-center gap-9 md:flex"
+                        className="absolute bottom-0 left-0 hidden h-[80px] w-screen flex-row items-center justify-center gap-9 lg:flex"
                     >
                         <ZoomButton
                             onZoomChange={(adj) => setZoom(zoom + adj)}

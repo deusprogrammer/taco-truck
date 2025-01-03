@@ -88,7 +88,7 @@ const ComponentMenu = ({
 
     return !toggleMenu ? (
         <div
-            className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto bg-slate-400 p-2 md:block"
+            className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:block"
             {...bind()}
         >
             <div className="flex flex-row items-center gap-1">
