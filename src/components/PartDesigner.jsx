@@ -62,6 +62,10 @@ const PartDesigner = ({
     const realSizeRatio = useRealScaleRatio()
 
     const [width, height] = useContainerSize(containerRef)
+    const [[screenWidth, screenHeight], setScreenSize] = useState([
+        window.innerWidth,
+        window.innerHeight,
+    ])
     const [initialLoad, setInitialLoad] = useState(true)
 
     const [workspacePosition, setWorkspacePosition] = useAtom(
@@ -79,7 +83,6 @@ const PartDesigner = ({
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
 
-    const [lastClicked, setLastClicked] = useState(null)
     const [selected, setSelected] = useState(null)
     const [hovered, setHovered] = useState(null)
 
@@ -316,6 +319,7 @@ const PartDesigner = ({
     }
 
     const centerWorkPiece = useCallback(() => {
+        setScreenSize([window.innerWidth, window.innerHeight])
         if (
             (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) ||
             layout.parts.length > 0
@@ -405,8 +409,10 @@ const PartDesigner = ({
 
     useEffect(() => {
         window.addEventListener('resize', centerWorkPiece)
+        window.addEventListener('orientationchange', centerWorkPiece)
         return () => {
             window.removeEventListener('resize', centerWorkPiece)
+            window.removeEventListener('orientationchange', centerWorkPiece)
         }
     }, [centerWorkPiece])
 
@@ -414,8 +420,6 @@ const PartDesigner = ({
 
     const screenX = workspacePosition[0]
     const screenY = workspacePosition[1]
-
-    console.log('MODE: ' + mode)
 
     return (
         <div className="bg-[#1099bb]">
@@ -566,6 +570,8 @@ const PartDesigner = ({
                         workspaceRef={containerRef}
                         layout={layout}
                         currentScale={zoom}
+                        screenWidth={screenWidth}
+                        screenHeight={screenHeight}
                         selected={selected}
                         hovered={hovered}
                         mode={mode}
@@ -578,7 +584,7 @@ const PartDesigner = ({
                         onHoverPart={hoverPart}
                         onSelectPart={selectPart}
                         onSecondarySelectPart={afterSelect}
-                        onClickPart={setLastClicked}
+                        onClickPart={() => {}}
                         onLayoutChange={onLayoutChange}
                     />
                 </div>

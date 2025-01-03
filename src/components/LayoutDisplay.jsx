@@ -40,6 +40,8 @@ const timeThreshold = 100
 const LayoutDisplay = ({
     layout,
     currentScale,
+    screenWidth,
+    screenHeight,
     selected,
     hovered,
     mode,
@@ -58,11 +60,6 @@ const LayoutDisplay = ({
     const [editLock] = useAtom(editLockComponentAtom)
     const websocket = useRef()
     const controllerId = useRef()
-
-    const [screenSize, setScreenSize] = useState([
-        window.innerWidth,
-        window.innerHeight,
-    ])
 
     const buttonsDown = useButtonDown()
     const [dragging, setDragging] = useState(null)
@@ -167,10 +164,6 @@ const LayoutDisplay = ({
             workspacePosition,
         ]
     )
-
-    const handleResize = () => {
-        setScreenSize([window.innerWidth, window.innerHeight])
-    }
 
     const handlePointerDown = useCallback((event) => {
         isMoving.current = false
@@ -277,12 +270,10 @@ const LayoutDisplay = ({
         ele.addEventListener('pointerdown', handlePointerDown)
         ele.addEventListener('pointermove', handlePointerMove)
         ele.addEventListener('pointerup', handlePointerUp)
-        window.addEventListener('resize', handleResize)
         return () => {
             ele.removeEventListener('pointerdown', handlePointerDown)
             ele.removeEventListener('pointermove', handlePointerMove)
             ele.removeEventListener('pointerup', handlePointerUp)
-            window.removeEventListener('resize', handleResize)
         }
     }, [
         addPart,
@@ -425,8 +416,8 @@ const LayoutDisplay = ({
                 </div>
             ) : null}
             <Stage
-                width={screenSize[0]}
-                height={screenSize[1]}
+                width={screenWidth}
+                height={screenHeight}
                 renderOnComponentChange={false}
                 options={{ background: 0x1099bb }}
                 {...bind()}
