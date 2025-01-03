@@ -148,7 +148,7 @@ const ComponentManagerRoute = () => {
                                     to={`/designer/projects/${project.id}${project.isLocal ? '?isLocal=true' : ''}`}
                                 >
                                     <button className="h-20 bg-slate-500 p-4 text-white">
-                                        Edit
+                                        Open
                                     </button>
                                 </Link>
                                 <button
@@ -212,7 +212,7 @@ const ComponentManagerRoute = () => {
                                     to={`/designer/parts/${part.id}${part.isLocal ? '?isLocal' : ''}`}
                                 >
                                     <button className="h-20 bg-slate-500 p-4 text-white">
-                                        Edit
+                                        Open
                                     </button>
                                 </Link>
                                 <button
