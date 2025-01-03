@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import BufferedInput from '../elements/BufferedInput'
 import { useAtom } from 'jotai'
 import { screenHeightAtom } from '../../atoms/ViewOptions.atom'
@@ -122,6 +123,11 @@ const OptionsModal = ({ open, onClose }) => {
                             </option>
                         ))}
                     </select>
+                    <Link to="/calibration">
+                        <button className="bg-slate-500 p-2">
+                            Card Calibration
+                        </button>
+                    </Link>
                     <span>Ratio: {vRes / screenHeight} pixels/mm</span>
                 </div>
                 <div>
