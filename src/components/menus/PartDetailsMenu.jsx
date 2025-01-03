@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { calculateRelativePosition } from '../utils'
 import BufferedInput from '../elements/BufferedInput'
+import { useResize } from '../../hooks/ContainerHooks'
 
 const PartDetailsMenu = ({
     layout,
@@ -9,6 +10,8 @@ const PartDetailsMenu = ({
     onSecondarySelectPart,
     onSetSecondarySelect,
 }) => {
+    const bind = useResize()
+
     const onKeyDown = useCallback(
         (evt) => {
             if (evt.key === 'ArrowUp') {
@@ -55,10 +58,6 @@ const PartDetailsMenu = ({
         }
     }, [onKeyDown])
 
-    if (!selectedPart) {
-        return null
-    }
-
     const adjustPositionToRelative = (part, referencePart) => {
         let copy = { ...part }
 
@@ -75,10 +74,14 @@ const PartDetailsMenu = ({
         return copy
     }
 
+    if (!selectedPart) {
+        return null
+    }
+
     return (
         <div
-            className="absolute right-[10px] top-[50%] flex max-w-[300px] translate-y-[-50%] flex-col gap-1 overflow-y-auto bg-slate-400 p-2"
-            style={{ height: `${window.innerHeight - 480}px` }}
+            className="absolute right-[10px] hidden max-w-[300px] flex-col gap-1 overflow-y-auto bg-slate-400 p-2 md:flex"
+            {...bind()}
         >
             <h2 className="text-center text-[1rem] font-bold">Part Details</h2>
             <div className="flex flex-col gap-1 overflow-y-auto">

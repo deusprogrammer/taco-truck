@@ -35,7 +35,7 @@ export const ModeButton = ({ mode, currentMode, onClick }) => (
     <button
         className={`h-20 w-64 text-white ${currentMode === mode.toUpperCase() ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
         onClick={(e) => {
-            onClick(e, mode.toUpperCase())
+            onClick(mode.toUpperCase())
         }}
     >
         {mode}

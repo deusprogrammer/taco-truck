@@ -1,8 +1,13 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
 import { useGesture } from '@use-gesture/react'
-import ModeSelect, { ADD, EXPORT, SELECT } from './elements/ModeSelect'
+import { ADD, EXPORT, SELECT } from './elements/Modes'
 import ComponentMenu from './menus/ComponentMenu'
 import LayoutDisplay from './LayoutDisplay'
+import ModalContainer, {
+    closeModal,
+    ModalButton,
+    openModal,
+} from './modals/ModalContainer'
 import LayoutDisplaySvg from './svg/LayoutDisplaySvg'
 import PartDetailsMenu from './menus/PartDetailsMenu'
 import SaveModal from './menus/SaveModal'
@@ -23,6 +28,7 @@ import {
     editLockComponentAtom,
     previewAtom,
     scrollLockComponentAtom,
+    selectedAtom,
     workspacePositionAtom,
     zoomAtom,
     zoomLockComponentAtom,
@@ -30,11 +36,16 @@ import {
 import { useAtom } from 'jotai'
 import {
     LockToggleButton,
+    ModeButton,
+    NewButton,
+    OpenButton,
     RealSizeZoomButton,
     ToggleButton,
     ZoomButton,
 } from './elements/Buttons'
 import AboutModal from './menus/About'
+import PartMenu from './menus/PartMenu'
+import { useKeyShortcuts } from '../hooks/AtomHooks'
 
 const SCALE_RATIO = 1000
 
@@ -44,15 +55,11 @@ const PartDesigner = ({
     isNew,
     onLayoutChange,
 }) => {
-    const [partsWidth, partsHeight] = calculateSizeOfPart({
-        type: 'custom',
-        layout: layout,
-    })
+    const containerRef = createRef()
+    useKeyShortcuts({ layout, containerRef })
 
     const navigate = useNavigate()
     const realSizeRatio = useRealScaleRatio()
-
-    const containerRef = createRef()
 
     const [width, height] = useContainerSize(containerRef)
     const [initialLoad, setInitialLoad] = useState(true)
@@ -61,9 +68,7 @@ const PartDesigner = ({
         workspacePositionAtom
     )
     const [zoom, setZoom] = useAtom(zoomAtom)
-
-    const [mode, setMode] = useState(SELECT)
-
+    const [mode, setMode] = useAtom(selectedAtom)
     const [editLock, setEditLock] = useAtom(editLockComponentAtom)
     const [scrollLock, setScrollLock] = useAtom(scrollLockComponentAtom)
     const [zoomLock, setZoomLock] = useAtom(zoomLockComponentAtom)
@@ -77,11 +82,6 @@ const PartDesigner = ({
     const [lastClicked, setLastClicked] = useState(null)
     const [selected, setSelected] = useState(null)
     const [hovered, setHovered] = useState(null)
-
-    const [saveModalOpen, setSaveModalOpen] = useState(false)
-    const [importModalOpen, setImportModalOpen] = useState(false)
-    const [optionsModalOpen, setOptionsModalOpen] = useState(false)
-    const [aboutModalOpen, setAboutModalOpen] = useState(false)
 
     const bind = useGesture(
         {
@@ -131,14 +131,6 @@ const PartDesigner = ({
         }
     )
 
-    const saveComponent = () => {
-        setSaveModalOpen(true)
-    }
-
-    const importCustomPart = () => {
-        setImportModalOpen(true)
-    }
-
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
             if (zoomLock) {
@@ -157,6 +149,11 @@ const PartDesigner = ({
             saveCloud(name, type)
         }
     }
+
+    const [partsWidth, partsHeight] = calculateSizeOfPart({
+        type: 'custom',
+        layout: layout,
+    })
 
     const saveCloud = async (name, type) => {
         try {
@@ -311,108 +308,60 @@ const PartDesigner = ({
 
     const setRealSizeZoom = () => {
         if (!realSizeRatio) {
-            setOptionsModalOpen(true)
+            openModal('options')
             return
         }
 
         setZoom(realSizeRatio)
     }
 
-    const onKeyDown = useCallback(
-        (evt) => {
-            if (evt.key === 'Escape') {
-                if (mode === SELECT) {
-                    setSelected(null)
-                } else if (mode === ADD) {
-                    setMode(SELECT)
-                }
-            } else if (evt.key === 'p') {
-                setPreview(!preview)
-            } else if (evt.key === '1') {
-                setEditLock(!editLock)
-            } else if (evt.key === '2') {
-                setScrollLock(!scrollLock)
-            } else if (evt.key === '3') {
-                setZoomLock(!zoomLock)
-            } else if (evt.key === '4') {
-                if (buttonOpacity === 0.5) {
-                    setButtonOpacity(1)
-                } else {
-                    setButtonOpacity(0.5)
-                }
-            } else if (evt.key === 'r') {
-                setZoom(realSizeRatio)
-            } else if (evt.key === 'q') {
-                !zoomLock && setZoom(Math.max(zoom - 0.2, 0.1))
-            } else if (evt.key === 'e') {
-                !zoomLock && setZoom(zoom + 0.2)
-            } else if (evt.key === 'w') {
-                !scrollLock &&
-                    setWorkspacePosition([
-                        workspacePosition[0],
-                        workspacePosition[1] - 8 * zoom,
-                    ])
-            } else if (evt.key === 's') {
-                !scrollLock &&
-                    setWorkspacePosition([
-                        workspacePosition[0],
-                        workspacePosition[1] + 8 * zoom,
-                    ])
-            } else if (evt.key === 'a') {
-                !scrollLock &&
-                    setWorkspacePosition([
-                        workspacePosition[0] - 8 * zoom,
-                        workspacePosition[1],
-                    ])
-            } else if (evt.key === 'd') {
-                !scrollLock &&
-                    setWorkspacePosition([
-                        workspacePosition[0] + 8 * zoom,
-                        workspacePosition[1],
-                    ])
-            }
-        },
-        [
-            mode,
-            realSizeRatio,
-            zoomLock,
-            scrollLock,
-            editLock,
-            zoom,
-            workspacePosition,
-            preview,
-            buttonOpacity,
-            setButtonOpacity,
-            setPreview,
-            setWorkspacePosition,
-            setZoom,
-            setZoomLock,
-            setScrollLock,
-            setEditLock,
-        ]
-    )
-
-    useEffect(() => {
-        window.addEventListener('keydown', onKeyDown)
-        return () => {
-            window.removeEventListener('keydown', onKeyDown)
+    const centerWorkPiece = useCallback(() => {
+        if (
+            (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) ||
+            layout.parts.length > 0
+        ) {
+            setWorkspacePosition([
+                width / 2 -
+                    (Math.min(
+                        partsWidth,
+                        layout.panelDimensions[0] || partsWidth
+                    ) /
+                        2) *
+                        zoom,
+                height / 2 -
+                    (Math.min(
+                        partsHeight,
+                        layout.panelDimensions[1] || partsHeight
+                    ) /
+                        2) *
+                        zoom,
+            ])
         }
-    }, [onKeyDown])
+    }, [
+        height,
+        layout.panelDimensions,
+        layout.parts.length,
+        partsHeight,
+        partsWidth,
+        setWorkspacePosition,
+        width,
+        zoom,
+    ])
 
     useEffect(() => {
         if (!preview) {
             return () => {}
         }
 
-        setOptionsModalOpen(false)
+        closeModal()
         setMode('NONE')
         if (!realSizeRatio) {
-            setOptionsModalOpen(true)
+            openModal('options')
             return
         }
 
         setZoom(realSizeRatio)
-    }, [realSizeRatio, preview, previewOverride, setOptionsModalOpen, setZoom])
+    }, [realSizeRatio, preview, previewOverride, setZoom, setMode])
 
     useEffect(() => {
         setPreview(previewOverride)
@@ -439,27 +388,7 @@ const PartDesigner = ({
             setInitialLoad(false)
         }
 
-        if (
-            (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) ||
-            layout.parts.length > 0
-        ) {
-            setWorkspacePosition([
-                width / 2 -
-                    (Math.min(
-                        partsWidth,
-                        layout.panelDimensions[0] || partsWidth
-                    ) /
-                        2) *
-                        zoom,
-                height / 2 -
-                    (Math.min(
-                        partsHeight,
-                        layout.panelDimensions[1] || partsHeight
-                    ) /
-                        2) *
-                        zoom,
-            ])
-        }
+        centerWorkPiece()
     }, [
         isNew,
         width,
@@ -470,48 +399,72 @@ const PartDesigner = ({
         layout,
         preview,
         initialLoad,
+        centerWorkPiece,
         setWorkspacePosition,
     ])
+
+    useEffect(() => {
+        window.addEventListener('resize', centerWorkPiece)
+        return () => {
+            window.removeEventListener('resize', centerWorkPiece)
+        }
+    }, [centerWorkPiece])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
     const screenX = workspacePosition[0]
     const screenY = workspacePosition[1]
 
+    console.log('MODE: ' + mode)
+
     return (
         <div className="bg-[#1099bb]">
-            <SaveModal
-                open={saveModalOpen}
-                name={layout.name}
-                onSaveComplete={completeSave}
-                onClose={() => setSaveModalOpen(false)}
-            />
-            <ImportModal
-                open={importModalOpen}
-                onImportComplete={completeImport}
-                onClose={() => setImportModalOpen(false)}
-            />
-            <OptionsModal
-                open={optionsModalOpen}
-                onClose={() => setOptionsModalOpen(false)}
-            />
-            <AboutModal
-                open={aboutModalOpen}
-                onClose={() => setAboutModalOpen(false)}
+            <ModalContainer
+                modalMapping={{
+                    save: (
+                        <SaveModal
+                            name={layout.name}
+                            onSaveComplete={completeSave}
+                        />
+                    ),
+                    import: <ImportModal onImportComplete={completeImport} />,
+                    options: <OptionsModal />,
+                    about: <AboutModal />,
+                }}
             />
 
             {!preview ? (
                 <>
-                    <ModeSelect
-                        currentMode={mode}
-                        currentPart={placingPartId}
-                        onModeChange={setMode}
-                        onSave={saveComponent}
-                        onImport={importCustomPart}
-                        onOptions={setOptionsModalOpen}
-                        onChangeAddPart={selectPlacingPart}
-                        onAbout={() => setAboutModalOpen(true)}
-                    />
+                    <div
+                        id="menu-top"
+                        className="absolute left-0 top-0 hidden w-screen flex-col md:flex"
+                    >
+                        <div className="flex w-screen flex-row items-center justify-around gap-10 p-[10px]">
+                            <NewButton />
+                            <OpenButton />
+                            <ModeButton
+                                mode="Select"
+                                currentMode={mode}
+                                onClick={setMode}
+                            />
+                            <ModeButton
+                                mode="Add"
+                                currentMode={mode}
+                                onClick={setMode}
+                            />
+                            <ModalButton modalKey="import">Import</ModalButton>
+                            <ModalButton modalKey="save">Save</ModalButton>
+                            <ModalButton modalKey="options">
+                                Options
+                            </ModalButton>
+                            <ModalButton modalKey="about">About</ModalButton>
+                        </div>
+                        <PartMenu
+                            active={mode === ADD}
+                            currentPart={placingPartId}
+                            onChange={selectPlacingPart}
+                        />
+                    </div>
                     <ComponentMenu
                         layout={layout}
                         selectedPartId={selected}
@@ -526,7 +479,10 @@ const PartDesigner = ({
                         onSecondarySelectPart={afterSelect}
                         onSetSecondarySelect={setAfterSelect}
                     />
-                    <div className="absolute bottom-0 left-0 flex h-[80px] w-screen flex-row items-center justify-center gap-9">
+                    <div
+                        id="menu-bottom"
+                        className="absolute bottom-0 left-0 hidden h-[80px] w-screen flex-row items-center justify-center gap-9 md:flex"
+                    >
                         <ZoomButton
                             onZoomChange={(adj) => setZoom(zoom + adj)}
                             currentZoom={zoom}

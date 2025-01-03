@@ -16,7 +16,7 @@ import {
     useMousePosition,
     usePrevious,
 } from '../hooks/MouseHooks'
-import { ADD, SELECT } from './elements/ModeSelect'
+import { ADD, SELECT } from './elements/Modes'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
 import { CIRCLE, partTable } from '../data/parts.table'
@@ -58,6 +58,12 @@ const LayoutDisplay = ({
     const [editLock] = useAtom(editLockComponentAtom)
     const websocket = useRef()
     const controllerId = useRef()
+
+    const [screenSize, setScreenSize] = useState([
+        window.innerWidth,
+        window.innerHeight,
+    ])
+
     const buttonsDown = useButtonDown()
     const [dragging, setDragging] = useState(null)
     const [latch, setLatch] = useState(null)
@@ -161,6 +167,10 @@ const LayoutDisplay = ({
             workspacePosition,
         ]
     )
+
+    const handleResize = () => {
+        setScreenSize([window.innerWidth, window.innerHeight])
+    }
 
     const handlePointerDown = useCallback((event) => {
         isMoving.current = false
@@ -267,10 +277,12 @@ const LayoutDisplay = ({
         ele.addEventListener('pointerdown', handlePointerDown)
         ele.addEventListener('pointermove', handlePointerMove)
         ele.addEventListener('pointerup', handlePointerUp)
+        window.addEventListener('resize', handleResize)
         return () => {
             ele.removeEventListener('pointerdown', handlePointerDown)
             ele.removeEventListener('pointermove', handlePointerMove)
             ele.removeEventListener('pointerup', handlePointerUp)
+            window.removeEventListener('resize', handleResize)
         }
     }, [
         addPart,
@@ -413,8 +425,8 @@ const LayoutDisplay = ({
                 </div>
             ) : null}
             <Stage
-                width={window.innerWidth}
-                height={window.innerHeight}
+                width={screenSize[0]}
+                height={screenSize[1]}
                 renderOnComponentChange={false}
                 options={{ background: 0x1099bb }}
                 {...bind()}

@@ -1,4 +1,6 @@
+import { useAtom } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { screenHeightAtom } from '../atoms/ViewOptions.atom'
 
 export const getMouseButtonsMap = (evt) => {
     return {
@@ -163,7 +165,7 @@ export const useContainerSize = (ref) => {
             width: ref.current.clientWidth,
             height: ref.current.clientHeight,
         })
-    }, [ref])
+    }, [dimensions.height, dimensions.width, ref])
 
     useEffect(() => {
         if (!ref?.current) {
@@ -217,8 +219,12 @@ export const usePixiContainerSize = (ref) => {
 }
 
 export const useRealScaleRatio = () => {
-    const [screenHeight, setScreenHeight] = useState(0);
-    const vRes = window.screen.availHeight
+    const [screenHeight] = useAtom(screenHeightAtom);
+    const [vRes, setVRes] = useState(window.screen.availHeight);
+
+    const handleResize = () => {
+        setVRes(window.screen.availHeight)
+    }
 
     useEffect(() => {
         let dataJSON = localStorage.getItem('screen-metrics')
@@ -227,7 +233,10 @@ export const useRealScaleRatio = () => {
             return () => {}
         }
 
-        setScreenHeight(JSON.parse(dataJSON).screenHeight)
+        window.addEventListener('resize', handleResize)
+        return () => {
+            window.removeEventListener('resize', handleResize)
+        }
     }, [])
 
     if (!screenHeight) {

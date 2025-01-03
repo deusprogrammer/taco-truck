@@ -3,22 +3,35 @@ import BufferedInput from '../elements/BufferedInput'
 import { useAtom } from 'jotai'
 import { screenHeightAtom } from '../../atoms/ViewOptions.atom'
 
-import config from '../../../package.json'
-
-const SCREEN_HEIGHT_CATALOG = [
-    { name: 'Sony InZone H9 4K Monitor', height: 330 },
-    { name: 'iPad Air/Pro M4', height: 197 },
-]
+import { addDoc, collection, getDocs } from 'firebase/firestore'
+import { db } from '../../firebase.config'
 
 const OptionsModal = ({ open, onClose }) => {
     const [screenHeight, setScreenHeight] = useAtom(screenHeightAtom)
+    const [presets, setPresets] = useState([])
     const [showRims, setShowRims] = useState(true)
     const [presetName, setPresetName] = useState('')
     const [showPresetModal, setShowPresetModal] = useState(false)
     const vRes = window.screen.availHeight
 
+    const fetchPresets = async () => {
+        const querySnapshot = await getDocs(collection(db, 'screenMetrics'))
+        const retrieved = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }))
+        setPresets(retrieved)
+    }
+
+    const storePreset = async (preset) => {
+        await addDoc(collection(db, 'screenMetrics'), preset)
+        fetchPresets()
+    }
+
     useEffect(() => {
         let dataJSON = localStorage.getItem('screen-metrics')
+
+        fetchPresets()
 
         if (dataJSON) {
             setScreenHeight(JSON.parse(dataJSON).screenHeight)
@@ -32,6 +45,7 @@ const OptionsModal = ({ open, onClose }) => {
                 screenHeight,
             })
         )
+        setScreenHeight(screenHeight)
     }
 
     if (!open) {
@@ -53,7 +67,13 @@ const OptionsModal = ({ open, onClose }) => {
                         />
                         <button
                             className="bg-slate-500 p-2"
-                            onClick={() => setShowPresetModal(false)}
+                            onClick={() => {
+                                storePreset({
+                                    name: presetName,
+                                    height: screenHeight,
+                                })
+                                setShowPresetModal(false)
+                            }}
                         >
                             Save
                         </button>
@@ -96,8 +116,8 @@ const OptionsModal = ({ open, onClose }) => {
                         }
                     >
                         <option>Check a list of pre-measured monitors</option>
-                        {SCREEN_HEIGHT_CATALOG.map((monitor) => (
-                            <option value={monitor.height}>
+                        {presets.map((monitor) => (
+                            <option key={monitor.id} value={monitor.height}>
                                 {monitor.name}
                             </option>
                         ))}

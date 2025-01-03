@@ -4,6 +4,7 @@ import BufferedInput from '../elements/BufferedInput'
 import { getImageDimensions } from '../utils'
 import { useAtom } from 'jotai'
 import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
+import { useResize } from '../../hooks/ContainerHooks'
 
 const ComponentMenu = ({
     layout,
@@ -11,11 +12,11 @@ const ComponentMenu = ({
     onLayoutChange,
     onSelect,
     onHover,
-    onDelete,
 }) => {
     const [renderMeasurements, setRenderMeasurements] = useAtom(
         renderMeasurementsAtom
     )
+    const bind = useResize()
 
     const [toggleMenu, setToggleMenu] = useState(false)
 
@@ -87,8 +88,8 @@ const ComponentMenu = ({
 
     return !toggleMenu ? (
         <div
-            className="absolute left-[10px] top-[50%] max-w-[300px] translate-y-[-50%] overflow-y-auto bg-slate-400 p-2"
-            style={{ height: `${window.innerHeight - 480}px` }}
+            className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto bg-slate-400 p-2 md:block"
+            {...bind()}
         >
             <div className="flex flex-row items-center gap-1">
                 <button
@@ -234,7 +235,7 @@ const ComponentMenu = ({
             </div>
         </div>
     ) : (
-        <div className="absolute left-0 top-0 flex h-[100vh] flex-col justify-center">
+        <div className="absolute left-0 top-0 hidden h-[100vh] flex-col justify-center lg:flex">
             <button
                 onClick={() => setToggleMenu(false)}
                 onPointerDown={() => setToggleMenu(false)}
