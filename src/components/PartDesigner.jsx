@@ -545,17 +545,13 @@ const PartDesigner = ({
             {preview ? (
                 <div className="absolute left-0 top-0 text-white">
                     <div>
-                        Scale: {Math.trunc(zoom * 100)}% ({realSizeRatio}{' '}
-                        pixels/mm )
+                        <span className="font-extrabold">Name:</span>{' '}
+                        {layout.name}
                     </div>
-                    <div>Name: {layout.name}</div>
                     <div>
-                        Panel: {layout.panelDimensions[0]}mm X{' '}
+                        <span className="font-extrabold">Panel:</span>{' '}
+                        {layout.panelDimensions[0]}mm X{' '}
                         {layout.panelDimensions[1]}mm
-                    </div>
-                    <div>
-                        Last Clicked: {lastClicked?.name || 'None'}[
-                        {lastClicked?.id}]
                     </div>
                 </div>
             ) : null}
