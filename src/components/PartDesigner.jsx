@@ -416,6 +416,10 @@ const PartDesigner = ({
         }
     }, [centerWorkPiece])
 
+    useEffect(() => {
+        setSelected(null)
+    }, [mode])
+
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
     const screenX = workspacePosition[0]
@@ -456,11 +460,6 @@ const PartDesigner = ({
                             <OpenButton />
                             <ModeButton
                                 mode="Select"
-                                currentMode={mode}
-                                onClick={setMode}
-                            />
-                            <ModeButton
-                                mode="Edit"
                                 currentMode={mode}
                                 onClick={setMode}
                             />
