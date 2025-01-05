@@ -292,9 +292,9 @@ const PartDesigner = ({
     }
 
     const hoverPart = (hoveredPart) => {
-        if (mode !== SELECT) {
-            return
-        }
+        // if (mode !== SELECT) {
+        //     return
+        // }
         setHovered(hoveredPart?.id)
     }
 
