@@ -460,6 +460,11 @@ const PartDesigner = ({
                                 onClick={setMode}
                             />
                             <ModeButton
+                                mode="Edit"
+                                currentMode={mode}
+                                onClick={setMode}
+                            />
+                            <ModeButton
                                 mode="Add"
                                 currentMode={mode}
                                 onClick={setMode}
