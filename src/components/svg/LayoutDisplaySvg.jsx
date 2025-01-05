@@ -4,7 +4,13 @@ import PanelSvg from './PanelSvg'
 import { saveAs } from 'file-saver'
 import { calculateSizeOfPart } from '../utils'
 
-const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
+const LayoutDisplaySvg = ({
+    layout,
+    scale,
+    drillingGuide,
+    units,
+    hideButton,
+}) => {
     const svgRef = createRef()
     const [partsWidth, partsHeight] = calculateSizeOfPart({
         type: 'custom',
@@ -68,6 +74,10 @@ const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
         saveAs(blob, `${layout.name}.svg`)
     }
 
+    if (units === 'mm') {
+        scale = 1
+    }
+
     const svgWidth =
         layout?.panelDimensions[0] !== 0
             ? layout?.panelDimensions[0]
@@ -81,13 +91,15 @@ const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
         <div className="flex flex-col items-center justify-center gap-4">
             <svg
                 ref={svgRef}
-                width={svgWidth * scale}
-                height={svgHeight * scale}
+                width={`${svgWidth * scale}${units ?? ''}`}
+                height={`${svgHeight * scale}${units ?? ''}`}
             >
                 <PanelSvg layout={layout} scale={scale} />
                 {layout?.parts?.map((part, index) => (
                     <PartSvg
                         key={`partsvg-${part.id || index}`}
+                        drillingGuide={drillingGuide}
+                        units={units}
                         part={part}
                         parent={layout}
                         scale={scale}

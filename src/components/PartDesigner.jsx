@@ -46,6 +46,7 @@ import {
 import AboutModal from './menus/About'
 import PartMenu from './menus/PartMenu'
 import { useKeyShortcuts } from '../hooks/AtomHooks'
+import ExportModal from './menus/ExportModal'
 
 const SCALE_RATIO = 1000
 
@@ -432,6 +433,7 @@ const PartDesigner = ({
                         />
                     ),
                     import: <ImportModal onImportComplete={completeImport} />,
+                    export: <ExportModal layout={layout} />,
                     options: <OptionsModal />,
                     about: <AboutModal />,
                 }}
@@ -465,6 +467,7 @@ const PartDesigner = ({
                                 onClick={setMode}
                             />
                             <ModalButton modalKey="import">Import</ModalButton>
+                            <ModalButton modalKey="export">Export</ModalButton>
                             <ModalButton modalKey="save">Save</ModalButton>
                             <ModalButton modalKey="options">
                                 Options
