@@ -416,10 +416,6 @@ const PartDesigner = ({
         }
     }, [centerWorkPiece])
 
-    useEffect(() => {
-        setSelected(null)
-    }, [mode])
-
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 
     const screenX = workspacePosition[0]
