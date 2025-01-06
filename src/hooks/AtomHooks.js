@@ -18,7 +18,7 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
     )
     const [, setScreenSize] = useAtom(screenSizeAtom)
     const [zoom, setZoom] = useAtom(zoomAtom)
-    const [mode, setMode] = useAtom(modeAtom)
+    const [, setMode] = useAtom(modeAtom)
 
     const [editLock, setEditLock] = useAtom(editLockComponentAtom)
     const [scrollLock, setScrollLock] = useAtom(scrollLockComponentAtom)
@@ -27,37 +27,37 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
     const [buttonOpacity, setButtonOpacity] = useAtom(buttonOpacityAtom)
     const [, setSelected] = useAtom(selectedAtom)
 
-        const centerWorkPiece = useCallback(() => {
-            setScreenSize([window.innerWidth, window.innerHeight])
-    
-            let contextWidth = partsWidth
-            let contextHeight = partsHeight
-            if (layout.panelDimensions[0]) {
-                contextWidth = layout.panelDimensions[0]
-            }
-    
-            if (layout.panelDimensions[1]) {
-                contextHeight = layout.panelDimensions[1]
-            }
-    
-            console.log(`${contextWidth} x ${contextHeight}`)
-    
-            if (width > 0 && height > 0) {
-                setWorkspacePosition([
-                    width / 2 - (contextWidth / 2) * zoom,
-                    height / 2 - (contextHeight / 2) * zoom,
-                ])
-            }
-        }, [
-            width,
-            height,
-            zoom,
-            layout.panelDimensions,
-            partsHeight,
-            partsWidth,
-            setWorkspacePosition,
-            setScreenSize,
-        ])
+    const centerWorkPiece = useCallback(() => {
+        setScreenSize([window.innerWidth, window.innerHeight])
+
+        let contextWidth = partsWidth
+        let contextHeight = partsHeight
+        if (layout.panelDimensions[0]) {
+            contextWidth = layout.panelDimensions[0]
+        }
+
+        if (layout.panelDimensions[1]) {
+            contextHeight = layout.panelDimensions[1]
+        }
+
+        console.log(`${contextWidth} x ${contextHeight}`)
+
+        if (width > 0 && height > 0) {
+            setWorkspacePosition([
+                width / 2 - (contextWidth / 2) * zoom,
+                height / 2 - (contextHeight / 2) * zoom,
+            ])
+        }
+    }, [
+        width,
+        height,
+        zoom,
+        layout.panelDimensions,
+        partsHeight,
+        partsWidth,
+        setWorkspacePosition,
+        setScreenSize,
+    ])
 
     const onKeyDown = useCallback(
             (evt) => {

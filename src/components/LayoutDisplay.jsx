@@ -83,6 +83,7 @@ const LayoutDisplay = ({
                 }
 
                 if (
+                    mode === ART_ADJUST &&
                     artSelected &&
                     elapsedTime > timeThreshold &&
                     !shiftKey &&
@@ -391,7 +392,10 @@ const LayoutDisplay = ({
                                 onHoverPart={onHoverPart}
                                 onClick={onSecondarySelectPart || onSelectPart}
                                 onClickPart={(part, action) => {
-                                    if (part.type !== 'button') {
+                                    if (
+                                        part.type !== 'button' ||
+                                        mode === ART_ADJUST
+                                    ) {
                                         return
                                     }
 

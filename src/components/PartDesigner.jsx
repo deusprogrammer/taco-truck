@@ -95,7 +95,7 @@ const PartDesigner = ({
                 buttons,
                 shiftKey,
             }) => {
-                if (scrollLock) {
+                if (scrollLock || mode === ART_ADJUST) {
                     return
                 }
 
@@ -303,6 +303,7 @@ const PartDesigner = ({
         if (currentMode !== SELECT) {
             return
         }
+
         setSelected(selectedPart?.id)
     }
 
@@ -429,6 +430,12 @@ const PartDesigner = ({
             window.removeEventListener('orientationchange', centerWorkPiece)
         }
     }, [centerWorkPiece])
+
+    useEffect(() => {
+        if (mode === ART_ADJUST) {
+            centerWorkPiece()
+        }
+    }, [mode, centerWorkPiece])
 
     const selectedPart = layout?.parts?.find(({ id }) => id === selected)
 

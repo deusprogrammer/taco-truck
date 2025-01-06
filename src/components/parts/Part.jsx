@@ -267,7 +267,7 @@ const Part = ({
                     alpha={buttonOpacity}
                     angle={rotation || 0}
                     zIndex={0}
-                    interactive={true}
+                    interactive={mode !== ART_ADJUST}
                     onmouseover={() => onHoverPart && onHoverPart(part)}
                     onmouseout={() => onHoverPart && onHoverPart(null)}
                     onpointerdown={() => {
