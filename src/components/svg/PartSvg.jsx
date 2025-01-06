@@ -3,7 +3,7 @@ import { calculateRelativePosition } from '../utils'
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import CustomPartSvg from './CustomPartSvg'
 
-const PartSvg = ({ part, parent, drillingGuide, scale }) => {
+const PartSvg = ({ part, parent, units, drillingGuide, scale }) => {
     const { partId, type, rotation } = part
 
     const { parts, panelDimensions } = parent
@@ -15,10 +15,15 @@ const PartSvg = ({ part, parent, drillingGuide, scale }) => {
         panelHeight
     )
 
+    if (units) {
+        scale = 1
+    }
+
     if (type === 'custom') {
         return (
             <CustomPartSvg
                 part={part}
+                units={units}
                 drillingGuide={drillingGuide}
                 parent={parent}
                 scale={scale}
@@ -36,10 +41,10 @@ const PartSvg = ({ part, parent, drillingGuide, scale }) => {
         case SQUARE:
             component = (
                 <rect
-                    x={`${(fixedX - size[0] / 2) * scale}`}
-                    y={`${(fixedY - size[1] / 2) * scale}`}
-                    width={`${size[0] * scale}`}
-                    height={`${size[1] * scale}`}
+                    x={`${(fixedX - size[0] / 2) * scale}${units ?? ''}`}
+                    y={`${(fixedY - size[1] / 2) * scale}${units ?? ''}`}
+                    width={`${size[0] * scale}${units ?? ''}`}
+                    height={`${size[1] * scale}${units ?? ''}`}
                     rotate={rotation || 0}
                     fill="white"
                     stroke="black"
@@ -52,17 +57,17 @@ const PartSvg = ({ part, parent, drillingGuide, scale }) => {
             component = (
                 <>
                     <circle
-                        cx={`${fixedX * scale}`}
-                        cy={`${fixedY * scale}`}
-                        r={`${(size / 2) * scale}`}
+                        cx={`${fixedX * scale}${units ?? ''}`}
+                        cy={`${fixedY * scale}${units ?? ''}`}
+                        r={`${(size / 2) * scale}${units ?? ''}`}
                         fill="white"
                         stroke="black"
                         strokeWidth={1}
                     />
                     <circle
-                        cx={`${fixedX * scale}`}
-                        cy={`${fixedY * scale}`}
-                        r={`${1 * scale}`}
+                        cx={`${fixedX * scale}${units ?? ''}`}
+                        cy={`${fixedY * scale}${units ?? ''}`}
+                        r={`${1 * scale}${units ?? ''}`}
                         fill="white"
                         stroke="black"
                         strokeWidth={1}
@@ -70,17 +75,17 @@ const PartSvg = ({ part, parent, drillingGuide, scale }) => {
                     {drillingGuide ? (
                         <>
                             <line
-                                x1={`${fixedX * scale - (size / 2) * scale}`}
-                                x2={`${fixedX * scale + (size / 2) * scale}`}
-                                y1={`${fixedY * scale}`}
-                                y2={`${fixedY * scale}`}
+                                x1={`${fixedX * scale - (size / 2) * scale}${units ?? ''}`}
+                                x2={`${fixedX * scale + (size / 2) * scale}${units ?? ''}`}
+                                y1={`${fixedY * scale}${units ?? ''}`}
+                                y2={`${fixedY * scale}${units ?? ''}`}
                                 stroke="black"
                             />
                             <line
-                                y1={`${fixedY * scale - (size / 2) * scale}`}
-                                y2={`${fixedY * scale + (size / 2) * scale}`}
-                                x1={`${fixedX * scale}`}
-                                x2={`${fixedX * scale}`}
+                                y1={`${fixedY * scale - (size / 2) * scale}${units ?? ''}`}
+                                y2={`${fixedY * scale + (size / 2) * scale}${units ?? ''}`}
+                                x1={`${fixedX * scale}${units ?? ''}`}
+                                x2={`${fixedX * scale}${units ?? ''}`}
                                 stroke="black"
                             />
                         </>
