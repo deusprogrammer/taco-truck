@@ -11,11 +11,7 @@ import React, {
 import { useGesture } from '@use-gesture/react'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
 import { calculateSizeOfPart, generateUUID } from './utils'
-import {
-    useButtonDown,
-    useMousePosition,
-    usePrevious,
-} from '../hooks/MouseHooks'
+import { useMousePosition } from '../hooks/MouseHooks'
 import { ADD, ART_ADJUST, SELECT } from './elements/Modes'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
@@ -57,19 +53,18 @@ const LayoutDisplay = ({
     onLayoutChange,
 }) => {
     const componentRef = createRef()
-    const [editLock] = useAtom(editLockComponentAtom)
+
     const websocket = useRef()
     const controllerId = useRef()
 
-    const buttonsDown = useButtonDown()
-    const [dragging, setDragging] = useState(null)
-    const [latch, setLatch] = useState(null)
-    const previouslyDragged = usePrevious(dragging)
-    const [mouseX, mouseY] = useMousePosition(workspaceRef)
-    const [[dragX, dragY], setMouseXY] = useState([0, 0])
-    const [isDragging, setIsDragging] = useState(false)
+    const [editLock] = useAtom(editLockComponentAtom)
     const [artSelected, setArtSelected] = useState(false)
-    const previousIsDragging = usePrevious(isDragging)
+
+    const [selectedIndex, setSelectedIndex] = useState(-1)
+
+    const [mouseX, mouseY] = useMousePosition(workspaceRef)
+    const [isDragging, setIsDragging] = useState(false)
+
     const bind = useGesture(
         {
             onDrag: ({
@@ -81,6 +76,8 @@ const LayoutDisplay = ({
                 shiftKey,
                 elapsedTime,
             }) => {
+                setIsDragging(dragging)
+
                 if (editLock || (mode !== SELECT && mode !== ART_ADJUST)) {
                     return
                 }
@@ -89,7 +86,7 @@ const LayoutDisplay = ({
                     artSelected &&
                     elapsedTime > timeThreshold &&
                     !shiftKey &&
-                    (touches === 1 || buttons === 1 || latch)
+                    (touches === 1 || buttons === 1)
                 ) {
                     onLayoutChange({
                         ...layout,
@@ -102,11 +99,59 @@ const LayoutDisplay = ({
                     elapsedTime > timeThreshold &&
                     !shiftKey &&
                     dragging &&
-                    (touches === 1 || buttons === 1 || latch)
+                    (touches === 1 || buttons === 1)
                 ) {
-                    setMouseXY(xy)
-                    setIsDragging(dragging)
-                    setLatch(true)
+                    let updatedParts = [...layout.parts]
+                    let found = { ...layout.parts[selectedIndex] }
+                    if (found && !found?.relativeTo) {
+                        if (
+                            !partTable[found.type] ||
+                            partTable[found.type][
+                                found.partId
+                            ].shape.toUpperCase() !== CIRCLE
+                        ) {
+                            found = {
+                                ...found,
+                                position: [
+                                    Math.trunc(
+                                        (xy[0] -
+                                            workspacePosition[0] -
+                                            (calculateSizeOfPart(found)[0] *
+                                                currentScale) /
+                                                2) /
+                                            currentScale
+                                    ),
+                                    Math.trunc(
+                                        (xy[1] -
+                                            workspacePosition[1] -
+                                            (calculateSizeOfPart(found)[1] *
+                                                currentScale) /
+                                                2) /
+                                            currentScale
+                                    ),
+                                ],
+                                origin: [0, 0],
+                                anchor: [0, 0],
+                            }
+                        } else {
+                            found = {
+                                ...found,
+                                position: [
+                                    Math.trunc(
+                                        (xy[0] - workspacePosition[0]) /
+                                            currentScale
+                                    ),
+                                    Math.trunc(
+                                        (xy[1] - workspacePosition[1]) /
+                                            currentScale
+                                    ),
+                                ],
+                            }
+                        }
+
+                        updatedParts[selectedIndex] = found
+                        onLayoutChange({ ...layout, parts: updatedParts })
+                    }
                 }
             },
             onPinch: ({ offset: [d], memo }) => {
@@ -229,88 +274,6 @@ const LayoutDisplay = ({
         [addPart]
     )
 
-    const renderPart = (part, index) => {
-        const modifiedPart = { ...part }
-
-        if (
-            !part.relativeTo &&
-            dragging === part.id &&
-            isDragging &&
-            mode === SELECT &&
-            !editLock
-        ) {
-            if (
-                !partTable[modifiedPart.type] ||
-                partTable[modifiedPart.type][
-                    modifiedPart.partId
-                ].shape.toUpperCase() !== CIRCLE
-            ) {
-                modifiedPart.position = [
-                    (dragX -
-                        workspacePosition[0] -
-                        (calculateSizeOfPart(modifiedPart)[0] * currentScale) /
-                            2) /
-                        currentScale,
-                    (dragY -
-                        workspacePosition[1] -
-                        (calculateSizeOfPart(modifiedPart)[1] * currentScale) /
-                            2) /
-                        currentScale,
-                ]
-                modifiedPart.origin = [0, 0]
-                modifiedPart.anchor = [0, 0]
-            } else {
-                modifiedPart.position = [
-                    (dragX - workspacePosition[0]) / currentScale,
-                    (dragY - workspacePosition[1]) / currentScale,
-                ]
-            }
-        }
-
-        const renderedPart = (
-            <Part
-                key={`part-${part.id || index}`}
-                selectedPartId={selected}
-                hoveredPartId={hovered}
-                scale={currentScale}
-                part={modifiedPart}
-                index={index}
-                parent={layout}
-                onHoverPart={onHoverPart}
-                onClick={onSecondarySelectPart || onSelectPart}
-                onClickPart={(part, action) => {
-                    if (!preview) {
-                        if (action === 'DOWN') {
-                            setDragging(part.id)
-                        } else {
-                            setDragging(null)
-                        }
-                        return
-                    }
-
-                    if (part.type !== 'button') {
-                        return
-                    }
-
-                    let old = [...buttonsPressed]
-                    if (action === 'DOWN') {
-                        if (!old.find(({ id }) => id === part.id)) {
-                            old = [...buttonsPressed, part]
-                        }
-                    } else if (action === 'UP') {
-                        old = [...buttonsPressed].filter(
-                            ({ id }) => id !== part.id
-                        )
-                    }
-                    setButtonsPressed(old)
-                    updateRemoteButtons(old)
-                }}
-            />
-        )
-
-        return renderedPart
-    }
-
     useEffect(() => {
         const ele = workspaceRef.current
 
@@ -331,90 +294,15 @@ const LayoutDisplay = ({
     ])
 
     useEffect(() => {
-        if (
-            previouslyDragged === dragging ||
-            buttonsDown.includes('Shift') ||
-            !latch
-        ) {
-            return () => {}
+        const index = layout.parts.findIndex(({ id }) => id === selected)
+        setSelectedIndex(index)
+    }, [selected, layout.parts, setSelectedIndex])
+
+    useEffect(() => {
+        if (!isDragging) {
+            setButtonsPressed([])
         }
-
-        setLatch(false)
-
-        if (mode === SELECT && !editLock) {
-            const updatedParts = [...layout.parts]
-            const index = updatedParts.findIndex(
-                ({ id }) => id === previouslyDragged
-            )
-
-            const updatedPart = updatedParts[index]
-
-            if (updatedPart && !updatedPart?.relativeTo) {
-                if (
-                    !partTable[updatedPart.type] ||
-                    partTable[updatedPart.type][
-                        updatedPart.partId
-                    ].shape.toUpperCase() !== CIRCLE
-                ) {
-                    updatedParts[index] = {
-                        ...updatedPart,
-                        position: [
-                            Math.trunc(
-                                (dragX -
-                                    workspacePosition[0] -
-                                    (calculateSizeOfPart(updatedPart)[0] *
-                                        currentScale) /
-                                        2) /
-                                    currentScale
-                            ),
-                            Math.trunc(
-                                (dragY -
-                                    workspacePosition[1] -
-                                    (calculateSizeOfPart(updatedPart)[1] *
-                                        currentScale) /
-                                        2) /
-                                    currentScale
-                            ),
-                        ],
-                        origin: [0, 0],
-                        anchor: [0, 0],
-                    }
-                } else {
-                    updatedParts[index] = {
-                        ...updatedPart,
-                        position: [
-                            Math.trunc(
-                                (dragX - workspacePosition[0]) / currentScale
-                            ),
-                            Math.trunc(
-                                (dragY - workspacePosition[1]) / currentScale
-                            ),
-                        ],
-                    }
-                }
-                const updatedLayout = { ...layout, parts: updatedParts }
-
-                onLayoutChange(updatedLayout)
-                setDragging(null)
-                setIsDragging(false)
-            }
-        }
-    }, [
-        dragging,
-        latch,
-        buttonsDown,
-        layout,
-        mode,
-        editLock,
-        onLayoutChange,
-        dragX,
-        dragY,
-        workspacePosition,
-        currentScale,
-        isDragging,
-        previousIsDragging,
-        previouslyDragged,
-    ])
+    }, [isDragging])
 
     let component
     switch (mode) {
@@ -491,9 +379,41 @@ const LayoutDisplay = ({
                     />
                     {component}
                     <ButtonStatusContext.Provider value={buttonsPressed}>
-                        {layout?.parts?.map((part, index) =>
-                            renderPart(part, index)
-                        )}
+                        {layout?.parts?.map((part, index) => (
+                            <Part
+                                key={`part-${part.id || index}`}
+                                selectedPartId={selected}
+                                hoveredPartId={hovered}
+                                scale={currentScale}
+                                part={part}
+                                index={index}
+                                parent={layout}
+                                onHoverPart={onHoverPart}
+                                onClick={onSecondarySelectPart || onSelectPart}
+                                onClickPart={(part, action) => {
+                                    if (part.type !== 'button') {
+                                        return
+                                    }
+
+                                    let old = [...buttonsPressed]
+                                    if (action === 'DOWN') {
+                                        if (
+                                            !old.find(
+                                                ({ id }) => id === part.id
+                                            )
+                                        ) {
+                                            old = [...buttonsPressed, part]
+                                        }
+                                    } else if (action === 'UP') {
+                                        old = [...buttonsPressed].filter(
+                                            ({ id }) => id !== part.id
+                                        )
+                                    }
+                                    setButtonsPressed(old)
+                                    updateRemoteButtons(old)
+                                }}
+                            />
+                        ))}
                     </ButtonStatusContext.Provider>
                 </Container>
             </Stage>
