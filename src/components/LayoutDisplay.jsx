@@ -155,7 +155,7 @@ const LayoutDisplay = ({
                 }
             },
             onPinch: ({ offset: [d], memo }) => {
-                if (editLock) {
+                if (editLock || mode !== ART_ADJUST) {
                     return
                 }
 
@@ -165,7 +165,7 @@ const LayoutDisplay = ({
 
                 onLayoutChange({
                     ...layout,
-                    artworkZoom: Math.max(1, memo * d),
+                    artworkZoom: Math.max(0.1, memo * d),
                 })
                 return memo
             },
