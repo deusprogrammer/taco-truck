@@ -45,6 +45,7 @@ const LayoutDisplaySvg = ({
                 ref={svgRef}
                 width={`${svgWidth * scale}${units ?? ''}`}
                 height={`${svgHeight * scale}${units ?? ''}`}
+                viewBox={`0 0 ${svgWidth * scale} ${svgHeight * scale}`}
             >
                 <PanelSvg layout={layout} scale={scale} units={units} />
                 {layout?.parts?.map((part, index) => (

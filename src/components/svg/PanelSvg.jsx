@@ -18,7 +18,7 @@ export const imageUrlToDataUrl = async (imageUrl) => {
     }
 }
 
-const PanelSvg = ({ layout, units, scale }) => {
+const PanelSvg = ({ layout, scale }) => {
     const [artworkUrl, setArtworkUrl] = useState('')
     const clipPathId = `panelClip-${layout?.panelDimensions?.[0]}-${layout?.panelDimensions?.[1]}`
 
@@ -30,14 +30,6 @@ const PanelSvg = ({ layout, units, scale }) => {
         convertImg()
     }, [layout])
 
-    if (units) {
-        scale = 1
-    }
-
-    if (units) {
-        scale = 1
-    }
-
     return (
         <>
             <defs>
@@ -47,8 +39,8 @@ const PanelSvg = ({ layout, units, scale }) => {
                         y={0}
                         rx={layout?.cornerRadius * scale || 0}
                         ry={layout?.cornerRadius * scale || 0}
-                        width={`${layout?.panelDimensions?.[0] * scale}${units ?? ''}`}
-                        height={`${layout?.panelDimensions?.[1] * scale}${units ?? ''}`}
+                        width={`${layout?.panelDimensions?.[0] * scale}`}
+                        height={`${layout?.panelDimensions?.[1] * scale}`}
                     />
                 </clipPath>
             </defs>
@@ -57,8 +49,8 @@ const PanelSvg = ({ layout, units, scale }) => {
                 y={0}
                 rx={layout?.cornerRadius * scale || 0}
                 ry={layout?.cornerRadius * scale || 0}
-                width={`${layout?.panelDimensions?.[0] * scale}${units ?? ''}`}
-                height={`${layout?.panelDimensions?.[1] * scale}${units ?? ''}`}
+                width={`${layout?.panelDimensions?.[0] * scale}`}
+                height={`${layout?.panelDimensions?.[1] * scale}`}
                 stroke="white"
                 strokeWidth={1}
                 fill="black"
@@ -67,7 +59,7 @@ const PanelSvg = ({ layout, units, scale }) => {
                 {layout.artwork && (
                     <image
                         href={artworkUrl}
-                        transform={`translate(${layout.artworkOffset?.[0] * scale || 0}${units ?? ''}, ${layout.artworkOffset?.[1] * scale || 0}${units ?? ''}) scale(${layout.artworkZoom * scale || 1})`}
+                        transform={`translate(${layout.artworkOffset?.[0] * scale || 0}, ${layout.artworkOffset?.[1] * scale || 0}) scale(${layout.artworkZoom * scale || 1})`}
                     />
                 )}
             </g>
