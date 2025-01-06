@@ -8,7 +8,8 @@ export const NewButton = () => {
         <button
             className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
             onClick={() => {
-                navigate('/designer')
+                localStorage.removeItem('taco-truck-cache')
+                navigate(`/designer?ts=${new Date().getTime()}`)
             }}
         >
             New

@@ -27,6 +27,7 @@ import {
     buttonOpacityAtom,
     editLockComponentAtom,
     previewAtom,
+    screenSizeAtom,
     scrollLockComponentAtom,
     selectedAtom,
     workspacePositionAtom,
@@ -63,10 +64,11 @@ const PartDesigner = ({
     const realSizeRatio = useRealScaleRatio()
 
     const [width, height] = useContainerSize(containerRef)
-    const [[screenWidth, screenHeight], setScreenSize] = useState([
-        window.innerWidth,
-        window.innerHeight,
-    ])
+    const [[screenWidth, screenHeight], setScreenSize] = useAtom(screenSizeAtom)
+    // const [[screenWidth, screenHeight], setScreenSize] = useState([
+    //     window.innerWidth,
+    //     window.innerHeight,
+    // ])
     const [initialLoad, setInitialLoad] = useState(true)
 
     const [workspacePosition, setWorkspacePosition] = useAtom(
@@ -321,31 +323,28 @@ const PartDesigner = ({
 
     const centerWorkPiece = useCallback(() => {
         setScreenSize([window.innerWidth, window.innerHeight])
-        if (
-            (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) ||
-            layout.parts.length > 0
-        ) {
+
+        let contextWidth = partsWidth
+        let contextHeight = partsHeight
+        if (layout.panelDimensions[0]) {
+            contextWidth = layout.panelDimensions[0]
+        }
+
+        if (layout.panelDimensions[1]) {
+            contextHeight = layout.panelDimensions[1]
+        }
+
+        console.log(`${contextWidth} x ${contextHeight}`)
+
+        if (width > 0 && height > 0) {
             setWorkspacePosition([
-                width / 2 -
-                    (Math.min(
-                        partsWidth,
-                        layout.panelDimensions[0] || partsWidth
-                    ) /
-                        2) *
-                        zoom,
-                height / 2 -
-                    (Math.min(
-                        partsHeight,
-                        layout.panelDimensions[1] || partsHeight
-                    ) /
-                        2) *
-                        zoom,
+                width / 2 - (contextWidth / 2) * zoom,
+                height / 2 - (contextHeight / 2) * zoom,
             ])
         }
     }, [
         height,
         layout.panelDimensions,
-        layout.parts.length,
         partsHeight,
         partsWidth,
         setWorkspacePosition,

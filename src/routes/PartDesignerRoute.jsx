@@ -68,11 +68,18 @@ const PartDesignerRoute = () => {
 
     useEffect(() => {
         if (!type || !id) {
-            setLayout({
+            const cacheJSON = localStorage.getItem('taco-truck-cache')
+            let cachedLayout = {
                 units: 'mm',
                 panelDimensions: [0, 0],
                 parts: [],
-            })
+            }
+
+            if (cacheJSON) {
+                cachedLayout = JSON.parse(cacheJSON)
+            }
+
+            setLayout(cachedLayout)
             setIsNew(true)
             return
         }
@@ -93,7 +100,13 @@ const PartDesignerRoute = () => {
             <PartDesigner
                 layout={layout}
                 isNew={isNew}
-                onLayoutChange={setLayout}
+                onLayoutChange={(layout) => {
+                    localStorage.setItem(
+                        'taco-truck-cache',
+                        JSON.stringify(layout)
+                    )
+                    setLayout(layout)
+                }}
                 preview={preview}
             />
         </div>

@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
 import { useCallback, useEffect } from "react"
-import { buttonOpacityAtom, editLockComponentAtom, modeAtom, previewAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
+import { buttonOpacityAtom, editLockComponentAtom, modeAtom, previewAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
 import { ADD, SELECT } from "../components/elements/Modes"
 import { useContainerSize, useRealScaleRatio } from "./MouseHooks"
 import { calculateSizeOfPart } from "../components/utils"
@@ -17,6 +17,7 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
     const [, setWorkspacePosition] = useAtom(
         workspacePositionAtom
     )
+    const [, setScreenSize] = useAtom(screenSizeAtom)
     const [zoom, setZoom] = useAtom(zoomAtom)
     const [mode, setMode] = useAtom(modeAtom)
 
@@ -27,38 +28,37 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
     const [buttonOpacity, setButtonOpacity] = useAtom(buttonOpacityAtom)
     const [, setSelected] = useAtom(selectedAtom)
 
-    const centerWorkPiece = useCallback(() => {
-        if (
-            (layout.panelDimensions[0] > 0 && layout.panelDimensions[1] > 0) ||
-            layout.parts.length > 0
-        ) {
-            setWorkspacePosition([
-                width / 2 -
-                    (Math.min(
-                        partsWidth,
-                        layout.panelDimensions[0] || partsWidth
-                    ) /
-                        2) *
-                        zoom,
-                height / 2 -
-                    (Math.min(
-                        partsHeight,
-                        layout.panelDimensions[1] || partsHeight
-                    ) /
-                        2) *
-                        zoom,
-            ])
-        }
-    }, [
-        height,
-        layout.panelDimensions,
-        layout.parts.length,
-        partsHeight,
-        partsWidth,
-        setWorkspacePosition,
-        width,
-        zoom,
-    ])
+        const centerWorkPiece = useCallback(() => {
+            setScreenSize([window.innerWidth, window.innerHeight])
+    
+            let contextWidth = partsWidth
+            let contextHeight = partsHeight
+            if (layout.panelDimensions[0]) {
+                contextWidth = layout.panelDimensions[0]
+            }
+    
+            if (layout.panelDimensions[1]) {
+                contextHeight = layout.panelDimensions[1]
+            }
+    
+            console.log(`${contextWidth} x ${contextHeight}`)
+    
+            if (width > 0 && height > 0) {
+                setWorkspacePosition([
+                    width / 2 - (contextWidth / 2) * zoom,
+                    height / 2 - (contextHeight / 2) * zoom,
+                ])
+            }
+        }, [
+            width,
+            height,
+            zoom,
+            layout.panelDimensions,
+            partsHeight,
+            partsWidth,
+            setWorkspacePosition,
+            setScreenSize,
+        ])
 
     const onKeyDown = useCallback(
             (evt) => {
