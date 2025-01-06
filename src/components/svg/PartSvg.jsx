@@ -59,14 +59,16 @@ const PartSvg = ({ part, parent, drillingGuide, scale }) => {
                         stroke="black"
                         strokeWidth={1}
                     />
-                    <circle
-                        cx={`${fixedX * scale}`}
-                        cy={`${fixedY * scale}`}
-                        r={`${1 * scale}`}
-                        fill="white"
-                        stroke="black"
-                        strokeWidth={1}
-                    />
+                    {!drillingGuide ? (
+                        <circle
+                            cx={`${fixedX * scale}`}
+                            cy={`${fixedY * scale}`}
+                            r={`${1 * scale}`}
+                            fill="white"
+                            stroke="black"
+                            strokeWidth={1}
+                        />
+                    ) : null}
                     {drillingGuide ? (
                         <>
                             <line

@@ -18,7 +18,7 @@ export const imageUrlToDataUrl = async (imageUrl) => {
     }
 }
 
-const PanelSvg = ({ layout, scale }) => {
+const PanelSvg = ({ layout, scale, noArt }) => {
     const [artworkUrl, setArtworkUrl] = useState('')
     const clipPathId = `panelClip-${layout?.panelDimensions?.[0]}-${layout?.panelDimensions?.[1]}`
 
@@ -53,16 +53,18 @@ const PanelSvg = ({ layout, scale }) => {
                 height={`${layout?.panelDimensions?.[1] * scale}`}
                 stroke="white"
                 strokeWidth={1}
-                fill="black"
+                fill={`${noArt ? 'white' : 'black'}`}
             />
-            <g clipPath={`url(#${clipPathId})`}>
-                {layout.artwork && (
-                    <image
-                        href={artworkUrl}
-                        transform={`translate(${layout.artworkOffset?.[0] * scale || 0}, ${layout.artworkOffset?.[1] * scale || 0}) scale(${layout.artworkZoom * scale || 1})`}
-                    />
-                )}
-            </g>
+            {!noArt ? (
+                <g clipPath={`url(#${clipPathId})`}>
+                    {layout.artwork && (
+                        <image
+                            href={artworkUrl}
+                            transform={`translate(${layout.artworkOffset?.[0] * scale || 0}, ${layout.artworkOffset?.[1] * scale || 0}) scale(${layout.artworkZoom * scale || 1})`}
+                        />
+                    )}
+                </g>
+            ) : null}
         </>
     )
 }

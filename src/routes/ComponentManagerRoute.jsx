@@ -140,6 +140,7 @@ const ComponentManagerRoute = () => {
                                     <LayoutDisplaySvg
                                         layout={project.layout}
                                         scale={1}
+                                        hideButton={true}
                                     />
                                 </div>
                             </td>

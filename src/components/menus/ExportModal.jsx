@@ -21,17 +21,19 @@ const ExportModal = ({ open, layout, onClose }) => {
                             setDrillingGuide(checked)
                         }
                     />
-                    <label>Add Drilling Guide</label>
+                    <label>Drilling Guide</label>
                 </div>
                 <LayoutDisplaySvg
                     layout={layout}
                     drillingGuide={drillingGuide}
+                    noArt={drillingGuide}
                     scale={1}
                     hideButton={true}
                 />
                 <LayoutDisplaySvg
                     layout={layout}
                     drillingGuide={drillingGuide}
+                    noArt={drillingGuide}
                     scale={1}
                     units="mm"
                     hidden={true}

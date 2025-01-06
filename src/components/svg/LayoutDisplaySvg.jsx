@@ -8,6 +8,7 @@ const LayoutDisplaySvg = ({
     layout,
     scale,
     drillingGuide,
+    noArt,
     units,
     hidden,
     hideButton,
@@ -49,7 +50,12 @@ const LayoutDisplaySvg = ({
                 viewBox={`0 0 ${svgWidth * scale} ${svgHeight * scale}`}
                 className={`${hidden ? 'hidden' : null}`}
             >
-                <PanelSvg layout={layout} scale={scale} units={units} />
+                <PanelSvg
+                    layout={layout}
+                    scale={scale}
+                    units={units}
+                    noArt={noArt}
+                />
                 {layout?.parts?.map((part, index) => (
                     <PartSvg
                         key={`partsvg-${part.id || index}`}
