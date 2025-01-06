@@ -261,6 +261,108 @@ const PartDetailsMenu = ({
                         }}
                     />
                 </div>
+                <h3 className="text-center text-[0.8rem] font-bold">
+                    Quick Alignment
+                </h3>
+                <button
+                    className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                    onClick={() => {
+                        onUpdatePart(selectedPart.id, {
+                            ...selectedPart,
+                            position: [0, selectedPart.position[1]],
+                            anchor: [0.5, selectedPart.anchor[1]],
+                            origin: [0.5, selectedPart.origin[1]],
+                        })
+                    }}
+                >
+                    Center Horizontally
+                </button>
+                <button
+                    className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                    onClick={() => {
+                        onUpdatePart(selectedPart.id, {
+                            ...selectedPart,
+                            position: [selectedPart.position[0], 0],
+                            anchor: [selectedPart.anchor[0], 0.5],
+                            origin: [selectedPart.origin[0], 0.5],
+                        })
+                    }}
+                >
+                    Center Vertically
+                </button>
+                <button
+                    className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                    onClick={() => {
+                        onUpdatePart(selectedPart.id, {
+                            ...selectedPart,
+                            position: [0, 0],
+                            anchor: [0.5, 0.5],
+                            origin: [0.5, 0.5],
+                        })
+                    }}
+                >
+                    Center Both
+                </button>
+                <div className="flex flex-row">
+                    <button
+                        className={`min-w-20 border-2 border-solid border-black bg-white p-1`}
+                        onClick={() => {
+                            onUpdatePart(selectedPart.id, {
+                                ...selectedPart,
+                                origin: [
+                                    selectedPart.origin[0] * 0.5,
+                                    selectedPart.origin[1],
+                                ],
+                            })
+                        }}
+                    >
+                        Split Left
+                    </button>
+                    <div className="flex flex-col">
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    origin: [
+                                        selectedPart.origin[0],
+                                        selectedPart.origin[1] * 0.5,
+                                    ],
+                                })
+                            }}
+                        >
+                            Split Up
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    origin: [
+                                        selectedPart.origin[0],
+                                        selectedPart.origin[1] * 1.5,
+                                    ],
+                                })
+                            }}
+                        >
+                            Split Down
+                        </button>
+                    </div>
+                    <button
+                        className={`min-w-20 border-2 border-solid border-black bg-white p-1`}
+                        onClick={() => {
+                            onUpdatePart(selectedPart.id, {
+                                ...selectedPart,
+                                origin: [
+                                    selectedPart.origin[0] * 1.5,
+                                    selectedPart.origin[1],
+                                ],
+                            })
+                        }}
+                    >
+                        Split Right
+                    </button>
+                </div>
             </div>
         </div>
     )
