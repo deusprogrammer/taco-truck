@@ -3,8 +3,13 @@ import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { getImageDimensions } from '../utils'
 import { useAtom } from 'jotai'
-import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
+import {
+    modeAtom,
+    renderMeasurementsAtom,
+    selectedAtom,
+} from '../../atoms/ViewOptions.atom'
 import { useResize } from '../../hooks/ContainerHooks'
+import { ART_ADJUST } from '../elements/Modes'
 
 const ComponentMenu = ({
     layout,
@@ -19,6 +24,9 @@ const ComponentMenu = ({
     const bind = useResize()
 
     const [toggleMenu, setToggleMenu] = useState(false)
+
+    const [mode, setMode] = useAtom(modeAtom)
+    const [, setSelected] = useAtom(selectedAtom)
 
     const updatePanelSize = (dimensions) => {
         onLayoutChange({ ...layout, panelDimensions: dimensions })
@@ -140,14 +148,29 @@ const ComponentMenu = ({
                 />
                 <label>Artwork:</label>
                 {layout?.artwork ? (
-                    <button
-                        className={`border-2 border-solid border-black bg-white p-3 hover:bg-slate-600 hover:text-white`}
-                        onClick={() =>
-                            onLayoutChange({ ...layout, artwork: null })
-                        }
-                    >
-                        Clear Artwork
-                    </button>
+                    <>
+                        <button
+                            className={`border-2 border-solid border-black ${mode === ART_ADJUST ? 'border-white bg-black text-white' : 'bg-white'} p-3 hover:bg-slate-600 hover:text-white`}
+                            onClick={() => {
+                                if (mode === ART_ADJUST) {
+                                    setMode(null)
+                                } else {
+                                    setMode(ART_ADJUST)
+                                }
+                                setSelected(null)
+                            }}
+                        >
+                            Adjust Artwork
+                        </button>
+                        <button
+                            className={`border-2 border-solid border-black bg-white p-3 hover:bg-slate-600 hover:text-white`}
+                            onClick={() =>
+                                onLayoutChange({ ...layout, artwork: null })
+                            }
+                        >
+                            Clear Artwork
+                        </button>
+                    </>
                 ) : (
                     <input type="file" onChange={handleFileChange} />
                 )}

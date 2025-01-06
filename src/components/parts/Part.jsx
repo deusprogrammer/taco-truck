@@ -11,9 +11,11 @@ import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import { useAtom } from 'jotai'
 import {
     buttonOpacityAtom,
+    modeAtom,
     renderMeasurementsAtom,
 } from '../../atoms/ViewOptions.atom'
 import { useButtonStatus } from '../LayoutDisplay'
+import { ART_ADJUST } from '../elements/Modes'
 
 const Part = ({
     scale,
@@ -27,6 +29,7 @@ const Part = ({
 }) => {
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
     const [buttonOpacity] = useAtom(buttonOpacityAtom)
+    const [mode] = useAtom(modeAtom)
     const buttonPressed = useButtonStatus(part)
     const { partId, type, id, rotation } = part
 
@@ -241,7 +244,7 @@ const Part = ({
                     alpha={buttonOpacity}
                     angle={rotation || 0}
                     zIndex={0}
-                    interactive={true}
+                    interactive={mode !== ART_ADJUST}
                     onmouseover={() => onHoverPart && onHoverPart(part)}
                     onmouseout={() => onHoverPart && onHoverPart(null)}
                     onpointerdown={() => {

@@ -1,4 +1,5 @@
 export const ADD = 'ADD'
 export const SELECT = 'SELECT'
 export const EDIT = 'EDIT'
+export const ART_ADJUST = 'ART_ADJUST'
 export const EXPORT = 'EXPORT'

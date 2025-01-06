@@ -1,6 +1,6 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
 import { useGesture } from '@use-gesture/react'
-import { ADD, EXPORT, SELECT } from './elements/Modes'
+import { ADD, ART_ADJUST, EXPORT, SELECT } from './elements/Modes'
 import ComponentMenu from './menus/ComponentMenu'
 import LayoutDisplay from './LayoutDisplay'
 import ModalContainer, {
@@ -26,6 +26,7 @@ import OptionsModal from './menus/OptionsModal'
 import {
     buttonOpacityAtom,
     editLockComponentAtom,
+    modeAtom,
     previewAtom,
     screenSizeAtom,
     scrollLockComponentAtom,
@@ -65,17 +66,13 @@ const PartDesigner = ({
 
     const [width, height] = useContainerSize(containerRef)
     const [[screenWidth, screenHeight], setScreenSize] = useAtom(screenSizeAtom)
-    // const [[screenWidth, screenHeight], setScreenSize] = useState([
-    //     window.innerWidth,
-    //     window.innerHeight,
-    // ])
     const [initialLoad, setInitialLoad] = useState(true)
 
     const [workspacePosition, setWorkspacePosition] = useAtom(
         workspacePositionAtom
     )
     const [zoom, setZoom] = useAtom(zoomAtom)
-    const [mode, setMode] = useAtom(selectedAtom)
+    const [mode, setMode] = useAtom(modeAtom)
     const [editLock, setEditLock] = useAtom(editLockComponentAtom)
     const [scrollLock, setScrollLock] = useAtom(scrollLockComponentAtom)
     const [zoomLock, setZoomLock] = useAtom(zoomLockComponentAtom)
@@ -86,7 +83,7 @@ const PartDesigner = ({
     const [placingPartType, setPlacingPartType] = useState('button')
     const [afterSelect, setAfterSelect] = useState(null)
 
-    const [selected, setSelected] = useState(null)
+    const [selected, setSelected] = useAtom(selectedAtom)
     const [hovered, setHovered] = useState(null)
 
     const bind = useGesture(
@@ -288,16 +285,23 @@ const PartDesigner = ({
     }
 
     const selectPart = (selectedPart) => {
-        if (mode !== SELECT) {
+        let currentMode = mode
+        if (currentMode === null) {
+            currentMode = SELECT
+            setMode(SELECT)
+        }
+
+        if (currentMode !== SELECT) {
             return
         }
         setSelected(selectedPart?.id)
     }
 
     const hoverPart = (hoveredPart) => {
-        // if (mode !== SELECT) {
-        //     return
-        // }
+        if (mode === ART_ADJUST) {
+            return
+        }
+
         setHovered(hoveredPart?.id)
     }
 
@@ -348,6 +352,7 @@ const PartDesigner = ({
         partsHeight,
         partsWidth,
         setWorkspacePosition,
+        setScreenSize,
         width,
         zoom,
     ])

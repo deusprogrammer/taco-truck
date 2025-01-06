@@ -16,7 +16,7 @@ import {
     useMousePosition,
     usePrevious,
 } from '../hooks/MouseHooks'
-import { ADD, SELECT } from './elements/Modes'
+import { ADD, ART_ADJUST, SELECT } from './elements/Modes'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
 import { CIRCLE, partTable } from '../data/parts.table'
@@ -68,10 +68,32 @@ const LayoutDisplay = ({
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
     const [[dragX, dragY], setMouseXY] = useState([0, 0])
     const [isDragging, setIsDragging] = useState(false)
+    const [artSelected, setArtSelected] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
     const bind = useDrag(
-        ({ xy, dragging, touches, buttons, shiftKey, elapsedTime }) => {
-            if (editLock || mode !== SELECT) {
+        ({
+            xy,
+            offset: [artworkOffsetX, artworkOffsetY],
+            dragging,
+            touches,
+            buttons,
+            shiftKey,
+            elapsedTime,
+        }) => {
+            if (editLock || (mode !== SELECT && mode !== ART_ADJUST)) {
+                return
+            }
+
+            if (
+                artSelected &&
+                elapsedTime > timeThreshold &&
+                !shiftKey &&
+                (touches === 1 || buttons === 1 || latch)
+            ) {
+                onLayoutChange({
+                    ...layout,
+                    artworkOffset: [artworkOffsetX, artworkOffsetY],
+                })
                 return
             }
 
@@ -434,6 +456,13 @@ const LayoutDisplay = ({
                         scale={currentScale}
                         layout={layout}
                         fill="#000000"
+                        onClick={(state) => {
+                            if (state === 'DOWN') {
+                                setArtSelected(true)
+                            } else {
+                                setArtSelected(false)
+                            }
+                        }}
                     />
                     {component}
                     <ButtonStatusContext.Provider value={buttonsPressed}>

@@ -3,6 +3,9 @@ import '@pixi/events'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { Container, Graphics } from '@pixi/react'
 import Part from './Part'
+import { useAtom } from 'jotai'
+import { modeAtom } from '../../atoms/ViewOptions.atom'
+import { ART_ADJUST } from '../elements/Modes'
 
 const CustomPart = ({
     scale,
@@ -15,6 +18,7 @@ const CustomPart = ({
     onClickPart,
 }) => {
     const containerRef = createRef()
+    const [mode] = useAtom(modeAtom)
     const [width, height] = calculateSizeOfPart(part)
 
     const { parts, panelDimensions } = parent
@@ -43,7 +47,7 @@ const CustomPart = ({
                 onpointerup={() => {
                     onClickPart && onClickPart(part, 'UP')
                 }}
-                interactive={true}
+                interactive={mode !== ART_ADJUST}
             >
                 <Graphics
                     alpha={0}
@@ -58,7 +62,7 @@ const CustomPart = ({
                         onClick && onClick(null)
                         onClickPart && onClickPart(part, 'UP')
                     }}
-                    interactive={true}
+                    interactive={mode !== ART_ADJUST}
                     draw={(g) => {
                         g.clear()
                         g.beginFill('green')

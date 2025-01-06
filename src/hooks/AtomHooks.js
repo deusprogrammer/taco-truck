@@ -63,11 +63,8 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
     const onKeyDown = useCallback(
             (evt) => {
                 if (evt.key === 'Escape') {
-                    if (mode === SELECT) {
-                        setSelected(null)
-                    } else if (mode === ADD) {
-                        setMode(SELECT)
-                    }
+                    setSelected(null)
+                    setMode(null)
                 } else if (evt.key === 'c') {
                     centerWorkPiece()
                 } else if (evt.key === 'p') {
