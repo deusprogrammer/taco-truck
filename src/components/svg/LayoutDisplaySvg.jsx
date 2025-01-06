@@ -67,8 +67,8 @@ const LayoutDisplaySvg = ({
     const downloadInkscapeSvg = () => {
         const svgElement = svgRef.current
         const svgData = new XMLSerializer().serializeToString(svgElement)
-        const inkscapeSvgData = convertToInkscapeSvg(svgData)
-        const blob = new Blob([inkscapeSvgData], {
+        // const inkscapeSvgData = convertToInkscapeSvg(svgData)
+        const blob = new Blob([svgData], {
             type: 'image/svg+xml;charset=utf-8',
         })
         saveAs(blob, `${layout.name}.svg`)
