@@ -9,6 +9,7 @@ const LayoutDisplaySvg = ({
     scale,
     drillingGuide,
     units,
+    hidden,
     hideButton,
 }) => {
     const svgRef = createRef()
@@ -46,6 +47,7 @@ const LayoutDisplaySvg = ({
                 width={`${svgWidth * scale}${units ?? ''}`}
                 height={`${svgHeight * scale}${units ?? ''}`}
                 viewBox={`0 0 ${svgWidth * scale} ${svgHeight * scale}`}
+                className={`${hidden ? 'hidden' : null}`}
             >
                 <PanelSvg layout={layout} scale={scale} units={units} />
                 {layout?.parts?.map((part, index) => (

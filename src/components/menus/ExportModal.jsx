@@ -27,7 +27,14 @@ const ExportModal = ({ open, layout, onClose }) => {
                     layout={layout}
                     drillingGuide={drillingGuide}
                     scale={1}
-                    // units="mm"
+                    hideButton={true}
+                />
+                <LayoutDisplaySvg
+                    layout={layout}
+                    drillingGuide={drillingGuide}
+                    scale={1}
+                    units="mm"
+                    hidden={true}
                     hideButton={false}
                 />
                 <button className="bg-slate-500 p-2" onClick={onClose}>
