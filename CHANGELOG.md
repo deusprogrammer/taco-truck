@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.3.4-beta
+
+### Changes
+
+- Fixed output to be in mm (metric)
+
 ## v1.3.2-beta
 
 ### Changes
