@@ -99,7 +99,6 @@ const LayoutDisplaySvg = ({
                     <PartSvg
                         key={`partsvg-${part.id || index}`}
                         drillingGuide={drillingGuide}
-                        units={units}
                         part={part}
                         parent={layout}
                         scale={scale}
