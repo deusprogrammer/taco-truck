@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.4.0-beta
+
+### Changes
+
+- Simplified editing code
+
 ## v1.3.4-beta
 
 ### Changes
