@@ -107,7 +107,7 @@ const PartDesigner = ({
                 }
             },
             onPinch: ({ offset: [d], memo }) => {
-                if (zoomLock || preview) {
+                if (zoomLock || preview || mode === ART_ADJUST) {
                     return
                 }
 
@@ -136,13 +136,22 @@ const PartDesigner = ({
 
     const onScroll = useCallback(
         ({ deltaX, deltaY }) => {
+            if (mode === ART_ADJUST) {
+                onLayoutChange({
+                    ...layout,
+                    artworkZoom:
+                        layout.artworkZoom - (deltaY || deltaX) / SCALE_RATIO,
+                })
+                return
+            }
+
             if (zoomLock) {
                 return
             }
 
             setZoom(Math.max(1, zoom - (deltaY || deltaX) / SCALE_RATIO))
         },
-        [zoom, zoomLock, setZoom]
+        [zoom, zoomLock, mode, layout, onLayoutChange, setZoom]
     )
 
     const completeSave = (name, type, isLocal) => {

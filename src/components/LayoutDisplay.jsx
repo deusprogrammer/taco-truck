@@ -8,7 +8,7 @@ import React, {
     useRef,
     useState,
 } from 'react'
-import { useDrag } from '@use-gesture/react'
+import { useGesture } from '@use-gesture/react'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
 import { calculateSizeOfPart, generateUUID } from './utils'
 import {
@@ -70,48 +70,73 @@ const LayoutDisplay = ({
     const [isDragging, setIsDragging] = useState(false)
     const [artSelected, setArtSelected] = useState(false)
     const previousIsDragging = usePrevious(isDragging)
-    const bind = useDrag(
-        ({
-            xy,
-            offset: [artworkOffsetX, artworkOffsetY],
-            dragging,
-            touches,
-            buttons,
-            shiftKey,
-            elapsedTime,
-        }) => {
-            if (editLock || (mode !== SELECT && mode !== ART_ADJUST)) {
-                return
-            }
+    const bind = useGesture(
+        {
+            onDrag: ({
+                xy,
+                offset: [artworkOffsetX, artworkOffsetY],
+                dragging,
+                touches,
+                buttons,
+                shiftKey,
+                elapsedTime,
+            }) => {
+                if (editLock || (mode !== SELECT && mode !== ART_ADJUST)) {
+                    return
+                }
 
-            if (
-                artSelected &&
-                elapsedTime > timeThreshold &&
-                !shiftKey &&
-                (touches === 1 || buttons === 1 || latch)
-            ) {
+                if (
+                    artSelected &&
+                    elapsedTime > timeThreshold &&
+                    !shiftKey &&
+                    (touches === 1 || buttons === 1 || latch)
+                ) {
+                    onLayoutChange({
+                        ...layout,
+                        artworkOffset: [artworkOffsetX, artworkOffsetY],
+                    })
+                    return
+                }
+
+                if (
+                    elapsedTime > timeThreshold &&
+                    !shiftKey &&
+                    dragging &&
+                    (touches === 1 || buttons === 1 || latch)
+                ) {
+                    setMouseXY(xy)
+                    setIsDragging(dragging)
+                    setLatch(true)
+                }
+            },
+            onPinch: ({ offset: [d], memo }) => {
+                if (editLock) {
+                    return
+                }
+
+                if (!memo) {
+                    memo = layout.artworkZoom
+                }
+
                 onLayoutChange({
                     ...layout,
-                    artworkOffset: [artworkOffsetX, artworkOffsetY],
+                    artworkZoom: Math.max(1, memo * d),
                 })
-                return
-            }
-
-            if (
-                elapsedTime > timeThreshold &&
-                !shiftKey &&
-                dragging &&
-                (touches === 1 || buttons === 1 || latch)
-            ) {
-                setMouseXY(xy)
-                setIsDragging(dragging)
-                setLatch(true)
-            }
+                return memo
+            },
         },
         {
-            pointer: {
-                touch: true,
-                mouse: true,
+            drag: {
+                pointer: {
+                    touch: true,
+                    mouse: true,
+                },
+            },
+            pinch: {
+                pointer: {
+                    touch: true,
+                    mouse: true,
+                },
             },
         }
     )

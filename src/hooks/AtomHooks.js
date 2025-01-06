@@ -1,7 +1,6 @@
 import { useAtom } from "jotai"
 import { useCallback, useEffect } from "react"
 import { buttonOpacityAtom, editLockComponentAtom, modeAtom, previewAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
-import { ADD, SELECT } from "../components/elements/Modes"
 import { useContainerSize, useRealScaleRatio } from "./MouseHooks"
 import { calculateSizeOfPart } from "../components/utils"
 
@@ -113,7 +112,7 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
                         ])
                 }
             },
-            [mode, setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition]
+            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition]
     )
     
     useEffect(() => {
