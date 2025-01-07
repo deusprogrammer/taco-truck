@@ -94,6 +94,60 @@ const ComponentMenu = ({
         }
     }, [layout, loadImageDimensions])
 
+    const renderParts = (layout) => {
+        return [...Object.keys(partTable), 'custom'].map((key) => (
+            <React.Fragment key={`part-type-${key}`}>
+                {layout?.parts?.filter(({ type }) => key === type).length >
+                0 ? (
+                    <h4 className="bg-slate-300">{key.toUpperCase()}</h4>
+                ) : null}
+                {layout?.parts
+                    ?.filter(({ type }) => key === type)
+                    .map(
+                        (
+                            { id, type, partId, name, layout: subLayout },
+                            index
+                        ) => (
+                            <>
+                                <div
+                                    className="flex flex-row gap-0"
+                                    key={`part-${index}`}
+                                >
+                                    <button
+                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
+                                        onClick={() => {
+                                            onSelect(id)
+                                        }}
+                                        onMouseEnter={() => {
+                                            onHover(id)
+                                        }}
+                                        onMouseOut={() => {
+                                            onHover(null)
+                                        }}
+                                    >
+                                        <b>{name}</b>({partId})
+                                    </button>
+                                    <button
+                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
+                                        onClick={() => {
+                                            deleteComponent(id)
+                                        }}
+                                    >
+                                        X
+                                    </button>
+                                </div>
+                                <div className="ml-2">
+                                    {type === 'custom'
+                                        ? renderParts(subLayout)
+                                        : null}
+                                </div>
+                            </>
+                        )
+                    )}
+            </React.Fragment>
+        ))
+    }
+
     return !toggleMenu ? (
         <div
             className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:block"
@@ -219,42 +273,7 @@ const ComponentMenu = ({
                     }}
                 />
                 <label>Parts:</label>
-                {[...Object.keys(partTable), 'custom'].map((key) => (
-                    <React.Fragment key={`part-type-${key}`}>
-                        <h4 className="bg-slate-300">{key.toUpperCase()}</h4>
-                        {layout?.parts
-                            ?.filter(({ type }) => key === type)
-                            .map(({ id, type, partId, name }, index) => (
-                                <div
-                                    className="flex flex-row gap-0"
-                                    key={`part-${index}`}
-                                >
-                                    <button
-                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
-                                        onClick={() => {
-                                            onSelect(id)
-                                        }}
-                                        onMouseEnter={() => {
-                                            onHover(id)
-                                        }}
-                                        onMouseOut={() => {
-                                            onHover(null)
-                                        }}
-                                    >
-                                        <b>{name}</b>({partId})
-                                    </button>
-                                    <button
-                                        className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
-                                        onClick={() => {
-                                            deleteComponent(id)
-                                        }}
-                                    >
-                                        X
-                                    </button>
-                                </div>
-                            ))}
-                    </React.Fragment>
-                ))}
+                {renderParts(layout)}
             </div>
         </div>
     ) : (

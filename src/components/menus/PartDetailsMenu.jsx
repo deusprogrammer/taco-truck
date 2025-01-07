@@ -111,7 +111,9 @@ const PartDetailsMenu = ({
                     <div className="flex flex-col gap-1">
                         <label>mapping:</label>
                         <select
+                            id={`${selectedPart?.id}-part-button-mapping`}
                             value={selectedPart?.mapping}
+                            defaultValue={'unassigned'}
                             onChange={({ target: { value } }) => {
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
@@ -119,9 +121,14 @@ const PartDetailsMenu = ({
                                 })
                             }}
                         >
-                            <option value={null}>Unassigned</option>
+                            <option value={'unassigned'}>Unassigned</option>
                             {MAPPINGS[mappingStyle].map((button, index) => (
-                                <option value={index}>{button}</option>
+                                <option
+                                    key={`${selectedPart?.id}-button-${index}`}
+                                    value={index}
+                                >
+                                    {button}
+                                </option>
                             ))}
                         </select>
                     </div>

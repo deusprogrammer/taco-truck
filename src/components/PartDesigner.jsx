@@ -315,12 +315,29 @@ const PartDesigner = ({
         setHovered(hoveredPart?.id)
     }
 
-    const updatePart = (partId, newPart) => {
-        const parts = [...layout.parts]
-        const index = parts.findIndex(({ id }) => id === partId)
+    const updatePart = (partId, newPart, parts = layout.parts) => {
+        const updatedParts = parts.map((part) => {
+            if (part.id === partId) {
+                return newPart
+            }
+            if (part.layout && part.layout.parts) {
+                return {
+                    ...part,
+                    layout: {
+                        ...part.layout,
+                        parts: updatePart(partId, newPart, part.layout.parts),
+                    },
+                }
+            }
+            return part
+        })
 
-        parts[index] = newPart
-        const updatedLayout = { ...layout, parts }
+        return updatedParts
+    }
+
+    const handleUpdatePart = (partId, newPart) => {
+        const updatedParts = updatePart(partId, newPart)
+        const updatedLayout = { ...layout, parts: updatedParts }
 
         onLayoutChange(updatedLayout)
         setAfterSelect(null)
@@ -437,7 +454,26 @@ const PartDesigner = ({
         }
     }, [mode, centerWorkPiece])
 
-    const selectedPart = layout?.parts?.find(({ id }) => id === selected)
+    const flattenParts = (layout) => {
+        let parts = []
+
+        if (!layout) {
+            return []
+        }
+
+        for (let part of layout.parts) {
+            if (part.layout) {
+                parts = [...parts, part, ...flattenParts(part.layout)]
+            } else {
+                parts.push(part)
+            }
+        }
+
+        return parts
+    }
+
+    const flattenedParts = flattenParts(layout)
+    const selectedPart = flattenedParts?.find(({ id }) => id === selected)
 
     const screenX = workspacePosition[0]
     const screenY = workspacePosition[1]
@@ -510,7 +546,7 @@ const PartDesigner = ({
                     <PartDetailsMenu
                         layout={layout}
                         selectedPart={selectedPart}
-                        onUpdatePart={updatePart}
+                        onUpdatePart={handleUpdatePart}
                         onSecondarySelectPart={afterSelect}
                         onSetSecondarySelect={setAfterSelect}
                     />
