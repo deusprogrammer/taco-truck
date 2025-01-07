@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.4.2-beta
+
+### Changes
+
+- Added button mapping
+- Added editing of sub components in custom components
+
 ## v1.4.0-beta
 
 ### Changes
