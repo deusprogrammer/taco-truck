@@ -112,6 +112,9 @@ const ComponentMenu = ({
                                 <div
                                     className="flex flex-row gap-0"
                                     key={`part-${index}`}
+                                    onMouseLeave={() => {
+                                        onHover(null)
+                                    }}
                                 >
                                     <button
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
@@ -120,9 +123,6 @@ const ComponentMenu = ({
                                         }}
                                         onMouseEnter={() => {
                                             onHover(id)
-                                        }}
-                                        onMouseOut={() => {
-                                            onHover(null)
                                         }}
                                     >
                                         <b>{name}</b>
