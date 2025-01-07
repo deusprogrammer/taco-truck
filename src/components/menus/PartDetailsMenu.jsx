@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect } from 'react'
+import { useAtom } from 'jotai'
 import { calculateRelativePosition } from '../utils'
 import BufferedInput from '../elements/BufferedInput'
 import { useResize } from '../../hooks/ContainerHooks'
+import { mappingStyleAtom } from '../../atoms/ViewOptions.atom'
+import { MAPPINGS } from '../elements/Constants'
 
 const PartDetailsMenu = ({
     layout,
@@ -11,6 +14,8 @@ const PartDetailsMenu = ({
     onSetSecondarySelect,
 }) => {
     const bind = useResize()
+
+    const [mappingStyle] = useAtom(mappingStyleAtom)
 
     const onKeyDown = useCallback(
         (evt) => {
@@ -102,6 +107,25 @@ const PartDetailsMenu = ({
                         }}
                     />
                 </div>
+                {selectedPart.type === 'button' ? (
+                    <div className="flex flex-col gap-1">
+                        <label>mapping:</label>
+                        <select
+                            value={selectedPart?.mapping}
+                            onChange={({ target: { value } }) => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    mapping: value,
+                                })
+                            }}
+                        >
+                            <option value={null}>Unassigned</option>
+                            {MAPPINGS[mappingStyle].map((button, index) => (
+                                <option value={index}>{button}</option>
+                            ))}
+                        </select>
+                    </div>
+                ) : null}
                 <div className="flex flex-col gap-1">
                     <label>relative to:</label>
                     <button
@@ -303,6 +327,131 @@ const PartDetailsMenu = ({
                 >
                     Center Both
                 </button>
+                <div className="flex flex-col gap-0">
+                    <div className="flex flex-row justify-center">
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [0, 0],
+                                })
+                            }}
+                        >
+                            UL
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [0.5, 0],
+                                })
+                            }}
+                        >
+                            UM
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [1, 0],
+                                })
+                            }}
+                        >
+                            UR
+                        </button>
+                    </div>
+                    <div className="flex flex-row justify-center">
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [0, 0.5],
+                                })
+                            }}
+                        >
+                            ML
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [0.5, 0.5],
+                                })
+                            }}
+                        >
+                            MM
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [1, 0.5],
+                                })
+                            }}
+                        >
+                            MR
+                        </button>
+                    </div>
+                    <div className="flex flex-row justify-center">
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [0, 1],
+                                })
+                            }}
+                        >
+                            LL
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [0.5, 1],
+                                })
+                            }}
+                        >
+                            LM
+                        </button>
+                        <button
+                            className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
+                            onClick={() => {
+                                onUpdatePart(selectedPart.id, {
+                                    ...selectedPart,
+                                    position: [0, 0],
+                                    anchor: [0.5, 0.5],
+                                    origin: [1, 1],
+                                })
+                            }}
+                        >
+                            LR
+                        </button>
+                    </div>
+                </div>
                 <div className="flex flex-row">
                     <button
                         className={`min-w-20 border-2 border-solid border-black bg-white p-1`}

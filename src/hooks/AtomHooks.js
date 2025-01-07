@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
 import { useCallback, useEffect } from "react"
-import { buttonOpacityAtom, editLockComponentAtom, modeAtom, previewAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
+import { buttonOpacityAtom, editLockComponentAtom, mappingStyleAtom, modeAtom, previewAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
 import { useContainerSize, useRealScaleRatio } from "./MouseHooks"
 import { calculateSizeOfPart } from "../components/utils"
 
@@ -26,6 +26,7 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
     const [preview, setPreview] = useAtom(previewAtom)
     const [buttonOpacity, setButtonOpacity] = useAtom(buttonOpacityAtom)
     const [, setSelected] = useAtom(selectedAtom)
+    const [mappingStyle, setMappingStyle] = useAtom(mappingStyleAtom)
 
     const centerWorkPiece = useCallback(() => {
         setScreenSize([window.innerWidth, window.innerHeight])
@@ -110,9 +111,17 @@ export const useKeyShortcuts = ({layout, containerRef}) => {
                             old[0] + 8 * zoom,
                             old[1],
                         ])
+                } else if (evt.key === 'm') {
+                    if (mappingStyle === 'PS') {
+                        setMappingStyle('XB')
+                    } else if (mappingStyle === 'XB') {
+                        setMappingStyle('NS')
+                    } else {
+                        setMappingStyle('PS')
+                    }
                 }
             },
-            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition]
+            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition, mappingStyle, setMappingStyle]
     )
     
     useEffect(() => {

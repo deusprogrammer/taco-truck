@@ -11,11 +11,13 @@ import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import { useAtom } from 'jotai'
 import {
     buttonOpacityAtom,
+    mappingStyleAtom,
     modeAtom,
     renderMeasurementsAtom,
 } from '../../atoms/ViewOptions.atom'
 import { useButtonStatus } from '../LayoutDisplay'
 import { ART_ADJUST } from '../elements/Modes'
+import { MAPPINGS } from '../elements/Constants'
 
 const Part = ({
     scale,
@@ -30,6 +32,7 @@ const Part = ({
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
     const [buttonOpacity] = useAtom(buttonOpacityAtom)
     const [mode] = useAtom(modeAtom)
+    const [mappingStyle] = useAtom(mappingStyleAtom)
     const buttonPressed = useButtonStatus(part)
     const { partId, type, id, rotation } = part
 
@@ -237,47 +240,79 @@ const Part = ({
     switch (shape) {
         case SQUARE:
             component = (
-                <Graphics
-                    draw={(g) => {
-                        drawRectangle(fixedX, fixedY, size, rim, scale, g)
-                    }}
-                    alpha={buttonOpacity}
-                    angle={rotation || 0}
-                    zIndex={0}
-                    interactive={mode !== ART_ADJUST}
-                    onmouseover={() => onHoverPart && onHoverPart(part)}
-                    onmouseout={() => onHoverPart && onHoverPart(null)}
-                    onpointerdown={() => {
-                        onClick && onClick(part)
-                        onClickPart && onClickPart(part, 'DOWN')
-                    }}
-                    onpointerup={() => {
-                        onClickPart && onClickPart(part, 'UP')
-                    }}
-                />
+                <>
+                    <Graphics
+                        draw={(g) => {
+                            drawRectangle(fixedX, fixedY, size, rim, scale, g)
+                        }}
+                        alpha={buttonOpacity}
+                        angle={rotation || 0}
+                        zIndex={0}
+                        interactive={mode !== ART_ADJUST}
+                        onmouseover={() => onHoverPart && onHoverPart(part)}
+                        onmouseout={() => onHoverPart && onHoverPart(null)}
+                        onpointerdown={() => {
+                            onClick && onClick(part)
+                            onClickPart && onClickPart(part, 'DOWN')
+                        }}
+                        onpointerup={() => {
+                            onClickPart && onClickPart(part, 'UP')
+                        }}
+                    />
+                    <Text
+                        text={MAPPINGS[mappingStyle][part.mapping]}
+                        anchor={0.5}
+                        x={fixedX * scale}
+                        y={fixedY * scale}
+                        style={
+                            new TextStyle({
+                                fontFamily:
+                                    '"Lucida Console", Monaco, monospace',
+                                fontSize: 20 * scale * 0.5, // Adjust font size as needed
+                                fill: 'white',
+                            })
+                        }
+                    />
+                </>
             )
             break
         case CIRCLE:
         default:
             component = (
-                <Graphics
-                    draw={(g) => {
-                        drawCircle(fixedX, fixedY, size / 2, rim, scale, g)
-                    }}
-                    alpha={buttonOpacity}
-                    angle={rotation || 0}
-                    zIndex={0}
-                    interactive={mode !== ART_ADJUST}
-                    onmouseover={() => onHoverPart && onHoverPart(part)}
-                    onmouseout={() => onHoverPart && onHoverPart(null)}
-                    onpointerdown={() => {
-                        onClick && onClick(part)
-                        onClickPart && onClickPart(part, 'DOWN')
-                    }}
-                    onpointerup={() => {
-                        onClickPart && onClickPart(part, 'UP')
-                    }}
-                />
+                <>
+                    <Graphics
+                        draw={(g) => {
+                            drawCircle(fixedX, fixedY, size / 2, rim, scale, g)
+                        }}
+                        alpha={buttonOpacity}
+                        angle={rotation || 0}
+                        zIndex={0}
+                        interactive={mode !== ART_ADJUST}
+                        onmouseover={() => onHoverPart && onHoverPart(part)}
+                        onmouseout={() => onHoverPart && onHoverPart(null)}
+                        onpointerdown={() => {
+                            onClick && onClick(part)
+                            onClickPart && onClickPart(part, 'DOWN')
+                        }}
+                        onpointerup={() => {
+                            onClickPart && onClickPart(part, 'UP')
+                        }}
+                    />
+                    <Text
+                        text={MAPPINGS[mappingStyle][part.mapping]}
+                        anchor={0.5}
+                        x={fixedX * scale}
+                        y={fixedY * scale}
+                        style={
+                            new TextStyle({
+                                fontFamily:
+                                    '"Lucida Console", Monaco, monospace',
+                                fontSize: 20 * scale * 0.5, // Adjust font size as needed
+                                fill: 'white',
+                            })
+                        }
+                    />
+                </>
             )
             break
     }

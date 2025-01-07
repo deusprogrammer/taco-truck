@@ -9,8 +9,8 @@ export const useResize = () => {
         const bottom = document.getElementById('menu-bottom')
 
         const newMenuHeight =
-            window.innerHeight - (top.clientHeight + bottom.clientHeight)
-        const newMenuTop = top.clientTop + top.clientHeight
+            window.innerHeight - (top?.clientHeight + bottom?.clientHeight)
+        const newMenuTop = top?.clientTop + top?.clientHeight
         setHeight(newMenuHeight - 10)
         setTop(newMenuTop)
     }

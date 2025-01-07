@@ -13,3 +13,4 @@ export const buttonOpacityAtom = atom(1.0);
 export const screenHeightAtom = atom(0)
 export const modeAtom = atom(SELECT)
 export const selectedAtom = atom(null)
+export const mappingStyleAtom = atom('XB')
