@@ -125,7 +125,8 @@ const ComponentMenu = ({
                                             onHover(null)
                                         }}
                                     >
-                                        <b>{name}</b>({partId})
+                                        <b>{name}</b>
+                                        {partId ? `(${partId})` : null}
                                     </button>
                                     <button
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
