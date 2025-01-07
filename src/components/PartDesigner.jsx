@@ -139,8 +139,10 @@ const PartDesigner = ({
             if (mode === ART_ADJUST) {
                 onLayoutChange({
                     ...layout,
-                    artworkZoom:
-                        layout.artworkZoom - (deltaY || deltaX) / SCALE_RATIO,
+                    artworkZoom: Math.max(
+                        0.01,
+                        layout.artworkZoom - (deltaY || deltaX) / SCALE_RATIO
+                    ),
                 })
                 return
             }
