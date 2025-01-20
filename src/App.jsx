@@ -4,6 +4,7 @@ import PartDesignerRoute from './routes/PartDesignerRoute'
 import ComponentManagerRoute from './routes/ComponentManagerRoute'
 import './App.css'
 import Calibration from './routes/Calibration'
+import PanelEditor from './routes/PanelEditor'
 
 const App = () => {
     return (
@@ -11,6 +12,7 @@ const App = () => {
             <Routes>
                 <Route index element={<Home />} />
                 <Route path={`/designer`} element={<PartDesignerRoute />} />
+                <Route path={`/designer/panel`} element={<PanelEditor />} />
                 <Route
                     path={`/designer/:type/:id`}
                     element={<PartDesignerRoute />}

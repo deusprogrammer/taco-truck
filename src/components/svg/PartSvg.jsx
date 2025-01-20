@@ -3,7 +3,7 @@ import { calculateRelativePosition } from '../utils'
 import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
 import CustomPartSvg from './CustomPartSvg'
 
-const PartSvg = ({ part, parent, drillingGuide, scale }) => {
+const PartSvg = ({ part, parent, drillingGuide, jig, scale }) => {
     const { partId, type, rotation } = part
 
     const { parts, panelDimensions } = parent
@@ -51,14 +51,16 @@ const PartSvg = ({ part, parent, drillingGuide, scale }) => {
         default:
             component = (
                 <>
-                    <circle
-                        cx={`${fixedX * scale}`}
-                        cy={`${fixedY * scale}`}
-                        r={`${(size / 2) * scale}`}
-                        fill="white"
-                        stroke="black"
-                        strokeWidth={1}
-                    />
+                    {!jig ? (
+                        <circle
+                            cx={`${fixedX * scale}`}
+                            cy={`${fixedY * scale}`}
+                            r={`${(size / 2) * scale}`}
+                            fill="white"
+                            stroke="black"
+                            strokeWidth={1}
+                        />
+                    ) : null}
                     {!drillingGuide ? (
                         <circle
                             cx={`${fixedX * scale}`}

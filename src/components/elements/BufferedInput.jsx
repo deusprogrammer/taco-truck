@@ -42,6 +42,10 @@ const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
                 type={type}
                 className={className}
                 value={buffer}
+                onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
                 onChange={({ target: { value } }) => {
                     setBuffer(value)
                     if (immediate) {

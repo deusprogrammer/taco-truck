@@ -36,6 +36,25 @@ const ComponentMenu = ({
         onLayoutChange({ ...layout, cornerRadius: radius })
     }
 
+    const ungroupCustomPart = (ungroupedPartId) => {
+        const customPart = layout.parts.find(({ id }) => id === ungroupedPartId)
+        const translatedParts = [...customPart.layout.parts].map((part) => ({
+            ...part,
+            position: [part.position[0], part.position[1]],
+        }))
+
+        const updatedParts = layout.parts.filter(
+            (part) => part.id !== ungroupedPartId
+        )
+
+        // Find and update part in nested layout
+        deleteComponent(ungroupedPartId)
+        onLayoutChange({
+            ...layout,
+            parts: [...translatedParts, ...updatedParts],
+        })
+    }
+
     const deleteComponent = useCallback(
         (id) => {
             const updatedParts = layout.parts.filter((part) => part.id !== id)
@@ -128,6 +147,16 @@ const ComponentMenu = ({
                                         <b>{name}</b>
                                         {partId ? `(${partId})` : null}
                                     </button>
+                                    {type === 'custom' ? (
+                                        <button
+                                            onClick={() => {
+                                                ungroupCustomPart(id)
+                                            }}
+                                            className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
+                                        >
+                                            Ungroup
+                                        </button>
+                                    ) : null}
                                     <button
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
                                         onClick={() => {
