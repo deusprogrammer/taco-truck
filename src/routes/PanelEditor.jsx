@@ -128,13 +128,12 @@ const PanelEditor = () => {
                     pointsCopy.push(endPoint)
                 }
 
-                console.log('POINTS: ' + JSON.stringify(pointsCopy, null, 5))
-
                 setPoints(pointsCopy)
                 setLines([...lines, [start, end]])
                 setStartPoint(null)
                 setEndPoint(null)
                 setSelectedPoint(null)
+                setSelectedLineIndex(lines.length)
                 startPointIndex.current = null
                 endPointIndex.current = null
                 return
@@ -190,6 +189,8 @@ const PanelEditor = () => {
         }
     )
 
+    const selectedLine = lines?.[selectedLineIndex]
+
     return (
         <div>
             <div className="absolute left-0 top-0 flex w-screen flex-row justify-center">
@@ -220,14 +221,24 @@ const PanelEditor = () => {
                     </button>
                 </div>
             </div>
-            <GeometryMenu
-                selectedGeometry={lines[selectedLineIndex]}
-                onUpdate={(updatedSegment) => {
-                    const copy = [...lines]
-                    copy[selectedLineIndex] = updatedSegment
-                    setLines(copy)
-                }}
-            />
+            {points && selectedLine ? (
+                <GeometryMenu
+                    selectedGeometry={{
+                        x1: points[selectedLine[0]][0],
+                        y1: points[selectedLine[0]][1],
+                        x2: points[selectedLine[1]][0],
+                        y2: points[selectedLine[1]][1],
+                    }}
+                    onUpdate={({ x1, y1, x2, y2 }) => {
+                        const startPointIndex = lines[selectedLineIndex][0]
+                        const endPointIndex = lines[selectedLineIndex][1]
+                        const pointsCopy = [...points]
+                        pointsCopy[startPointIndex] = [x1, y1]
+                        pointsCopy[endPointIndex] = [x2, y2]
+                        setPoints(pointsCopy)
+                    }}
+                />
+            ) : null}
             <div {...bind()}>
                 <Stage
                     width={screenWidth}
