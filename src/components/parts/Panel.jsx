@@ -1,5 +1,6 @@
 import { Graphics, Sprite } from '@pixi/react'
-import React, { useRef } from 'react'
+import { clearTextureCache } from '@pixi/utils'
+import React, { useEffect, useRef } from 'react'
 import { ART_ADJUST } from '../elements/Modes'
 import { modeAtom } from '../../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
@@ -7,6 +8,23 @@ import { useAtom } from 'jotai'
 const Panel = ({ layout, scale, fill, onClick }) => {
     const maskRef = useRef(null)
     const [mode] = useAtom(modeAtom)
+    const { panelDimensions, panelSvg } = layout
+
+    useEffect(() => {
+        clearTextureCache()
+    }, [scale])
+
+    if (panelSvg) {
+        return (
+            <>
+                <Sprite
+                    image={panelSvg}
+                    width={panelDimensions[0] * scale}
+                    height={panelDimensions[1] * scale}
+                />
+            </>
+        )
+    }
 
     return (
         <>

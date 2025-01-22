@@ -75,6 +75,17 @@ const ComponentMenu = ({
         }
     }
 
+    const handlePanelFileChange = (event) => {
+        const file = event.target.files[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                onLayoutChange({ ...layout, panelSvg: reader.result })
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
     const loadImageDimensions = useCallback(async () => {
         const [width, height] = await getImageDimensions(layout.artwork)
         onLayoutChange({
@@ -205,6 +216,60 @@ const ComponentMenu = ({
                         onLayoutChange({ ...layout, name: value })
                     }}
                 />
+                <label>Panel SVG</label>
+                {!layout?.panelSvg && (
+                    <input type="file" onChange={handlePanelFileChange} />
+                )}
+                {layout?.panelSvg && (
+                    <>
+                        <button
+                            className={`border-2 border-solid border-black bg-white p-3 hover:bg-slate-600 hover:text-white`}
+                            onClick={() =>
+                                onLayoutChange({ ...layout, panelSvg: null })
+                            }
+                        >
+                            Clear SVG
+                        </button>
+                        <div className="ml-2">
+                            <div>
+                                <input
+                                    type="checkbox"
+                                    onChange={({ target: { checked } }) =>
+                                        onLayoutChange({
+                                            ...layout,
+                                            panelSvgFlipH: checked,
+                                        })
+                                    }
+                                />
+                                <label>SVG Flip H</label>
+                            </div>
+                            <div>
+                                <input
+                                    type="checkbox"
+                                    onChange={({ target: { checked } }) =>
+                                        onLayoutChange({
+                                            ...layout,
+                                            panelSvgFlipV: checked,
+                                        })
+                                    }
+                                />
+                                <label>SVG Flip V</label>
+                            </div>
+                            <label>Rotate</label>
+                            <BufferedInput
+                                id={`panel-rotation`}
+                                value={layout?.panelRotation || 0}
+                                placeholder="rotation"
+                                onChange={(value) => {
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelRotation: value,
+                                    })
+                                }}
+                            />
+                        </div>
+                    </>
+                )}
                 <label>Width:</label>
                 <BufferedInput
                     id={`panel-dimension-w`}
