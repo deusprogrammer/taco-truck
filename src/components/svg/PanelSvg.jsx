@@ -212,7 +212,7 @@ const PanelSvg = ({ layout, scale, noArt }) => {
                     fill={`${noArt ? 'white' : 'black'}`}
                 />
             )}
-            {!noArt ? (
+            {!noArt && !layout.panelSvg ? (
                 <g clipPath={`url(#${clipPathId})`}>
                     {layout.artwork && (
                         <image
