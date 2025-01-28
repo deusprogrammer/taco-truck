@@ -14,17 +14,17 @@ const Panel = ({ layout, scale, fill, onClick }) => {
         clearTextureCache()
     }, [scale])
 
-    if (panelSvg) {
-        return (
-            <>
-                <Sprite
-                    image={panelSvg}
-                    width={panelDimensions[0] * scale}
-                    height={panelDimensions[1] * scale}
-                />
-            </>
-        )
-    }
+    // if (panelSvg) {
+    //     return (
+    //         <>
+    //             <Sprite
+    //                 image={panelSvg}
+    //                 width={panelDimensions[0] * scale}
+    //                 height={panelDimensions[1] * scale}
+    //             />
+    //         </>
+    //     )
+    // }
 
     return (
         <>
@@ -76,19 +76,27 @@ const Panel = ({ layout, scale, fill, onClick }) => {
                     />
                 </>
             )}
-            <Graphics
-                draw={(g) => {
-                    g.clear()
-                    g.lineStyle({ width: 2, color: '#FFFFFF' })
-                    g.drawRoundedRect(
-                        0,
-                        0,
-                        layout?.panelDimensions?.[0] * scale,
-                        layout?.panelDimensions?.[1] * scale,
-                        layout?.cornerRadius * scale || 0
-                    )
-                }}
-            />
+            {panelSvg ? (
+                <Sprite
+                    image={panelSvg}
+                    width={panelDimensions[0] * scale}
+                    height={panelDimensions[1] * scale}
+                />
+            ) : (
+                <Graphics
+                    draw={(g) => {
+                        g.clear()
+                        g.lineStyle({ width: 2, color: '#FFFFFF' })
+                        g.drawRoundedRect(
+                            0,
+                            0,
+                            layout?.panelDimensions?.[0] * scale,
+                            layout?.panelDimensions?.[1] * scale,
+                            layout?.cornerRadius * scale || 0
+                        )
+                    }}
+                />
+            )}
         </>
     )
 }

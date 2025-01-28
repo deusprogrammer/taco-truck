@@ -80,9 +80,28 @@ const ComponentMenu = ({
         if (file) {
             const reader = new FileReader()
             reader.onloadend = () => {
-                onLayoutChange({ ...layout, panelSvg: reader.result })
+                const svgString = reader.result
+                const parser = new DOMParser()
+                const svgDoc = parser.parseFromString(
+                    svgString,
+                    'image/svg+xml'
+                )
+                const svgElement = svgDoc.querySelector('svg')
+                let width = svgElement.getAttribute('width')
+                let height = svgElement.getAttribute('height')
+
+                width = width ? width.replace(/[^\d.]/g, '') : null
+                height = height ? height.replace(/[^\d.]/g, '') : null
+
+                const dataUri = `data:image/svg+xml;base64,${btoa(svgString)}`
+
+                onLayoutChange({
+                    ...layout,
+                    panelSvg: dataUri,
+                    panelDimensions: [width, height],
+                })
             }
-            reader.readAsDataURL(file)
+            reader.readAsText(file)
         }
     }
 
