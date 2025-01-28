@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.5.1-beta
+
+### Changes
+
+- Added SVG import for more complex designs
+
 ## v1.4.2-beta
 
 ### Changes
