@@ -1,6 +1,6 @@
 {
-    "name": "lever-lass-react",
-    "version": "1.4.2-beta",
+    "name": "taco-truck",
+    "version": "1.5.1-beta",
     "private": true,
     "dependencies": {
         "@pixi/react": "^7.1.2",
