@@ -14,17 +14,51 @@ const Panel = ({ layout, scale, fill, onClick }) => {
         clearTextureCache()
     }, [scale])
 
-    // if (panelSvg) {
-    //     return (
-    //         <>
-    //             <Sprite
-    //                 image={panelSvg}
-    //                 width={panelDimensions[0] * scale}
-    //                 height={panelDimensions[1] * scale}
-    //             />
-    //         </>
-    //     )
-    // }
+    if (panelSvg) {
+        return (
+            <>
+                {layout.artwork && (
+                    <>
+                        <Graphics
+                            draw={(g) => {
+                                g.clear()
+                                g.beginFill(fill)
+                                g.drawRoundedRect(
+                                    0,
+                                    0,
+                                    layout?.panelDimensions?.[0] * scale,
+                                    layout?.panelDimensions?.[1] * scale,
+                                    layout?.cornerRadius * scale || 0
+                                )
+                                g.endFill()
+                            }}
+                            ref={maskRef}
+                        />
+                        <Sprite
+                            image={layout.artwork}
+                            x={layout.artworkOffset?.[0] * scale || 0}
+                            y={layout.artworkOffset?.[1] * scale || 0}
+                            anchor={0}
+                            mask={maskRef.current}
+                            scale={scale * (layout.artworkZoom || 1)}
+                            onpointerdown={() => {
+                                onClick('DOWN')
+                            }}
+                            onpointerup={() => {
+                                onClick('UP')
+                            }}
+                            interactive={mode === ART_ADJUST}
+                        />
+                    </>
+                )}
+                <Sprite
+                    image={panelSvg}
+                    width={panelDimensions[0] * scale}
+                    height={panelDimensions[1] * scale}
+                />
+            </>
+        )
+    }
 
     return (
         <>

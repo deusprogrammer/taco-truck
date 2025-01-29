@@ -3,6 +3,10 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 
 const getSvgString = async (input) => {
+    if (!input) {
+        return null
+    }
+
     if (input.startsWith('data:')) {
         const base64Index = input.indexOf('base64,') + 'base64,'.length
         const base64 = input.substring(base64Index)
@@ -15,6 +19,11 @@ const getSvgString = async (input) => {
 
 const calculateBoundingBox = async (input, id) => {
     const svgString = await getSvgString(input)
+
+    if (!svgString) {
+        return { minX: 0, minY: 0, maxX: 0, maxY: 0 }
+    }
+
     const parser = new DOMParser()
     const svgDoc = parser.parseFromString(svgString, 'image/svg+xml')
     const paths = svgDoc.querySelectorAll(`path#${id}`)
@@ -98,6 +107,11 @@ const scaleAndNormalizePathData = (
 const extractPathData = async (input, id) => {
     try {
         const svgString = await getSvgString(input)
+
+        if (!svgString) {
+            return null
+        }
+
         const parser = new DOMParser()
         const svgDoc = parser.parseFromString(svgString, 'image/svg+xml')
 
@@ -196,32 +210,48 @@ const PanelSvg = ({ layout, scale, noArt }) => {
             </defs>
             {layout.panelSvg ? (
                 <>
-                    <path d={cutPathData} fill="black" />
-                    <path d={mountingPathData} fill="white" />
+                    {!noArt ? (
+                        <g clipPath={`url(#${clipPathId})`}>
+                            {layout.artwork && (
+                                <image
+                                    href={artworkUrl}
+                                    transform={`translate(${layout.artworkOffset?.[0] * scale || 0}, ${layout.artworkOffset?.[1] * scale || 0}) scale(${layout.artworkZoom * scale || 1})`}
+                                />
+                            )}
+                        </g>
+                    ) : null}
+                    <path
+                        d={cutPathData}
+                        stroke="white"
+                        fill={`${noArt ? 'black' : 'none'}`}
+                    />
+                    <path d={mountingPathData} stroke="white" fill="black" />
                 </>
             ) : (
-                <rect
-                    x={0}
-                    y={0}
-                    rx={layout?.cornerRadius * scale || 0}
-                    ry={layout?.cornerRadius * scale || 0}
-                    width={`${layout?.panelDimensions?.[0] * scale}`}
-                    height={`${layout?.panelDimensions?.[1] * scale}`}
-                    stroke="white"
-                    strokeWidth={1}
-                    fill={`${noArt ? 'white' : 'black'}`}
-                />
+                <>
+                    {!noArt ? (
+                        <g clipPath={`url(#${clipPathId})`}>
+                            {layout.artwork && (
+                                <image
+                                    href={artworkUrl}
+                                    transform={`translate(${layout.artworkOffset?.[0] * scale || 0}, ${layout.artworkOffset?.[1] * scale || 0}) scale(${layout.artworkZoom * scale || 1})`}
+                                />
+                            )}
+                        </g>
+                    ) : null}
+                    <rect
+                        x={0}
+                        y={0}
+                        rx={layout?.cornerRadius * scale || 0}
+                        ry={layout?.cornerRadius * scale || 0}
+                        width={`${layout?.panelDimensions?.[0] * scale}`}
+                        height={`${layout?.panelDimensions?.[1] * scale}`}
+                        stroke="white"
+                        strokeWidth={1}
+                        fill={`${noArt ? 'white' : 'black'}`}
+                    />
+                </>
             )}
-            {!noArt && !layout.panelSvg ? (
-                <g clipPath={`url(#${clipPathId})`}>
-                    {layout.artwork && (
-                        <image
-                            href={artworkUrl}
-                            transform={`translate(${layout.artworkOffset?.[0] * scale || 0}, ${layout.artworkOffset?.[1] * scale || 0}) scale(${layout.artworkZoom * scale || 1})`}
-                        />
-                    )}
-                </g>
-            ) : null}
         </>
     )
 }
