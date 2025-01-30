@@ -198,14 +198,18 @@ const PanelSvg = ({ layout, scale, noArt }) => {
         <>
             <defs>
                 <clipPath id={clipPathId}>
-                    <rect
-                        x={0}
-                        y={0}
-                        rx={layout?.cornerRadius * scale || 0}
-                        ry={layout?.cornerRadius * scale || 0}
-                        width={`${layout?.panelDimensions?.[0] * scale}`}
-                        height={`${layout?.panelDimensions?.[1] * scale}`}
-                    />
+                    {layout.panelSvg ? (
+                        <path d={cutPathData} />
+                    ) : (
+                        <rect
+                            x={0}
+                            y={0}
+                            rx={layout?.cornerRadius * scale || 0}
+                            ry={layout?.cornerRadius * scale || 0}
+                            width={`${layout?.panelDimensions?.[0] * scale}`}
+                            height={`${layout?.panelDimensions?.[1] * scale}`}
+                        />
+                    )}
                 </clipPath>
             </defs>
             {layout.panelSvg ? (
