@@ -18,7 +18,7 @@ export const partTable = {
         M6: { shape: CIRCLE, size: 6, rim: 0 },
         M7: { shape: CIRCLE, size: 7, rim: 0 },
         M8: { shape: CIRCLE, size: 8, rim: 0 },
-        'Joystick-Hole-24mm': { shape: CIRCLE, size: 35, rim: 0 },
-        'Joystick-Hole-35mm': { shape: CIRCLE, size: 35, rim: 0 },
+        'Joystick-24mm': { shape: CIRCLE, size: 35, rim: 0 },
+        'Joystick-35mm': { shape: CIRCLE, size: 35, rim: 0 },
     },
 }

@@ -78,7 +78,7 @@ export const PartSelectionButton = ({
     onClick,
 }) => (
     <button
-        className={`h-20 w-64 text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
+        className={`block h-20 min-w-[100px] text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
         onClick={() => onClick(partType, partId)}
     >
         {name}
