@@ -252,7 +252,7 @@ const PanelSvg = ({ layout, scale, noArt }) => {
                         height={`${layout?.panelDimensions?.[1] * scale}`}
                         stroke="white"
                         strokeWidth={1}
-                        fill={`${noArt ? 'white' : 'black'}`}
+                        fill={`${noArt || !layout.artwork ? 'black' : 'none'}`}
                     />
                 </>
             )}
