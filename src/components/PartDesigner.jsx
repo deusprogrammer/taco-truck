@@ -194,10 +194,10 @@ const PartDesigner = ({
             if (layout.panelSvg) {
                 if (!layout.panelSvg.startsWith('https')) {
                     let { _id: id } = await storeMedia(
-                        layout.artwork,
+                        layout.panelSvg,
                         layout.name + '_PANEL'
                     )
-                    layoutCopy.artwork = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
+                    layoutCopy.panelSvg = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
                 }
             }
 

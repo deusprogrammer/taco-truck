@@ -5,6 +5,7 @@ import { db } from '../../firebase.config'
 const ImportModal = ({ open, onImportComplete, onClose }) => {
     const [customParts, setCustomParts] = useState([])
     const [selectedParts, setSelectedParts] = useState([])
+    const [searchTerm, setSearchTerm] = useState(null)
 
     useEffect(() => {
         const loadLocalData = () => {
@@ -33,7 +34,10 @@ const ImportModal = ({ open, onImportComplete, onClose }) => {
         const fetchData = async () => {
             const localParts = loadLocalData()
             const cloudParts = await loadCloudData()
-            setCustomParts([...cloudParts, ...localParts])
+            let allParts = [...localParts, ...cloudParts].sort((a, b) =>
+                a.name.localeCompare(b.name)
+            )
+            setCustomParts(allParts)
         }
 
         if (open) {
@@ -45,10 +49,26 @@ const ImportModal = ({ open, onImportComplete, onClose }) => {
         return null
     }
 
+    let filteredParts = customParts
+    if (searchTerm) {
+        filteredParts = customParts.filter((part) =>
+            part.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }
+
     return (
         <div className="absolute left-0 top-0 flex h-screen w-screen flex-col items-center justify-center">
             <div className="flex flex-col gap-2 border-2 border-black bg-slate-800 p-10 text-white">
                 <h3 className="text-[1.5rem]">Import</h3>
+                <input
+                    type="text"
+                    className="p-2 text-black"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(event) => {
+                        setSearchTerm(event.target.value)
+                    }}
+                />
                 <select
                     className="p-2 text-black"
                     multiple={true}
@@ -59,7 +79,7 @@ const ImportModal = ({ open, onImportComplete, onClose }) => {
                         setSelectedParts(values)
                     }}
                 >
-                    {customParts.map(({ name, id, isLocal }) => (
+                    {filteredParts.map(({ name, id, isLocal }) => (
                         <option
                             key={`cp-${id}`}
                             value={`${isLocal ? 'local-' : 'cloud-'}${id}`}
