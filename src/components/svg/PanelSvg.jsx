@@ -1,30 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import DOMPurify from 'dompurify'
 
-function getSvgDimensions(svgString) {
-    if (!svgString) return { width: 1, height: 1 }
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(svgString, 'image/svg+xml')
-    const svgEl = doc.querySelector('svg')
-    if (!svgEl) return { width: 1, height: 1 }
-
-    // Try viewBox first
-    if (svgEl.hasAttribute('viewBox')) {
-        const vb = svgEl.getAttribute('viewBox').split(/\s+/).map(Number)
-        if (vb.length === 4) {
-            return { width: vb[2], height: vb[3] }
-        }
-    }
-    // Fallback to width/height attributes
-    if (svgEl.hasAttribute('width') && svgEl.hasAttribute('height')) {
-        return {
-            width: parseFloat(svgEl.getAttribute('width')),
-            height: parseFloat(svgEl.getAttribute('height')),
-        }
-    }
-    return { width: 1, height: 1 }
-}
-
 const getSvgString = async (input) => {
     if (!input) {
         return null
@@ -127,10 +103,14 @@ const PanelSvg = ({ layout, scale, noArt }) => {
                 return
             }
             const svgString = await getSvgString(layout.panelSvg)
-            // Extract only the children of the SVG tag (no outer <svg>)
-            const innerSvg = extractSvgChildren(svgString)
+            // Sanitize the full SVG string first
+            const safeSvgString = DOMPurify.sanitize(svgString, {
+                USE_PROFILES: { svg: true, svgFilters: true },
+            })
+            // Then extract only the children of the SVG tag (no outer <svg>)
+            let innerSvg = extractSvgChildren(safeSvgString)
             setSanitizedSvg(innerSvg)
-            setViewBox(extractViewBox(svgString))
+            setViewBox(extractViewBox(safeSvgString))
         }
 
         getSanitizedSvg()
