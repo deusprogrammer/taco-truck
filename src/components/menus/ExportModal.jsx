@@ -26,14 +26,14 @@ const ExportModal = ({ open, layout, onClose }) => {
                 <LayoutDisplaySvg
                     layout={layout}
                     drillingGuide={drillingGuide}
-                    noArt={drillingGuide}
+                    noArt={true}
                     scale={1}
                     hideButton={true}
                 />
                 <LayoutDisplaySvg
                     layout={layout}
                     drillingGuide={drillingGuide}
-                    noArt={drillingGuide}
+                    noArt={true}
                     scale={1}
                     units="mm"
                     hidden={true}

@@ -131,8 +131,14 @@ const ComponentManagerRoute = () => {
                                     {project.isLocal ? '(Local)' : ''}
                                     <br />
                                     <br />
-                                    {project.layout.panelDimensions?.[0]}mm X{' '}
-                                    {project.layout.panelDimensions?.[1]}mm
+                                    {Math.trunc(
+                                        project.layout.panelDimensions?.[0]
+                                    )}
+                                    mm X{' '}
+                                    {Math.trunc(
+                                        project.layout.panelDimensions?.[1]
+                                    )}
+                                    mm
                                 </div>
                             </td>
                             <td className="p-8">
@@ -141,6 +147,7 @@ const ComponentManagerRoute = () => {
                                         layout={project.layout}
                                         scale={1}
                                         hideButton={true}
+                                        noArt={true}
                                     />
                                 </div>
                             </td>

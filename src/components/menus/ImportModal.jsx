@@ -62,15 +62,21 @@ const ImportModal = ({ open, onImportComplete, onClose }) => {
                 <h3 className="text-[1.5rem]">Import</h3>
                 <input
                     type="text"
-                    className="p-2 text-black"
+                    className="h-[40px] w-[300px] p-2 text-black"
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(event) => {
                         setSearchTerm(event.target.value)
                     }}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
+                            setSearchTerm('')
+                        }
+                        event.stopPropagation()
+                    }}
                 />
                 <select
-                    className="p-2 text-black"
+                    className="h-[200px] w-[300px] overflow-y-auto p-2 text-black"
                     multiple={true}
                     value={selectedParts}
                     onChange={({ target: { selectedOptions } }) => {
