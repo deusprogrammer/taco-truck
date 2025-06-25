@@ -11,6 +11,7 @@ const ComponentManagerRoute = () => {
     const [panelDesigns] = useState([])
     const [combinedProjects, setCombinedProjects] = useState([])
     const [combinedParts, setCombinedParts] = useState([])
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
         const loadLocalData = () => {
@@ -103,6 +104,14 @@ const ComponentManagerRoute = () => {
         )
     }
 
+    // Filter projects and parts by search
+    const filteredProjects = combinedProjects.filter((project) =>
+        project.name?.toLowerCase().includes(search.toLowerCase())
+    )
+    const filteredParts = combinedParts.filter((part) =>
+        part.name?.toLowerCase().includes(search.toLowerCase())
+    )
+
     return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-10 bg-slate-600 text-white">
             <div className="flex flex-row items-center justify-center gap-10">
@@ -116,9 +125,18 @@ const ComponentManagerRoute = () => {
                 </h1>
             </div>
             <div className="mx-auto flex w-[90%] flex-col justify-center">
+                <div className="mb-4 flex justify-center">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-80 rounded p-2 text-black"
+                    />
+                </div>
                 <h2 className="text-center text-[1.8rem]">Panel Designs</h2>
                 <table className="flex flex-col justify-center">
-                    {combinedProjects.map((project) => (
+                    {filteredProjects.map((project) => (
                         <tr
                             key={project.id}
                             className={`flex flex-col justify-center border-b-2 border-solid border-black lg:flex-row`}
@@ -194,7 +212,7 @@ const ComponentManagerRoute = () => {
             <div>
                 <h2 className="text-center text-[1.8rem]">Custom Parts</h2>
                 <table>
-                    {combinedParts.map((part) => (
+                    {filteredParts.map((part) => (
                         <tr
                             key={part.id}
                             className={`flex flex-col border-b-2 border-solid border-black lg:flex-row ${part.isLocal ? 'bg-lightblue' : ''} items-center justify-center`}
