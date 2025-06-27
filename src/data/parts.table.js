@@ -7,6 +7,7 @@ export const partTable = {
         'SANWA-24mm': { shape: CIRCLE, size: 24, rim: 2 },
         'SANWA-30mm': { shape: CIRCLE, size: 30, rim: 2 },
         'HAPP-28mm': { shape: CIRCLE, size: 28, rim: 2 },
+        'WICO-28mm': { shape: CIRCLE, size: 28, rim: 3 },
         'GEN-Menu-20mm': { shape: CIRCLE, size: 20, rim: 2 },
         'GEN-Menu-12mm': { shape: CIRCLE, size: 12, rim: 2 },
         'CHERRY-Keyboard': { shape: SQUARE, size: [18, 18], rim: 1 },
