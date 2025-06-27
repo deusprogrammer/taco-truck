@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { useAtom } from 'jotai'
 import { calculateRelativePosition } from '../utils'
+import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { useResize } from '../../hooks/ContainerHooks'
 import { mappingStyleAtom } from '../../atoms/ViewOptions.atom'
@@ -83,6 +84,11 @@ const PartDetailsMenu = ({
         return null
     }
 
+    console.log(
+        `PartDetailsMenu: selectedPart`,
+        JSON.stringify(selectedPart, null, 2)
+    )
+
     return (
         <div
             className="absolute right-[10px] hidden max-w-[300px] flex-col gap-1 overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:flex"
@@ -92,7 +98,39 @@ const PartDetailsMenu = ({
             <div className="flex flex-col gap-1 overflow-y-auto">
                 <div className="flex flex-col gap-1">
                     <label>type:</label>
-                    <input value={selectedPart?.type} disabled />
+                    <select
+                        value={`${selectedPart?.type}-${selectedPart?.partId}`}
+                        id={`${selectedPart?.id}-part-type`}
+                        onChange={({ target: { value } }) => {
+                            const [type, ...partId] = value.split('-')
+                            console.log(`Value ${value} = ${type} + ${partId}`)
+                            // Update the part
+                            onUpdatePart(selectedPart.id, {
+                                ...selectedPart,
+                                partId: partId.join('-'),
+                                type,
+                                name: `${type}-${partId.join('-')}`,
+                            })
+                        }}
+                    >
+                        {[
+                            ...Object.keys(partTable.button).map((partId) => ({
+                                type: `button`,
+                                partId,
+                            })),
+                            ...Object.keys(partTable.hole).map((partId) => ({
+                                type: `hole`,
+                                partId,
+                            })),
+                        ].map((part) => (
+                            <option
+                                key={`${selectedPart?.id}-part-type-${part.type}-${part.partId}`}
+                                value={`${part.type}-${part.partId}`}
+                            >
+                                {part.type}: {part.partId}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div className="flex flex-col gap-1">
                     <label>name:</label>
