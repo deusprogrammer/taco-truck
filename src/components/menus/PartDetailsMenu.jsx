@@ -103,7 +103,6 @@ const PartDetailsMenu = ({
                         id={`${selectedPart?.id}-part-type`}
                         onChange={({ target: { value } }) => {
                             const [type, ...partId] = value.split('-')
-                            console.log(`Value ${value} = ${type} + ${partId}`)
                             // Update the part
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
@@ -112,6 +111,7 @@ const PartDetailsMenu = ({
                                 name: `${type}-${partId.join('-')}`,
                             })
                         }}
+                        disabled={selectedPart.type === 'custom'}
                     >
                         {[
                             ...Object.keys(partTable.button).map((partId) => ({
@@ -130,6 +130,12 @@ const PartDetailsMenu = ({
                                 {part.type}: {part.partId}
                             </option>
                         ))}
+                        <option
+                            key={`${selectedPart?.id}-part-type-custom`}
+                            value={`custom-${selectedPart.partId}`}
+                        >
+                            custom: {selectedPart.partId}
+                        </option>
                     </select>
                 </div>
                 <div className="flex flex-col gap-1">
