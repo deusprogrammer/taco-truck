@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import LayoutDisplaySvg from '../components/svg/LayoutDisplaySvg'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase.config'
@@ -7,11 +7,23 @@ import { db } from '../firebase.config'
 import config from '../../package.json'
 
 const ComponentManagerRoute = () => {
+    const [searchParams, setSearchParams] = useSearchParams()
+    const initialSearch = searchParams.get('search') || ''
+    const initialShowBasePanels = searchParams.get('showBasePanels') === 'true'
     const [customParts] = useState([])
     const [panelDesigns] = useState([])
     const [combinedProjects, setCombinedProjects] = useState([])
     const [combinedParts, setCombinedParts] = useState([])
-    const [search, setSearch] = useState('')
+    const [search, setSearch] = useState(initialSearch)
+    const [
+        showPanelsWithoutButtonsOrParts,
+        setShowPanelsWithoutButtonsOrParts,
+    ] = useState(initialShowBasePanels)
+
+    useEffect(() => {
+        setSearch(searchParams.get('search') || '')
+        setShowPanelsWithoutButtonsOrParts(searchParams.get('showBasePanels') === 'true')
+    }, [searchParams])
 
     useEffect(() => {
         const loadLocalData = () => {
@@ -105,12 +117,21 @@ const ComponentManagerRoute = () => {
     }
 
     // Filter projects and parts by search
-    const filteredProjects = combinedProjects.filter((project) =>
+    let filteredProjects = combinedProjects.filter((project) =>
         project.name?.toLowerCase().includes(search.toLowerCase())
     )
     const filteredParts = combinedParts.filter((part) =>
         part.name?.toLowerCase().includes(search.toLowerCase())
     )
+
+    // Add filter for panels with no buttons or custom parts
+    if (showPanelsWithoutButtonsOrParts) {
+        filteredProjects = filteredProjects.filter((project) => {
+            // If there are no parts, or all parts are type 'hole', keep it
+            const parts = project.layout?.parts || []
+            return parts.every((part) => part.type === 'hole')
+        })
+    }
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-10 bg-slate-600 text-white">
@@ -125,14 +146,54 @@ const ComponentManagerRoute = () => {
                 </h1>
             </div>
             <div className="mx-auto flex w-[90%] flex-col justify-center">
-                <div className="mb-4 flex justify-center">
+                <div className="mb-4 flex flex-col items-center justify-center gap-2">
                     <input
                         type="text"
                         placeholder="Search by name..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => {
+                            setSearch(e.target.value)
+                            setSearchParams(params => {
+                                const newParams = new URLSearchParams(params)
+                                if (e.target.value) {
+                                    newParams.set('search', e.target.value)
+                                } else {
+                                    newParams.delete('search')
+                                }
+                                if (showPanelsWithoutButtonsOrParts) {
+                                    newParams.set('showBasePanels', 'true')
+                                } else {
+                                    newParams.delete('showBasePanels')
+                                }
+                                return newParams
+                            })
+                        }}
                         className="w-80 rounded p-2 text-black"
                     />
+                    <label className="">
+                        <input
+                            type="checkbox"
+                            checked={showPanelsWithoutButtonsOrParts}
+                            onChange={(e) => {
+                                setShowPanelsWithoutButtonsOrParts(e.target.checked)
+                                setSearchParams(params => {
+                                    const newParams = new URLSearchParams(params)
+                                    if (search) {
+                                        newParams.set('search', search)
+                                    } else {
+                                        newParams.delete('search')
+                                    }
+                                    if (e.target.checked) {
+                                        newParams.set('showBasePanels', 'true')
+                                    } else {
+                                        newParams.delete('showBasePanels')
+                                    }
+                                    return newParams
+                                })
+                            }}
+                        />
+                        <label>Show Base Panels</label>
+                    </label>
                 </div>
                 <h2 className="text-center text-[1.8rem]">Panel Designs</h2>
                 <table className="flex flex-col justify-center">
