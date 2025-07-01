@@ -10,6 +10,8 @@ import {
 } from '../../atoms/ViewOptions.atom'
 import { useResize } from '../../hooks/ContainerHooks'
 import { ART_ADJUST } from '../elements/Modes'
+import { parseSvgStructure } from '../svg-utils'
+import { parse } from 'svgson'
 
 const ComponentMenu = ({
     layout,
@@ -75,34 +77,22 @@ const ComponentMenu = ({
         }
     }
 
-    const handlePanelFileChange = (event) => {
-        const file = event.target.files[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                const svgString = reader.result
-                const parser = new DOMParser()
-                const svgDoc = parser.parseFromString(
-                    svgString,
-                    'image/svg+xml'
-                )
-                const svgElement = svgDoc.querySelector('svg')
-                let width = svgElement.getAttribute('width')
-                let height = svgElement.getAttribute('height')
+    const handlePanelFileChange = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        const svgText = await file.text()
 
-                width = width ? width.replace(/[^\d.]/g, '') : null
-                height = height ? height.replace(/[^\d.]/g, '') : null
-
-                const dataUri = `data:image/svg+xml;base64,${btoa(svgString)}`
-
-                onLayoutChange({
-                    ...layout,
-                    panelSvg: dataUri,
-                    panelDimensions: [width, height],
-                })
-            }
-            reader.readAsText(file)
-        }
+        if (!svgText) return
+        const svgJSON = await parse(svgText)
+        const panelModel = parseSvgStructure(svgJSON)
+        onLayoutChange({
+            ...layout,
+            panelModel,
+            panelDimensions: [
+                panelModel.header.viewBox.width,
+                panelModel.header.viewBox.height,
+            ],
+        })
     }
 
     const loadImageDimensions = useCallback(async () => {
@@ -236,15 +226,19 @@ const ComponentMenu = ({
                     }}
                 />
                 <label>Panel SVG</label>
-                {!layout?.panelSvg && (
+                {!layout?.panelModel && (
                     <input type="file" onChange={handlePanelFileChange} />
                 )}
-                {layout?.panelSvg && (
+                {layout?.panelModel && (
                     <>
                         <button
                             className={`border-2 border-solid border-black bg-white p-3 hover:bg-slate-600 hover:text-white`}
                             onClick={() =>
-                                onLayoutChange({ ...layout, panelSvg: null })
+                                onLayoutChange({
+                                    ...layout,
+                                    panelModel: null,
+                                    panelDimensions: [0, 0],
+                                })
                             }
                         >
                             Clear SVG

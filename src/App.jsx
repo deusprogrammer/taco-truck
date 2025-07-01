@@ -2,9 +2,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './routes/Home'
 import PartDesignerRoute from './routes/PartDesignerRoute'
 import ComponentManagerRoute from './routes/ComponentManagerRoute'
-import './App.css'
 import Calibration from './routes/Calibration'
 import PanelEditor from './routes/PanelEditor'
+import './App.css'
 
 const App = () => {
     return (

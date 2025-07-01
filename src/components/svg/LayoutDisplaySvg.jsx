@@ -1,79 +1,95 @@
-import React, { createRef } from 'react'
-import PartSvg from './PartSvg'
-import PanelSvg from './PanelSvg'
+import React, { createRef, useEffect, useState } from 'react'
 import { saveAs } from 'file-saver'
-import { calculateSizeOfPart } from '../utils'
+import { makerify, simplify } from '../utils'
+import makerjs from 'makerjs'
+import { CAG } from '@jscad/csg'
+import stlSerializer from '@jscad/stl-serializer'
 
-const LayoutDisplaySvg = ({
-    layout,
-    scale,
-    drillingGuide,
-    noArt,
-    units,
-    hidden,
-    hideButton,
-}) => {
+const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
     const svgRef = createRef()
-    const [partsWidth, partsHeight] = calculateSizeOfPart({
-        type: 'custom',
-        layout: layout,
-    })
+    const [makerModel, setMakerModel] = useState()
 
-    const downloadInkscapeSvg = () => {
-        const svgElement = svgRef.current
-        const svgData = new XMLSerializer().serializeToString(svgElement)
-        const blob = new Blob([svgData], {
-            type: 'image/svg+xml;charset=utf-8',
-        })
+    useEffect(() => {
+        const simplified = simplify(layout)
+        const makerified = makerify(simplified)
+        setMakerModel(makerjs.model.mirror(makerified, false, true))
+    }, [layout])
+
+    const downloadSvg = () => {
+        const blob = new Blob(
+            [makerjs.exporter.toSVG(makerModel, { units: layout.units })],
+            {
+                type: 'image/svg+xml;charset=utf-8',
+            }
+        )
         saveAs(blob, `${layout.name}.svg`)
     }
 
-    if (units === 'mm') {
-        scale = 1
+    const downloadDxf = () => {
+        const blob = new Blob(
+            [makerjs.exporter.toDXF(makerModel, { units: layout.units })],
+            {
+                type: 'image/x-dxf;charset=utf-8',
+            }
+        )
+        saveAs(blob, `${layout.name}.dxf`)
     }
 
-    const svgWidth =
-        layout?.panelDimensions[0] !== 0
-            ? layout?.panelDimensions[0]
-            : partsWidth
-    const svgHeight =
-        layout?.panelDimensions[1] !== 0
-            ? layout?.panelDimensions[1]
-            : partsHeight
+    const downloadStl = () => {
+        // Convert Maker.js model to JSCAD CSG (extrude to 3D)
+        const jscadModel = makerjs.exporter.toJscadCSG(CAG, makerModel, {
+            maxArcFacet: 1,
+            extrude: 6,
+        })
+        // Serialize to STL (returns an array of strings)
+        const stlDataArray = stlSerializer.serialize(
+            { binary: 'true' },
+            jscadModel
+        )
+        // Join the array to get the STL string
+        const stlString = stlDataArray.join('\n')
+        // Create and save the blob
+        const blob = new Blob([stlString], {
+            type: 'text/plain;charset=utf-8',
+        })
+        saveAs(blob, `${layout.name}.stl`)
+    }
+
+    const simplified = simplify(layout)
+    const makerified = makerify(simplified)
+
+    console.log('Simplified: ' + JSON.stringify(simplified, null, 2))
+    console.log('Makerified: ' + JSON.stringify(makerified, null, 2))
+
+    const svg = makerjs.exporter.toSVG(
+        makerjs.model.mirror(makerified, false, true),
+        { units: 'px' }
+    )
 
     return (
         <div className="flex flex-col items-center justify-center gap-4">
-            <svg
-                ref={svgRef}
-                width={`${svgWidth * scale}${units ?? ''}`}
-                height={`${svgHeight * scale}${units ?? ''}`}
-                viewBox={`0 0 ${svgWidth * scale} ${svgHeight * scale}`}
-                className={`${hidden ? 'hidden' : null}`}
-            >
-                <PanelSvg
-                    layout={layout}
-                    scale={scale}
-                    units={units}
-                    noArt={noArt}
-                />
-                {layout?.parts?.map((part, index) => (
-                    <PartSvg
-                        key={`partsvg-${part.id || index}`}
-                        drillingGuide={drillingGuide}
-                        units={units}
-                        part={part}
-                        parent={layout}
-                        scale={scale}
-                    />
-                ))}
-            </svg>
+            <div ref={svgRef} dangerouslySetInnerHTML={{ __html: svg }} />
             {!hideButton ? (
-                <button
-                    onClick={downloadInkscapeSvg}
-                    className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                >
-                    Save SVG
-                </button>
+                <>
+                    <button
+                        onClick={downloadSvg}
+                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
+                        Save SVG
+                    </button>
+                    <button
+                        onClick={downloadDxf}
+                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
+                        Save DXF
+                    </button>
+                    <button
+                        onClick={downloadStl}
+                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
+                        Save STL
+                    </button>
+                </>
             ) : null}
         </div>
     )

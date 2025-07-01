@@ -1,7 +1,9 @@
-import { CIRCLE, partTable } from '../data/parts.table'
+import { CIRCLE, partTable, SQUARE } from '../data/parts.table'
 import axios from 'axios';
 
 import Drawing from 'dxf-writer'
+
+import makerjs from 'makerjs'
 
 export const getImageDimensions = (imageUrl) => {
     return new Promise((resolve) => {
@@ -65,8 +67,7 @@ export const calculateRelativePosition = (
     part,
     parts,
     panelWidth,
-    panelHeight,
-    level = 0
+    panelHeight
 ) => {
     const {
         position: [x, y],
@@ -83,8 +84,7 @@ export const calculateRelativePosition = (
             relativePart,
             parts,
             panelWidth,
-            panelHeight,
-            level + 1
+            panelHeight
         )
         offsetX += relativeOffsetX
         offsetY += relativeOffsetY
@@ -177,15 +177,14 @@ export const normalizePartPositionsToZero = (parts) => {
 }
 
 export const calculateSizeOfPart = (part) => {
-    if (part.type !== 'custom') {
-        let { size } = partTable[part.type][part.partId]
+    console.log(JSON.stringify(part, null, 5));
+    if (!part || part?.type === undefined) {
+        return [0, 0];
+    }
 
-        if (Array.isArray(size)) {
-            return size
-        } else {
-            return [size, size]
-        }
-    } else {
+    if (part.type === 'svg') {
+        return [part.header.width, part.header.height]
+    } else if (part.type === 'custom') {
         let minX = Infinity
         let maxX = -Infinity
         let minY = Infinity
@@ -232,6 +231,14 @@ export const calculateSizeOfPart = (part) => {
         })
 
         return [maxX - minX, maxY - minY]
+    } else {
+        let { size } = partTable?.[part.type]?.[part.partId]
+
+        if (Array.isArray(size)) {
+            return size
+        } else {
+            return [size, size]
+        }
     }
 }
 
@@ -287,13 +294,230 @@ export const svgElementToDxf = (element, drawing) => {
     return drawing
 }
 
-// // Example usage:
-// const svgString = '<svg><line x1="0" y1="0" x2="100" y2="100" /></svg>';
-// const dxfString = svgToDxf(svgString);
+const clean = (arr) => {
+    return arr?.map(value => Number(value));
+}
 
-// // Download the DXF file
-// const blob = new Blob([dxfString], { type: 'text/plain' });
-// const link = document.createElement('a');
-// link.href = URL.createObjectURL(blob);
-// link.download = 'output.dxf';
-// link.click();
+export const simplify = (layout, parent) => {
+    if (!layout) {
+        return null
+    }
+
+    const { panelDimensions, type } = layout
+    let simplified = { ...layout }
+ 
+    let partsToFlatten = [];
+    if (parent) {
+        if (type === 'custom') {
+            const { parts, panelDimensions } = parent
+            const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
+            simplified.dimensions = clean(calculateSizeOfPart(layout)) 
+            simplified.position = clean(calculateRelativePosition(
+                { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
+                parts,
+                panelWidth,
+                panelHeight
+            )).slice(0, 2)
+            delete simplified.panelDimensions
+            partsToFlatten = layout.layout.parts
+
+            parent = {
+                ...layout.layout,
+                panelDimensions: simplified.dimensions
+            }
+        } else if (type === 'svg') {
+            // Do nothing    
+        } else {
+            const { parts, panelDimensions } = parent
+            const [panelWidth, panelHeight] = simplified.dimensions = panelDimensions || [0, 0]
+            simplified.dimensions = clean(calculateSizeOfPart(layout))
+            simplified.position = clean(calculateRelativePosition(
+                layout,
+                parts,
+                panelWidth,
+                panelHeight
+            )).slice(0, 2)
+            partsToFlatten = null
+        }
+    } else {
+        simplified.panelDimensions = clean(panelDimensions)
+        partsToFlatten = layout.parts
+        parent = layout;
+    }
+
+    simplified.children = [];
+    partsToFlatten?.forEach((part, index) => {
+        const simplifiedChild = simplify(part, parent)
+        simplified.children.push(simplifiedChild)
+    });
+
+    // Clean up
+    delete simplified.origin
+    delete simplified.anchor
+    delete simplified.layout
+    delete simplified.parts
+
+    return simplified
+}
+
+const convertPartToPath = ({type, partId, position}, panelHeight) => {
+    const { shape, size } = partTable[type]?.[partId] || {};
+    const makerjsPos = position;
+
+    switch (shape) {
+        case CIRCLE: {
+            const model = {
+                paths: {
+                    circle: new makerjs.paths.Circle(makerjsPos, size / 2)
+                }
+            }
+            return model;
+        }
+        case SQUARE: {
+            const model = new makerjs.models.Rectangle(size[0], size[1])
+            model.origin = makerjsPos
+            return model;
+        }
+        default:
+            break;
+    }
+}
+
+export const makerifyModelTree = (modelTree) => {
+    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform } = modelTree;
+    const { translate, rotate, scale, skewX, skewY } = transform || {};
+    
+    let model = {};
+
+    if (header) {
+        model = {
+            models: {}
+        }
+
+        children.forEach((child, index) => {
+            model.models[`child-${index}`] = makerifyModelTree(child)
+        })
+
+        return model;
+    }
+
+    if (type === 'path') {
+        model = makerjs.importer.fromSVGPathData(d);
+    } else if (type === 'group') {
+        model = {
+            models: {}
+        }
+
+        children.forEach((child, index) => {
+            model.models[`child-${index}`] = makerifyModelTree(child)
+        })
+    } else if (type === 'rectangle') {
+        if (rx && ry) {
+            model = new makerjs.models.RoundRectangle(width, height, (rx + ry) / 2);
+        } else {
+            model = new makerjs.models.Rectangle(width, height);
+            model.origin = [x, y];
+        }
+    } else if (type === 'circle') {
+        // Expect radius and origin in the modelTree
+        model = {
+            paths: {
+                circle: new makerjs.paths.Circle([cx, cy], r)
+            }
+        };
+    } else if (type === 'polygon') {
+        // modelTree.points is expected to be an array of [x, y] pairs
+        if (Array.isArray(modelTree.points) && modelTree.points.length > 1) {
+            model = {
+                paths: {}
+            };
+            // Draw lines between each point, and close the shape
+            for (let i = 0; i < modelTree.points.length; i++) {
+                const start = modelTree.points[i];
+                const end = modelTree.points[(i + 1) % modelTree.points.length];
+                model.paths[`line-${i}`] = new makerjs.paths.Line(start, end);
+            }
+        }
+        model = makerjs.model.mirror(model, false, true);
+    } else if (type === 'polyline') {
+        if (Array.isArray(modelTree.points) && modelTree.points.length > 1) {
+            model = {
+                paths: {}
+            };
+            // Draw lines between each point, do NOT close the shape
+            for (let i = 0; i < modelTree.points.length - 1; i++) {
+                const start = modelTree.points[i];
+                const end = modelTree.points[i + 1];
+                model.paths[`line-${i}`] = new makerjs.paths.Line(start, end);
+            }
+        }
+        model = makerjs.model.mirror(model, false, true);
+    } else {
+        // Handle other types or return empty model
+        model = {};
+    }
+
+    if (rotate) {
+        makerjs.model.rotate(model, rotate);
+    }
+
+    if (scale) {
+        model = makerjs.model.distort(model, scale.x, scale.y)
+    }
+
+    if (skewX > 0) {
+        makerjs.model.distort(model, skewX, 1)
+    }
+    
+    if (skewY > 0) {
+        makerjs.model.distort(model, 1, skewY)
+    }
+
+    if (translate) {
+        const { x, y } = translate;
+        model = makerjs.model.moveRelative(model, [x, -y]);
+    }
+
+    return model;
+}
+
+export const makerify = (simplifiedLayout, parent) => {
+    const { panelDimensions, panelModel, type, position, rotation, children } = simplifiedLayout
+
+    let model = {
+        models: {},
+        paths: {},
+        origin: [0, 0],
+        rotate: 0
+    };
+
+    if (parent) {
+        if (type === 'custom') {
+            // Makerjs building
+            model.origin = position
+            model.rotate = rotation
+        } else if (type === 'svg') {
+            // Unimplemented
+        }
+    } else {
+        parent = simplifiedLayout;
+        if (panelModel) {
+            model.models.panel = makerjs.model.mirror(makerifyModelTree(panelModel), false, true)
+        } else {
+            model.models.panel = new makerjs.models.Rectangle(panelDimensions[0], panelDimensions[1])
+        }
+        model.units = simplifiedLayout.units;
+    }
+
+    children.filter((child) => child.type === 'custom').forEach((child, index) => {
+        model.models[`customss-${index}`] = makerify(child, parent);
+    })
+    children.filter((child) => child.type !== 'custom' && child.type !== 'svg').forEach((child, index) => {
+        model.models[`parts-${index}`] = convertPartToPath(child, parent.panelDimensions[1]);
+    })
+    children.filter((child) => child.type === 'svg').forEach((child, index) => {
+        // Unimplemented
+    })
+
+    return model;
+}

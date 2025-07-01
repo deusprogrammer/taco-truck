@@ -18,6 +18,36 @@ const getYCoordinate = (x, x1, y1, x2, y2) => {
     return y
 }
 
+const calculateQuadraticBezierPoint = (t, p0, p1, p2) => {
+    const p0p1 = [p0[0] + t * (p1[0] - p0[0]), p0[1] + t * (p1[1] - p0[1])]
+    const p1p2 = [p1[0] + t * (p2[0] - p1[0]), p1[1] + t * (p2[1] - p1[1])]
+
+    return [
+        p0p1[0] + t * (p1p2[0] - p0p1[0]),
+        p0p1[1] + t * (p1p2[1] - p0p1[1]),
+    ]
+}
+
+const drawQuadraticBezierCurve = (g, p0, p1, p2) => {
+    g.clear()
+    g.lineStyle(2, 0xffffff, 1)
+    g.moveTo(p0[0], p0[1])
+    const steps = 100
+    for (let i = 0; i <= steps; i++) {
+        const t = i / steps
+        const point = calculateQuadraticBezierPoint(t, p0, p1, p2)
+        g.lineTo(point[0], point[1])
+    }
+    g.lineTo(p2[0], p2[1])
+}
+
+const QuadraticBezierCurve = ({ p0, p1, p2 }) => {
+    const drawCurve = (g) => {
+        drawQuadraticBezierCurve(g, p0, p1, p2)
+    }
+    return <Graphics draw={drawCurve} />
+}
+
 const Point = ({ x, y, selected, onClick, onHover }) => {
     const [hovered, setHovered] = useState(false)
 

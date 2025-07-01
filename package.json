@@ -3,6 +3,8 @@
     "version": "1.6.3-beta",
     "private": true,
     "dependencies": {
+        "@jscad/csg": "^0.7.0",
+        "@jscad/stl-serializer": "^2.1.20",
         "@pixi/react": "^7.1.2",
         "@pixi/utils": "^7.4.2",
         "@svgdotjs/svg.js": "^3.2.4",
@@ -18,6 +20,7 @@
         "file-saver": "^2.0.5",
         "firebase": "^11.1.0",
         "jotai": "^2.11.0",
+        "makerjs": "^0.18.1",
         "pixi.js": "^7.4.2",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
@@ -26,6 +29,7 @@
         "react-router-dom": "^7.0.2",
         "react-scripts": "5.0.1",
         "svgdom": "^0.1.21",
+        "svgson": "^5.3.1",
         "web-vitals": "^2.1.4",
         "websocket": "^1.0.35"
     },
