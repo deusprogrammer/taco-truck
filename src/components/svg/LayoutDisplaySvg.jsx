@@ -58,9 +58,6 @@ const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
     const simplified = simplify(layout)
     const makerified = makerify(simplified)
 
-    console.log('Simplified: ' + JSON.stringify(simplified, null, 2))
-    console.log('Makerified: ' + JSON.stringify(makerified, null, 2))
-
     const svg = makerjs.exporter.toSVG(
         makerjs.model.mirror(makerified, false, true),
         { units: 'px' }

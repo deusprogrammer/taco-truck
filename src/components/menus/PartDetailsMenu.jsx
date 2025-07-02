@@ -84,11 +84,6 @@ const PartDetailsMenu = ({
         return null
     }
 
-    console.log(
-        `PartDetailsMenu: selectedPart`,
-        JSON.stringify(selectedPart, null, 2)
-    )
-
     return (
         <div
             className="absolute right-[10px] hidden max-w-[300px] flex-col gap-1 overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:flex"

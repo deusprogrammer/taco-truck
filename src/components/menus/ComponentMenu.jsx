@@ -27,9 +27,6 @@ const ComponentMenu = ({
 
     const [toggleMenu, setToggleMenu] = useState(false)
 
-    const [mode, setMode] = useAtom(modeAtom)
-    const [, setSelected] = useAtom(selectedAtom)
-
     const updatePanelSize = (dimensions) => {
         onLayoutChange({ ...layout, panelDimensions: dimensions })
     }
@@ -65,17 +62,6 @@ const ComponentMenu = ({
         },
         [onLayoutChange, onSelect, layout]
     )
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                onLayoutChange({ ...layout, artwork: reader.result })
-            }
-            reader.readAsDataURL(file)
-        }
-    }
 
     const handlePanelFileChange = async (e) => {
         const file = e.target.files[0]
@@ -198,6 +184,98 @@ const ComponentMenu = ({
         ))
     }
 
+    const setValuePath = (path, field, value, modelTree) => {
+        if (!Array.isArray(path) || path.length === 0) return
+
+        // Remove the first element ('root')
+        const steps = [...path]
+        steps.shift()
+
+        let node = modelTree
+        let key = null
+
+        // Traverse the path
+        for (let i = 0; i < steps.length; i++) {
+            if (!node || !node.children) return
+            key = steps[i]
+            node = node.children[Number(key)]
+        }
+
+        // Set highlight properties if we found the node
+        if (node) {
+            node[field] = value
+        }
+
+        // Call onLayoutChange with the updated layout
+        onLayoutChange({ ...layout, panelModel: modelTree })
+    }
+
+    const unsetValuePath = (field, value, modelTree) => {
+        // Recursively reset all hovered fields to false
+        function resetHovered(node) {
+            if (!node || typeof node !== 'object') return
+            if (field in node) node[field] = value
+            if (Array.isArray(node.children)) {
+                node.children.forEach(resetHovered)
+            }
+        }
+        resetHovered(modelTree)
+
+        // Call onLayoutChange with the updated layout
+        onLayoutChange({ ...layout, panelModel: modelTree })
+    }
+
+    const renderPanelModel = (panelModel, path = 'root') => {
+        if (!panelModel) {
+            return <></>
+        }
+
+        return (
+            <div
+                className="ml-3 flex flex-col border-2 border-black bg-white"
+                onMouseOver={(e) => {
+                    let copy = { ...layout.panelModel }
+                    unsetValuePath('hovered', false, copy)
+                    setValuePath(path.split(','), 'hovered', true, copy)
+                    e.stopPropagation()
+                }}
+                onMouseOut={(e) => {
+                    let copy = { ...layout.panelModel }
+                    unsetValuePath('hovered', false, copy)
+                    e.stopPropagation()
+                }}
+            >
+                <div className="flex flex-row gap-2">
+                    <div className="font-extrabold">
+                        {panelModel.hovered && '->'}
+                        {panelModel.type || 'root'}
+                    </div>
+                    <div>
+                        <input
+                            type="checkbox"
+                            checked={panelModel.graphical}
+                            onChange={({ target: { checked } }) => {
+                                let copy = { ...layout.panelModel }
+                                setValuePath(
+                                    path.split(','),
+                                    'graphical',
+                                    checked,
+                                    copy
+                                )
+                            }}
+                        />
+                        <label>graphical</label>
+                    </div>
+                </div>
+                <div className="ml-3">
+                    {panelModel.children?.map((child, index) =>
+                        renderPanelModel(child, `${path},${index}`)
+                    )}
+                </div>
+            </div>
+        )
+    }
+
     return !toggleMenu ? (
         <div
             className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:block"
@@ -243,44 +321,6 @@ const ComponentMenu = ({
                         >
                             Clear SVG
                         </button>
-                        <div className="ml-2">
-                            <div>
-                                <input
-                                    type="checkbox"
-                                    onChange={({ target: { checked } }) =>
-                                        onLayoutChange({
-                                            ...layout,
-                                            panelSvgFlipH: checked,
-                                        })
-                                    }
-                                />
-                                <label>SVG Flip H</label>
-                            </div>
-                            <div>
-                                <input
-                                    type="checkbox"
-                                    onChange={({ target: { checked } }) =>
-                                        onLayoutChange({
-                                            ...layout,
-                                            panelSvgFlipV: checked,
-                                        })
-                                    }
-                                />
-                                <label>SVG Flip V</label>
-                            </div>
-                            <label>Rotate</label>
-                            <BufferedInput
-                                id={`panel-rotation`}
-                                value={layout?.panelRotation || 0}
-                                placeholder="rotation"
-                                onChange={(value) => {
-                                    onLayoutChange({
-                                        ...layout,
-                                        panelRotation: value,
-                                    })
-                                }}
-                            />
-                        </div>
                     </>
                 )}
                 <label>Width:</label>
@@ -308,78 +348,8 @@ const ComponentMenu = ({
                     value={layout?.cornerRadius || 0}
                     onChange={(value) => updateCornerRadius(value)}
                 />
-                <label>Artwork:</label>
-                {layout?.artwork ? (
-                    <>
-                        <button
-                            className={`border-2 border-solid border-black ${mode === ART_ADJUST ? 'border-white bg-black text-white' : 'bg-white'} p-3 hover:bg-slate-600 hover:text-white`}
-                            onClick={() => {
-                                if (mode === ART_ADJUST) {
-                                    setMode(null)
-                                } else {
-                                    setMode(ART_ADJUST)
-                                }
-                                setSelected(null)
-                            }}
-                        >
-                            Adjust Artwork
-                        </button>
-                        <button
-                            className={`border-2 border-solid border-black bg-white p-3 hover:bg-slate-600 hover:text-white`}
-                            onClick={() =>
-                                onLayoutChange({ ...layout, artwork: null })
-                            }
-                        >
-                            Clear Artwork
-                        </button>
-                    </>
-                ) : (
-                    <input type="file" onChange={handleFileChange} />
-                )}
-                <label>Artwork Dimensions:</label>
-                {layout.artworkWidth}px X {layout.artworkHeight}px
-                <label>Artwork Zoom:</label>
-                <BufferedInput
-                    id={`panel-art-zoom`}
-                    type="number"
-                    immediate={true}
-                    value={layout.artworkZoom * 100 || 100}
-                    onChange={(value) => {
-                        onLayoutChange({ ...layout, artworkZoom: value / 100 })
-                    }}
-                />
-                <label>Artwork X Offset:</label>
-                <BufferedInput
-                    id={`panel-art-x`}
-                    type="number"
-                    immediate={true}
-                    value={layout.artworkOffset?.[0] || '0'}
-                    onChange={(value) => {
-                        onLayoutChange({
-                            ...layout,
-                            artworkOffset: [
-                                value,
-                                layout.artworkOffset?.[1] || '0',
-                            ],
-                        })
-                    }}
-                />
-                <label>Artwork Y Offset:</label>
-                <BufferedInput
-                    id={`panel-art-y`}
-                    type="number"
-                    immediate={true}
-                    value={layout.artworkOffset?.[1] || '0'}
-                    onChange={(value) => {
-                        onLayoutChange({
-                            ...layout,
-                            artworkOffset: [
-                                layout.artworkOffset?.[0] || '0',
-                                value,
-                            ],
-                        })
-                    }}
-                />
+                <label>Panel Model:</label>
+                {renderPanelModel(layout.panelModel)}
                 <label>Parts:</label>
                 {renderParts(layout)}
             </div>

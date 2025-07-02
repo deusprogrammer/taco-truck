@@ -177,7 +177,7 @@ export const normalizePartPositionsToZero = (parts) => {
 }
 
 export const calculateSizeOfPart = (part) => {
-    console.log(JSON.stringify(part, null, 5));
+    // console.log(JSON.stringify(part, null, 5));
     if (!part || part?.type === undefined) {
         return [0, 0];
     }
@@ -384,10 +384,14 @@ const convertPartToPath = ({type, partId, position}, panelHeight) => {
 }
 
 export const makerifyModelTree = (modelTree) => {
-    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform } = modelTree;
+    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical } = modelTree;
     const { translate, rotate, scale, skewX, skewY } = transform || {};
     
     let model = {};
+
+    if (graphical) {
+        return model;
+    }
 
     if (header) {
         model = {
