@@ -5,6 +5,7 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase.config'
 
 import config from '../../package.json'
+import { convertPointsObjectsToArrays } from '../components/utils'
 
 const ComponentManagerRoute = () => {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -22,7 +23,9 @@ const ComponentManagerRoute = () => {
 
     useEffect(() => {
         setSearch(searchParams.get('search') || '')
-        setShowPanelsWithoutButtonsOrParts(searchParams.get('showBasePanels') === 'true')
+        setShowPanelsWithoutButtonsOrParts(
+            searchParams.get('showBasePanels') === 'true'
+        )
     }, [searchParams])
 
     useEffect(() => {
@@ -40,14 +43,16 @@ const ComponentManagerRoute = () => {
                 collection(db, 'components')
             )
 
-            const projects = projectsSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }))
-            const components = componentsSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }))
+            const projects = projectsSnapshot.docs.map((doc) => {
+                const data = { id: doc.id, ...doc.data() }
+                if (data.layout) convertPointsObjectsToArrays(data.layout)
+                return data
+            })
+            const components = componentsSnapshot.docs.map((doc) => {
+                const data = { id: doc.id, ...doc.data() }
+                if (data.layout) convertPointsObjectsToArrays(data.layout)
+                return data
+            })
 
             return { projects, components }
         }
@@ -153,7 +158,7 @@ const ComponentManagerRoute = () => {
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value)
-                            setSearchParams(params => {
+                            setSearchParams((params) => {
                                 const newParams = new URLSearchParams(params)
                                 if (e.target.value) {
                                     newParams.set('search', e.target.value)
@@ -175,9 +180,13 @@ const ComponentManagerRoute = () => {
                             type="checkbox"
                             checked={showPanelsWithoutButtonsOrParts}
                             onChange={(e) => {
-                                setShowPanelsWithoutButtonsOrParts(e.target.checked)
-                                setSearchParams(params => {
-                                    const newParams = new URLSearchParams(params)
+                                setShowPanelsWithoutButtonsOrParts(
+                                    e.target.checked
+                                )
+                                setSearchParams((params) => {
+                                    const newParams = new URLSearchParams(
+                                        params
+                                    )
                                     if (search) {
                                         newParams.set('search', search)
                                     } else {

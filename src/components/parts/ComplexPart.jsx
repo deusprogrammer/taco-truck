@@ -1,4 +1,5 @@
 import { Container, Graphics } from '@pixi/react'
+import { convertPathToInstructions } from '../svg-utils'
 
 const getColor = (node) => {
     const { graphical, hovered } = node
@@ -22,12 +23,16 @@ const getOpacity = (node) => {
     }
 }
 
-const drawPath = (g, instructions, node) => {
+const drawPath = (g, d, node) => {
     g.clear()
     const color = getColor(node)
     const opacity = getOpacity(node)
     g.lineStyle(2, color, opacity)
     let subpathStart = null
+
+    const instructions = convertPathToInstructions(
+        d.replace(/(?<![eE])-/g, ' -')
+    )
 
     instructions?.forEach(
         ({
@@ -121,16 +126,14 @@ const drawEllipticalRoundedRect = (g, x, y, width, height, rx, ry, node) => {
     g.endFill()
 }
 
-const renderModelTree = (modelTree) => {
-    if (!modelTree) {
-        return null
-    }
+const renderModelTree = (modelTree, path = 'root') => {
+    if (!modelTree) return null
 
     let graphicsToDraw = []
 
     const {
         type,
-        instructions,
+        d,
         children,
         transform,
         r,
@@ -146,11 +149,15 @@ const renderModelTree = (modelTree) => {
 
     if (type === 'path') {
         graphicsToDraw.push(
-            <Graphics draw={(g) => drawPath(g, instructions, modelTree)} />
+            <Graphics
+                key={`${path}-path`}
+                draw={(g) => drawPath(g, d, modelTree)}
+            />
         )
     } else if (type === 'circle') {
         graphicsToDraw.push(
             <Graphics
+                key={`${path}-circle`}
                 draw={(g) => {
                     g.clear()
                     const color = getColor(modelTree)
@@ -165,6 +172,7 @@ const renderModelTree = (modelTree) => {
     } else if (type === 'rectangle') {
         graphicsToDraw.push(
             <Graphics
+                key={`${path}-rectangle`}
                 draw={(g) => {
                     drawEllipticalRoundedRect(
                         g,
@@ -182,6 +190,7 @@ const renderModelTree = (modelTree) => {
     } else if (type === 'polyline') {
         graphicsToDraw.push(
             <Graphics
+                key={`${path}-polyline`}
                 draw={(g) => {
                     g.clear()
                     const color = getColor(modelTree)
@@ -200,6 +209,7 @@ const renderModelTree = (modelTree) => {
     } else if (type === 'polygon') {
         graphicsToDraw.push(
             <Graphics
+                key={`${path}-polygon`}
                 draw={(g) => {
                     g.clear()
                     const color = getColor(modelTree)
@@ -218,8 +228,11 @@ const renderModelTree = (modelTree) => {
     }
 
     if (children) {
-        children.forEach((child) => {
-            graphicsToDraw = [...graphicsToDraw, renderModelTree(child)]
+        children.forEach((child, idx) => {
+            graphicsToDraw = [
+                ...graphicsToDraw,
+                renderModelTree(child, `${path}.${idx}`),
+            ]
         })
     }
 

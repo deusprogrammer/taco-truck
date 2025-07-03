@@ -1,6 +1,6 @@
 {
     "name": "taco-truck",
-    "version": "1.6.3-beta",
+    "version": "2.0.0-beta",
     "private": true,
     "dependencies": {
         "@jscad/csg": "^0.7.0",

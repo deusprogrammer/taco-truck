@@ -14,6 +14,7 @@ import SaveModal from './menus/SaveModal'
 import ImportModal from './menus/ImportModal'
 import {
     calculateSizeOfPart,
+    convertNestedArraysToObjects,
     generateUUID,
     normalizePartPositionsToZero,
     storeMedia,
@@ -169,6 +170,21 @@ const PartDesigner = ({
         layout: layout,
     })
 
+    // Helper to recursively set all undefined fields to null
+    function setUndefinedToNull(obj) {
+        if (Array.isArray(obj)) {
+            obj.forEach(setUndefinedToNull)
+        } else if (obj && typeof obj === 'object') {
+            Object.keys(obj).forEach((key) => {
+                if (obj[key] === undefined) {
+                    obj[key] = null
+                } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    setUndefinedToNull(obj[key])
+                }
+            })
+        }
+    }
+
     const saveCloud = async (name, type) => {
         try {
             // Normalize values to zero
@@ -206,11 +222,14 @@ const PartDesigner = ({
                 layout: layoutCopy,
             }
 
+            const dataToSave = convertNestedArraysToObjects(data)
+            setUndefinedToNull(dataToSave) // <-- Ensure no undefined fields
+
             let docRef
             if (type === 'customParts') {
-                docRef = await addDoc(collection(db, 'components'), data)
+                docRef = await addDoc(collection(db, 'components'), dataToSave)
             } else if (type === 'panelDesigns') {
-                docRef = await addDoc(collection(db, 'projects'), data)
+                docRef = await addDoc(collection(db, 'projects'), dataToSave)
             }
 
             console.log('Document successfully written!')
@@ -249,8 +268,10 @@ const PartDesigner = ({
             name,
             layout: layoutCopy,
         }
-        data[type].push(newEntry)
 
+        setUndefinedToNull(newEntry) // <-- Ensure no undefined fields
+
+        data[type].push(newEntry)
         localStorage.setItem('taco-truck-data', JSON.stringify(data))
         navigate(
             `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${newEntry.id}?isLocal=true`
@@ -461,10 +482,8 @@ const PartDesigner = ({
     }, [centerWorkPiece])
 
     useEffect(() => {
-        if (mode === ART_ADJUST) {
-            centerWorkPiece()
-        }
-    }, [mode, centerWorkPiece])
+        centerWorkPiece()
+    }, [centerWorkPiece, layout])
 
     const flattenParts = (layout) => {
         let parts = []

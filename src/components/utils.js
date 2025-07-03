@@ -5,6 +5,49 @@ import Drawing from 'dxf-writer'
 
 import makerjs from 'makerjs'
 
+// Lazy fix for firebase being too primitive to store nested lists 
+export const convertNestedArraysToObjects = (obj) => {
+    if (Array.isArray(obj)) {
+        // If this is an array of arrays of numbers, convert to array of objects
+        if (
+            obj.length > 0 &&
+            Array.isArray(obj[0]) &&
+            obj[0].length === 2 &&
+            obj.every((e) => Array.isArray(e) && e.length === 2)
+        ) {
+            return obj.map(([x, y]) => ({ x, y }))
+        }
+        return obj.map(convertNestedArraysToObjects)
+    } else if (obj && typeof obj === 'object') {
+        Object.keys(obj).forEach((key) => {
+            obj[key] = convertNestedArraysToObjects(obj[key])
+        })
+    }
+    return obj
+}
+
+// Lazy fix for firebase being too primitive to store nested lists
+export const convertPointsObjectsToArrays = (obj) => {
+    if (Array.isArray(obj)) {
+        return obj.map(convertPointsObjectsToArrays)
+    } else if (obj && typeof obj === 'object') {
+        // Convert points: [{x, y}, ...] => [[x, y], ...]
+        if (
+            Array.isArray(obj.points) &&
+            obj.points.length > 0 &&
+            typeof obj.points[0] === 'object' &&
+            'x' in obj.points[0] &&
+            'y' in obj.points[0]
+        ) {
+            obj.points = obj.points.map(({ x, y }) => [x, y])
+        }
+        Object.keys(obj).forEach((key) => {
+            obj[key] = convertPointsObjectsToArrays(obj[key])
+        })
+    }
+    return obj
+}
+
 export const getImageDimensions = (imageUrl) => {
     return new Promise((resolve) => {
         const img = new Image()

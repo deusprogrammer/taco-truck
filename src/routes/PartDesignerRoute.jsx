@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import PartDesigner from '../components/PartDesigner'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase.config'
+import { convertPointsObjectsToArrays } from '../components/utils'
 
 const PartDesignerRoute = () => {
     const { type, id } = useParams()
@@ -57,6 +58,7 @@ const PartDesignerRoute = () => {
 
             if (docSnap.exists()) {
                 const data = docSnap.data()
+                convertPointsObjectsToArrays(data.layout) // <-- Convert points back to nested arrays
                 setLayout(data.layout)
             } else {
                 console.log('No such document!')

@@ -1,4 +1,4 @@
-const convertPathToInstructions = (path) => {
+export const convertPathToInstructions = (path) => {
   if (!path) return null;
   const instructions = [];
   const tokens = path.match(/[a-zA-Z]|-?\d*\.?\d+(?:[eE][+-]?\d+)?/g);
@@ -415,10 +415,10 @@ export const parseSvgStructure = (svgData) => {
         type: 'path',
         transform: extractTransform(svgData.attributes.transform),
         d: svgData.attributes.d.replace(/(?<![eE])-/g, ' -'),
-        instructions: convertPathToInstructions(
-          svgData.attributes.d.replace(/(?<![eE])-/g, ' -'),
-          extractTransform(svgData.attributes.transform)
-        ),
+        // instructions: convertPathToInstructions(
+        //   svgData.attributes.d.replace(/(?<![eE])-/g, ' -'),
+        //   extractTransform(svgData.attributes.transform)
+        // ),
         fill: svgData.attributes.fill,
         stroke: svgData.attributes.stroke,
         strokeWidth: svgData.attributes['stroke-width'],
