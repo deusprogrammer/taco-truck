@@ -16,6 +16,35 @@ const AboutModal = ({ open, onClose }) => {
                     <p>Offered under the GNU GPL V3 License</p>
                     <p>© 2025 Michael C Main</p>
                 </div>
+                <div className="flex flex-col gap-3">
+                    <h4 className="text-[1.5rem]">Tutorial Videos</h4>
+                    <div>
+                        <h5 className="text-[1.2rem]">Basics</h5>
+                        <iframe
+                            width="560"
+                            height="315"
+                            src="https://www.youtube.com/embed/kgut42UmlTs?si=j_XAHdrFrB7CRRI5"
+                            title="YouTube video player"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                    <div>
+                        <h5 className="text-[1.2rem]">Creating Components</h5>
+                        <iframe
+                            width="560"
+                            height="315"
+                            src="https://www.youtube.com/embed/k04WsGsiFP0?si=-4He7m5TyH4hBEcZ"
+                            title="YouTube video player"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </div>
                 <div className="flex w-1/3 flex-col gap-2 text-center">
                     <h4 className="text-[1.3rem]">About Taco Truck</h4>
                     <p className="text-left">
