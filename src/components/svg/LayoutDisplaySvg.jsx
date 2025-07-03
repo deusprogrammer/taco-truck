@@ -42,10 +42,9 @@ const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
             extrude: 6,
         })
         // Serialize to STL (returns an array of strings)
-        const stlDataArray = stlSerializer.serialize(
-            { binary: 'true' },
-            jscadModel
-        )
+        const stlDataArray = stlSerializer.serialize({ binary: 'true' }, [
+            jscadModel,
+        ])
         // Join the array to get the STL string
         const stlString = stlDataArray.join('\n')
         // Create and save the blob
@@ -56,11 +55,15 @@ const LayoutDisplaySvg = ({ layout, scale, hideButton }) => {
     }
 
     const simplified = simplify(layout)
-    const makerified = makerify(simplified)
+    const makerified = makerify(simplified, null, { includeGraphical: true })
 
     const svg = makerjs.exporter.toSVG(
         makerjs.model.mirror(makerified, false, true),
-        { units: 'px' }
+        {
+            units: 'px',
+            strokeWidth: '1mm',
+            stroke: 'white',
+        }
     )
 
     return (

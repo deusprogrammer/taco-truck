@@ -346,7 +346,7 @@ export const simplify = (layout, parent) => {
     }
 
     simplified.children = [];
-    partsToFlatten?.forEach((part, index) => {
+    partsToFlatten?.forEach((part) => {
         const simplifiedChild = simplify(part, parent)
         simplified.children.push(simplifiedChild)
     });
@@ -360,7 +360,7 @@ export const simplify = (layout, parent) => {
     return simplified
 }
 
-const convertPartToPath = ({type, partId, position}, panelHeight) => {
+const convertPartToPath = ({type, partId, position}) => {
     const { shape, size } = partTable[type]?.[partId] || {};
     const makerjsPos = position;
 
@@ -383,13 +383,14 @@ const convertPartToPath = ({type, partId, position}, panelHeight) => {
     }
 }
 
-export const makerifyModelTree = (modelTree) => {
+export const makerifyModelTree = (modelTree, options = {}) => {
     const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical } = modelTree;
     const { translate, rotate, scale, skewX, skewY } = transform || {};
+    const { includeGraphical } = options;
     
     let model = {};
 
-    if (graphical) {
+    if (!includeGraphical && graphical) {
         return model;
     }
 
@@ -399,7 +400,7 @@ export const makerifyModelTree = (modelTree) => {
         }
 
         children.forEach((child, index) => {
-            model.models[`child-${index}`] = makerifyModelTree(child)
+            model.models[`child-${index}`] = makerifyModelTree(child, options)
         })
 
         return model;
@@ -413,7 +414,7 @@ export const makerifyModelTree = (modelTree) => {
         }
 
         children.forEach((child, index) => {
-            model.models[`child-${index}`] = makerifyModelTree(child)
+            model.models[`child-${index}`] = makerifyModelTree(child, options)
         })
     } else if (type === 'rectangle') {
         if (rx && ry) {
@@ -462,7 +463,7 @@ export const makerifyModelTree = (modelTree) => {
     }
 
     if (rotate) {
-        makerjs.model.rotate(model, rotate);
+        model = makerjs.model.rotate(model, rotate, [0, 0]);
     }
 
     if (scale) {
@@ -470,11 +471,11 @@ export const makerifyModelTree = (modelTree) => {
     }
 
     if (skewX > 0) {
-        makerjs.model.distort(model, skewX, 1)
+        model = makerjs.model.distort(model, skewX, 1)
     }
     
     if (skewY > 0) {
-        makerjs.model.distort(model, 1, skewY)
+        model = makerjs.model.distort(model, 1, skewY)
     }
 
     if (translate) {
@@ -485,28 +486,19 @@ export const makerifyModelTree = (modelTree) => {
     return model;
 }
 
-export const makerify = (simplifiedLayout, parent) => {
+export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
     const { panelDimensions, panelModel, type, position, rotation, children } = simplifiedLayout
 
     let model = {
         models: {},
         paths: {},
-        origin: [0, 0],
-        rotate: 0
+        layer
     };
 
-    if (parent) {
-        if (type === 'custom') {
-            // Makerjs building
-            model.origin = position
-            model.rotate = rotation
-        } else if (type === 'svg') {
-            // Unimplemented
-        }
-    } else {
+    if (!parent) {
         parent = simplifiedLayout;
         if (panelModel) {
-            model.models.panel = makerjs.model.mirror(makerifyModelTree(panelModel), false, true)
+            model.models.panel = makerjs.model.mirror(makerifyModelTree(panelModel, options), false, true)
         } else {
             model.models.panel = new makerjs.models.Rectangle(panelDimensions[0], panelDimensions[1])
         }
@@ -514,14 +506,25 @@ export const makerify = (simplifiedLayout, parent) => {
     }
 
     children.filter((child) => child.type === 'custom').forEach((child, index) => {
-        model.models[`customss-${index}`] = makerify(child, parent);
+        model.models[`customs-${index}`] = makerify(child, parent, options, layer++);
     })
     children.filter((child) => child.type !== 'custom' && child.type !== 'svg').forEach((child, index) => {
-        model.models[`parts-${index}`] = convertPartToPath(child, parent.panelDimensions[1]);
+        model.models[`parts-${index}`] = convertPartToPath(child);
     })
     children.filter((child) => child.type === 'svg').forEach((child, index) => {
         // Unimplemented
     })
+
+    if (parent) {
+        if (type === 'custom') {
+            // Makerjs building
+            const [x, y] = position;
+            model = makerjs.model.rotate(model, rotation, [0, 0]);
+            model = makerjs.model.moveRelative(model, [x, y]);
+        } else if (type === 'svg') {
+            // Unimplemented
+        }
+    } 
 
     return model;
 }

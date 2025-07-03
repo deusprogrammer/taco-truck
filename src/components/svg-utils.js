@@ -1,33 +1,3 @@
-const argsToPoints = (args) => {
-  if (!args || args.length < 2) return [];
-  return args.reduce((acc, val, index) => {
-    if (index % 2 === 0) {
-      acc.push([val, args[index + 1]]);
-    }
-    return acc;
-  }, []);
-};
-
-const argsToPointsRelative = (args, currentPoint) => {
-  if (!args || args.length < 2) return [];
-  return args.reduce((acc, val, index) => {
-    if (index % 2 === 0) {
-      acc.push([currentPoint[0] + val, currentPoint[1] + args[index + 1]]);
-    }
-    return acc;
-  }, []);
-};
-
-const getLastPoint = (args) => {
-  if (!args || args.length < 2) return null;
-  return [args[args.length - 2], args[args.length - 1]];
-};
-
-const getLastPointRelative = (args, currentPoint) => {
-  if (!args || args.length < 2) return null;
-  return [currentPoint[0] + args[args.length - 2], currentPoint[1] + args[args.length - 1]];
-};
-
 const convertPathToInstructions = (path) => {
   if (!path) return null;
   const instructions = [];

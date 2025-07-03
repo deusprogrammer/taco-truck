@@ -1,27 +1,32 @@
 import { Container, Graphics } from '@pixi/react'
 
-function collectInstructionTypes(node) {
-    let types = []
+const getColor = (node) => {
+    const { graphical, hovered } = node
 
-    // If this node has an instructions array, collect their types
-    if (node.instructions && Array.isArray(node.instructions)) {
-        types.push(...node.instructions.map((instr) => instr.type))
+    if (hovered) {
+        return 0x00ff00
+    } else if (graphical) {
+        return 0xffffff
+    } else {
+        return 0x000000
     }
-
-    // If this node has children, recurse into them
-    if (node.children && Array.isArray(node.children)) {
-        for (const child of node.children) {
-            types.push(...collectInstructionTypes(child))
-        }
-    }
-
-    return types
 }
 
-const drawPath = (g, instructions, hovered) => {
+const getOpacity = (node) => {
+    const { graphical } = node
+
+    if (graphical) {
+        return 0.25
+    } else {
+        return 1
+    }
+}
+
+const drawPath = (g, instructions, node) => {
     g.clear()
-    g.lineStyle(2, 0xffffff, 1)
-    // g.beginFill(0x000000)
+    const color = getColor(node)
+    const opacity = getOpacity(node)
+    g.lineStyle(2, color, opacity)
     let subpathStart = null
 
     instructions?.forEach(
@@ -39,14 +44,10 @@ const drawPath = (g, instructions, hovered) => {
                 g.moveTo(point[0], point[1])
                 subpathStart = [point[0], point[1]]
             } else if (type === 'line') {
-                const color = hovered ? 0x00ff00 : 0x000000
-                g.lineStyle(2, color, 1)
                 g.lineTo(point[0], point[1])
             } else if (type === 'quadratic') {
                 if (!points || points.length !== 2) return
                 g.moveTo(points[0][0], points[0][1])
-                const color = hovered ? 0x00ff00 : 0x000000
-                g.lineStyle(2, color, 1)
                 g.quadraticCurveTo(
                     points[1][0],
                     points[1][1],
@@ -55,8 +56,6 @@ const drawPath = (g, instructions, hovered) => {
                 )
             } else if (type === 'bezier') {
                 if (!points || points.length !== 3) return
-                const color = hovered ? 0x00ff00 : 0x000000
-                g.lineStyle(2, color, 1)
                 g.bezierCurveTo(
                     points[0][0],
                     points[0][1],
@@ -69,8 +68,6 @@ const drawPath = (g, instructions, hovered) => {
                 // Unimplemented
             } else if (type === 'close') {
                 if (subpathStart) {
-                    const color = hovered ? 0x00ff00 : 0x000000
-                    g.lineStyle(2, color, 1)
                     g.lineTo(subpathStart[0], subpathStart[1])
                 }
             }
@@ -79,10 +76,11 @@ const drawPath = (g, instructions, hovered) => {
     // g.endFill()
 }
 
-const drawEllipticalRoundedRect = (g, x, y, width, height, rx, ry, hovered) => {
+const drawEllipticalRoundedRect = (g, x, y, width, height, rx, ry, node) => {
     g.clear()
-    const color = hovered ? 0x00ff00 : 0x000000
-    g.lineStyle(2, color, 1)
+    const color = getColor(node)
+    const opacity = getOpacity(node)
+    g.lineStyle(2, color, opacity)
     g.beginFill(0x000000)
 
     // Ensure rx and ry are numbers and do not exceed half width/height
@@ -144,20 +142,20 @@ const renderModelTree = (modelTree) => {
         ry,
         width,
         height,
-        hovered,
     } = modelTree
 
     if (type === 'path') {
         graphicsToDraw.push(
-            <Graphics draw={(g) => drawPath(g, instructions, hovered)} />
+            <Graphics draw={(g) => drawPath(g, instructions, modelTree)} />
         )
     } else if (type === 'circle') {
         graphicsToDraw.push(
             <Graphics
                 draw={(g) => {
                     g.clear()
-                    const color = hovered ? 0x00ff00 : 0x000000
-                    g.lineStyle(2, color, 1)
+                    const color = getColor(modelTree)
+                    const opacity = getOpacity(modelTree)
+                    g.lineStyle(2, color, opacity)
                     g.beginFill(0x000000)
                     g.drawCircle(cx, cy, r)
                     g.endFill()
@@ -176,7 +174,7 @@ const renderModelTree = (modelTree) => {
                         height,
                         rx,
                         ry,
-                        hovered
+                        modelTree
                     )
                 }}
             />
@@ -186,8 +184,9 @@ const renderModelTree = (modelTree) => {
             <Graphics
                 draw={(g) => {
                     g.clear()
-                    const color = hovered ? 0x00ff00 : 0x000000
-                    g.lineStyle(2, color, 1)
+                    const color = getColor(modelTree)
+                    const opacity = getOpacity(modelTree)
+                    g.lineStyle(2, color, opacity)
                     const pts = modelTree.points
                     if (pts && pts.length > 0) {
                         g.moveTo(pts[0][0], pts[0][1])
@@ -203,7 +202,7 @@ const renderModelTree = (modelTree) => {
             <Graphics
                 draw={(g) => {
                     g.clear()
-                    const color = hovered ? 0x00ff00 : 0x000000
+                    const color = getColor(modelTree)
                     g.lineStyle(2, color, 1)
                     const pts = modelTree.points
                     if (pts && pts.length > 0) {

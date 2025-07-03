@@ -3,13 +3,8 @@ import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { getImageDimensions } from '../utils'
 import { useAtom } from 'jotai'
-import {
-    modeAtom,
-    renderMeasurementsAtom,
-    selectedAtom,
-} from '../../atoms/ViewOptions.atom'
+import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
 import { useResize } from '../../hooks/ContainerHooks'
-import { ART_ADJUST } from '../elements/Modes'
 import { parseSvgStructure } from '../svg-utils'
 import { parse } from 'svgson'
 
@@ -184,70 +179,87 @@ const ComponentMenu = ({
         ))
     }
 
-    const setValuePath = (path, field, value, modelTree) => {
-        if (!Array.isArray(path) || path.length === 0) return
-
-        // Remove the first element ('root')
+    // Helper to traverse a path and return [parentNode, key] for the target node
+    const getNodeByPath = (path, modelTree) => {
+        if (!Array.isArray(path) || path.length === 0) return [null, null]
         const steps = [...path]
-        steps.shift()
+        if (typeof steps[0] === 'string' && steps[0] === 'root') steps.shift()
 
         let node = modelTree
+        let parent = null
         let key = null
 
-        // Traverse the path
         for (let i = 0; i < steps.length; i++) {
-            if (!node || !node.children) return
+            if (!node || !node.children) return [null, null]
+            parent = node
             key = steps[i]
             node = node.children[Number(key)]
         }
+        return [parent, key]
+    }
 
-        // Set highlight properties if we found the node
-        if (node) {
-            node[field] = value
+    const deleteNodeByPath = (path, modelTree) => {
+        const [parent, key] = getNodeByPath(path, modelTree)
+        if (parent && key !== null && parent.children) {
+            parent.children[Number(key)] = null
+            onLayoutChange({ ...layout, panelModel: modelTree })
         }
+    }
 
-        // Call onLayoutChange with the updated layout
-        onLayoutChange({ ...layout, panelModel: modelTree })
+    const setValuePath = (path, patch, modelTree) => {
+        const [parent, key] = getNodeByPath(path, modelTree)
+        if (
+            parent &&
+            key !== null &&
+            parent.children &&
+            typeof patch === 'object' &&
+            patch !== null
+        ) {
+            Object.assign(parent.children[Number(key)], patch)
+            onLayoutChange({ ...layout, panelModel: modelTree })
+        }
     }
 
     const unsetValuePath = (field, value, modelTree) => {
         // Recursively reset all hovered fields to false
-        function resetHovered(node) {
+        function resetField(node) {
             if (!node || typeof node !== 'object') return
             if (field in node) node[field] = value
             if (Array.isArray(node.children)) {
-                node.children.forEach(resetHovered)
+                node.children.forEach(resetField)
             }
         }
-        resetHovered(modelTree)
-
-        // Call onLayoutChange with the updated layout
+        resetField(modelTree)
         onLayoutChange({ ...layout, panelModel: modelTree })
     }
 
+    // Update renderPanelModel to use the new setValuePath form
     const renderPanelModel = (panelModel, path = 'root') => {
         if (!panelModel) {
             return <></>
         }
 
         return (
-            <div
-                className="ml-3 flex flex-col border-2 border-black bg-white"
-                onMouseOver={(e) => {
-                    let copy = { ...layout.panelModel }
-                    unsetValuePath('hovered', false, copy)
-                    setValuePath(path.split(','), 'hovered', true, copy)
-                    e.stopPropagation()
-                }}
-                onMouseOut={(e) => {
-                    let copy = { ...layout.panelModel }
-                    unsetValuePath('hovered', false, copy)
-                    e.stopPropagation()
-                }}
-            >
+            <div className="ml-3 flex flex-col border-2 border-black bg-white">
                 <div className="flex flex-row gap-2">
-                    <div className="font-extrabold">
-                        {panelModel.hovered && '->'}
+                    <div
+                        onMouseOver={(e) => {
+                            let copy = { ...layout.panelModel }
+                            unsetValuePath('hovered', false, copy)
+                            setValuePath(
+                                path.split(','),
+                                { hovered: true },
+                                copy
+                            )
+                            e.stopPropagation()
+                        }}
+                        onMouseOut={(e) => {
+                            let copy = { ...layout.panelModel }
+                            unsetValuePath('hovered', false, copy)
+                            e.stopPropagation()
+                        }}
+                        className="cursor-pointer font-extrabold"
+                    >
                         {panelModel.type || 'root'}
                     </div>
                     <div>
@@ -258,13 +270,23 @@ const ComponentMenu = ({
                                 let copy = { ...layout.panelModel }
                                 setValuePath(
                                     path.split(','),
-                                    'graphical',
-                                    checked,
+                                    { graphical: checked },
                                     copy
                                 )
                             }}
                         />
                         <label>graphical</label>
+                    </div>
+                    <div>
+                        <button
+                            className="border-1 m-[1px] bg-slate-500 text-white"
+                            onClick={() => {
+                                let copy = { ...layout.panelModel }
+                                deleteNodeByPath(path.split(','), copy)
+                            }}
+                        >
+                            Delete
+                        </button>
                     </div>
                 </div>
                 <div className="ml-3">
