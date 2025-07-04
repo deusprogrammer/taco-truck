@@ -6,6 +6,7 @@ import { db } from '../firebase.config'
 
 import config from '../../package.json'
 import { convertPointsObjectsToArrays } from '../components/utils'
+import { toast } from 'react-toastify'
 
 const ComponentManagerRoute = () => {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -253,6 +254,7 @@ const ComponentManagerRoute = () => {
                                         navigator.clipboard.writeText(
                                             `${window.location.origin}/designer/projects/${project.id}`
                                         )
+                                        toast.success('Copied URL to Clipboard')
                                     }}
                                 >
                                     Share
