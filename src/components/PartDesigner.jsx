@@ -526,7 +526,7 @@ const PartDesigner = ({
                 }}
             />
             <header className="absolute left-0 top-0 w-screen p-2 text-center text-xl font-extrabold text-white lg:hidden">
-                <div>View Only Mode</div>
+                <div>View Only Mode (Please use Desktop or Tablet to Edit)</div>
                 <div>{layout.name}</div>
             </header>
 

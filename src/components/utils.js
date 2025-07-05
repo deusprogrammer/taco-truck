@@ -530,7 +530,7 @@ export const makerifyModelTree = (modelTree, options = {}) => {
 }
 
 export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
-    const { panelDimensions, panelModel, type, position, rotation, children } = simplifiedLayout
+    const { panelDimensions, panelModel, type, position, rotation, cornerRadius, children } = simplifiedLayout
 
     let model = {
         models: {},
@@ -543,7 +543,11 @@ export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
         if (panelModel) {
             model.models.panel = makerjs.model.mirror(makerifyModelTree(panelModel, options), false, true)
         } else {
-            model.models.panel = new makerjs.models.Rectangle(panelDimensions[0], panelDimensions[1])
+            if (cornerRadius) {
+                model.models.panel = new makerjs.models.RoundRectangle(panelDimensions[0], panelDimensions[1], cornerRadius)
+            } else {
+                model.models.panel = new makerjs.models.Rectangle(panelDimensions[0], panelDimensions[1])
+            }
         }
         model.units = simplifiedLayout.units;
     }
