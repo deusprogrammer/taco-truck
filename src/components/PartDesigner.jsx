@@ -50,6 +50,12 @@ import AboutModal from './menus/About'
 import PartMenu from './menus/PartMenu'
 import { useKeyShortcuts } from '../hooks/AtomHooks'
 import ExportModal from './menus/ExportModal'
+import {
+    createComponent,
+    createProject,
+    updateComponent,
+    updateProject,
+} from '../api/Api'
 
 const SCALE_RATIO = 1000
 
@@ -197,44 +203,26 @@ const PartDesigner = ({
                         : layout.parts,
             }
 
-            if (layout.artwork) {
-                if (!layout.artwork.startsWith('https')) {
-                    let { _id: id } = await storeMedia(
-                        layout.artwork,
-                        layout.name + '_ART'
-                    )
-                    layoutCopy.artwork = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
-                }
-            }
+            delete layoutCopy._id
 
-            if (layout.panelSvg) {
-                if (!layout.panelSvg.startsWith('https')) {
-                    let { _id: id } = await storeMedia(
-                        layout.panelSvg,
-                        layout.name + '_PANEL'
-                    )
-                    layoutCopy.panelSvg = `https://deusprogrammer.com/api/img-svc/media/${id}/file`
-                }
-            }
+            // TODO if the current user is the owner, try to update, otherwise create a copy
+            let createNew = true
 
-            const data = {
-                name,
-                layout: layoutCopy,
-            }
+            setUndefinedToNull(layoutCopy) // <-- Ensure no undefined fields
 
-            const dataToSave = convertNestedArraysToObjects(data)
-            setUndefinedToNull(dataToSave) // <-- Ensure no undefined fields
-
-            let docRef
+            let component
             if (type === 'customParts') {
-                docRef = await addDoc(collection(db, 'components'), dataToSave)
+                component = createNew
+                    ? await createProject(layoutCopy)
+                    : await updateProject(layout.id, layoutCopy)
             } else if (type === 'panelDesigns') {
-                docRef = await addDoc(collection(db, 'projects'), dataToSave)
+                component = createNew
+                    ? await createComponent(layoutCopy)
+                    : await updateComponent(layout.id, layoutCopy)
             }
 
-            console.log('Document successfully written!')
             navigate(
-                `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${docRef.id}`
+                `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${component._id}`
             )
         } catch (e) {
             console.error('Error adding document: ', e)
@@ -516,6 +504,12 @@ const PartDesigner = ({
                     save: (
                         <SaveModal
                             name={layout.name}
+                            componentType={
+                                layout.panelDimensions[0] === 0 ||
+                                layout.panelDimensions[1] === 0
+                                    ? 'customParts'
+                                    : 'panelDesigns'
+                            }
                             onSaveComplete={completeSave}
                         />
                     ),

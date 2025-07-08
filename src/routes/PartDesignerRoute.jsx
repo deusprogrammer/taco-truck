@@ -4,6 +4,7 @@ import PartDesigner from '../components/PartDesigner'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase.config'
 import { convertPointsObjectsToArrays } from '../components/utils'
+import { getComponent, getProject } from '../api/Api'
 
 const PartDesignerRoute = () => {
     const { type, id } = useParams()
@@ -49,21 +50,14 @@ const PartDesignerRoute = () => {
 
     const loadCloud = async (type, id) => {
         try {
-            const docRef = doc(
-                db,
-                type === 'parts' ? 'components' : 'projects',
-                id
-            )
-            const docSnap = await getDoc(docRef)
-
-            if (docSnap.exists()) {
-                const data = docSnap.data()
-                convertPointsObjectsToArrays(data.layout) // <-- Convert points back to nested arrays
-                console.log(JSON.stringify(data.layout, null, 5))
-                setLayout(data.layout)
+            let component
+            if (type === 'parts') {
+                component = await getComponent(id)
             } else {
-                console.log('No such document!')
+                component = await getProject(id)
             }
+
+            setLayout(component)
         } catch (e) {
             console.error('Error getting document:', e)
         }

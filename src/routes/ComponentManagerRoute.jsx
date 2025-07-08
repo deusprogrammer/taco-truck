@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import LayoutDisplaySvg from '../components/svg/LayoutDisplaySvg'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../firebase.config'
 
 import config from '../../package.json'
-import { convertPointsObjectsToArrays } from '../components/utils'
 import { toast } from 'react-toastify'
+import { getComponents, getProjects } from '../api/Api'
 
 const ComponentManagerRoute = () => {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -39,20 +37,14 @@ const ComponentManagerRoute = () => {
         }
 
         const loadCloudData = async () => {
-            const projectsSnapshot = await getDocs(collection(db, 'projects'))
-            const componentsSnapshot = await getDocs(
-                collection(db, 'components')
-            )
+            const projectsSnapshot = await getProjects()
+            const componentsSnapshot = await getComponents()
 
-            const projects = projectsSnapshot.docs.map((doc) => {
-                const data = { id: doc.id, ...doc.data() }
-                if (data.layout) convertPointsObjectsToArrays(data.layout)
-                return data
+            const projects = projectsSnapshot.map((doc) => {
+                return { id: doc._id, ...doc }
             })
-            const components = componentsSnapshot.docs.map((doc) => {
-                const data = { id: doc.id, ...doc.data() }
-                if (data.layout) convertPointsObjectsToArrays(data.layout)
-                return data
+            const components = componentsSnapshot.map((doc) => {
+                return { id: doc._id, ...doc }
             })
 
             return { projects, components }
@@ -66,10 +58,8 @@ const ComponentManagerRoute = () => {
                     isLocal: true,
                 })),
             ].sort((a, b) => {
-                const areaA =
-                    a.layout.panelDimensions[0] * a.layout.panelDimensions[1]
-                const areaB =
-                    b.layout.panelDimensions[0] * b.layout.panelDimensions[1]
+                const areaA = a.panelDimensions[0] * a.panelDimensions[1]
+                const areaB = b.panelDimensions[0] * b.panelDimensions[1]
                 if (areaA !== areaB) return areaA - areaB
                 return a.name.localeCompare(b.name)
             })
@@ -134,7 +124,7 @@ const ComponentManagerRoute = () => {
     if (showPanelsWithoutButtonsOrParts) {
         filteredProjects = filteredProjects.filter((project) => {
             // If there are no parts, or all parts are type 'hole', keep it
-            const parts = project.layout?.parts || []
+            const parts = project?.parts || []
             return parts.every((part) => part.type === 'hole')
         })
     }
@@ -220,20 +210,16 @@ const ComponentManagerRoute = () => {
                                     {project.isLocal ? '(Local)' : ''}
                                     <br />
                                     <br />
-                                    {Math.trunc(
-                                        project.layout.panelDimensions?.[0]
-                                    )}
+                                    {Math.trunc(project.panelDimensions?.[0])}
                                     mm X{' '}
-                                    {Math.trunc(
-                                        project.layout.panelDimensions?.[1]
-                                    )}
+                                    {Math.trunc(project.panelDimensions?.[1])}
                                     mm
                                 </div>
                             </td>
                             <td className="p-8">
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
                                     <LayoutDisplaySvg
-                                        layout={project.layout}
+                                        layout={project}
                                         scale={1}
                                         hideButton={true}
                                         noArt={true}
@@ -299,10 +285,7 @@ const ComponentManagerRoute = () => {
                             </td>
                             <td className="items-center justify-center p-8">
                                 <div className="flex w-full flex-shrink flex-grow justify-center p-14">
-                                    <LayoutDisplaySvg
-                                        layout={part.layout}
-                                        scale={1}
-                                    />
+                                    <LayoutDisplaySvg layout={part} scale={1} />
                                 </div>
                             </td>
                             <td className="flex items-center justify-center gap-4">
