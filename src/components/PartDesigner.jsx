@@ -212,12 +212,16 @@ const PartDesigner = ({
             let component
             if (type === 'customParts') {
                 component = createNew
-                    ? await createProject(layoutCopy)
-                    : await updateProject(layout.id, layoutCopy)
+                    ? await createProject(layoutCopy, guestId)
+                    : await updateProject(layout.id, layoutCopy, guestId)
             } else if (type === 'panelDesigns') {
                 component = createNew
-                    ? await createComponent(layoutCopy)
-                    : await updateComponent(layout.id, layoutCopy)
+                    ? await createComponent(layoutCopy, guestId)
+                    : await updateComponent(layout.id, layoutCopy, guestId)
+            }
+
+            if (component.guestId) {
+                localStorage.setItem('taco-truck-guest-id', component.guestId)
             }
 
             navigate(
