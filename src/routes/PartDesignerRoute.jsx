@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import PartDesigner from '../components/PartDesigner'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../firebase.config'
-import { convertPointsObjectsToArrays } from '../components/utils'
 import { getComponent, getProject } from '../api/Api'
 
 const PartDesignerRoute = () => {

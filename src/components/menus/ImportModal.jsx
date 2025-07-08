@@ -1,6 +1,5 @@
-import { collection, getDocs } from 'firebase/firestore'
 import React, { useEffect, useState } from 'react'
-import { db } from '../../firebase.config'
+import { getComponents } from '../../api/Api'
 
 const ImportModal = ({ open, onImportComplete, onClose }) => {
     const [customParts, setCustomParts] = useState([])
@@ -22,9 +21,7 @@ const ImportModal = ({ open, onImportComplete, onClose }) => {
         }
 
         const loadCloudData = async () => {
-            const componentsSnapshot = await getDocs(
-                collection(db, 'components')
-            )
+            const componentsSnapshot = await getComponents()
             return componentsSnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),

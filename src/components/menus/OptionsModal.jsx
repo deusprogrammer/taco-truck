@@ -4,9 +4,6 @@ import BufferedInput from '../elements/BufferedInput'
 import { useAtom } from 'jotai'
 import { screenHeightAtom } from '../../atoms/ViewOptions.atom'
 
-import { addDoc, collection, getDocs } from 'firebase/firestore'
-import { db } from '../../firebase.config'
-
 const OptionsModal = ({ open, onClose }) => {
     const [screenHeight, setScreenHeight] = useAtom(screenHeightAtom)
     const [presets, setPresets] = useState([])
@@ -16,17 +13,17 @@ const OptionsModal = ({ open, onClose }) => {
     const vRes = window.screen.availHeight
 
     const fetchPresets = async () => {
-        const querySnapshot = await getDocs(collection(db, 'screenMetrics'))
-        const retrieved = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }))
-        setPresets(retrieved)
+        // const querySnapshot = await getDocs(collection(db, 'screenMetrics'))
+        // const retrieved = querySnapshot.docs.map((doc) => ({
+        //     id: doc.id,
+        //     ...doc.data(),
+        // }))
+        // setPresets(retrieved)
     }
 
     const storePreset = async (preset) => {
-        await addDoc(collection(db, 'screenMetrics'), preset)
-        fetchPresets()
+        // await addDoc(collection(db, 'screenMetrics'), preset)
+        // fetchPresets()
     }
 
     useEffect(() => {

@@ -14,15 +14,11 @@ import SaveModal from './menus/SaveModal'
 import ImportModal from './menus/ImportModal'
 import {
     calculateSizeOfPart,
-    convertNestedArraysToObjects,
     generateUUID,
     normalizePartPositionsToZero,
-    storeMedia,
 } from './utils'
-import { addDoc, collection, db, doc } from '../firebase.config'
 import { useContainerSize, useRealScaleRatio } from '../hooks/MouseHooks'
 import { useNavigate } from 'react-router'
-import { getDoc } from 'firebase/firestore'
 import OptionsModal from './menus/OptionsModal'
 import {
     buttonOpacityAtom,
@@ -53,6 +49,7 @@ import ExportModal from './menus/ExportModal'
 import {
     createComponent,
     createProject,
+    getComponent,
     updateComponent,
     updateProject,
 } from '../api/Api'
@@ -288,10 +285,8 @@ const PartDesigner = ({
                     }
                 } else if (partId.startsWith('cloud-')) {
                     const cloudPartId = partId.replace('cloud-', '')
-                    const docRef = doc(db, 'components', cloudPartId)
-                    const docSnap = await getDoc(docRef)
-                    if (docSnap.exists()) {
-                        const part = docSnap.data()
+                    const part = await getComponent(cloudPartId)
+                    if (part) {
                         return {
                             type: 'custom',
                             id: generateUUID(),
