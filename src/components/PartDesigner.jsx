@@ -193,6 +193,8 @@ const PartDesigner = ({
 
     const saveCloud = async (name, type) => {
         try {
+            let guestId = localStorage.getItem('taco-truck-guest-id')
+
             // Normalize values to zero
             const layoutCopy = {
                 ...layout,

@@ -1,6 +1,6 @@
 {
     "name": "taco-truck",
-    "version": "2.0.0-beta",
+    "version": "3.0.1-alpha",
     "private": true,
     "homepage": "https://deusprogrammer.com/taco-truck",
     "dependencies": {
