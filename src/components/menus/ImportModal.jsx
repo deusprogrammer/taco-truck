@@ -21,10 +21,10 @@ const ImportModal = ({ open, onImportComplete, onClose }) => {
         }
 
         const loadCloudData = async () => {
-            const componentsSnapshot = await getComponents()
-            return componentsSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
+            const components = await getComponents()
+            return components.map((component) => ({
+                id: component._id,
+                ...component,
             }))
         }
 
