@@ -2,7 +2,7 @@
     "name": "taco-truck",
     "version": "3.0.1-alpha",
     "private": true,
-    "homepage": "https://deusprogrammer.com/taco-truck",
+    "homepage": "/taco-truck",
     "dependencies": {
         "@jscad/csg": "^0.7.0",
         "@jscad/stl-serializer": "^2.1.20",

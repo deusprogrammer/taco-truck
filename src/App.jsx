@@ -6,12 +6,12 @@ import Calibration from './routes/Calibration'
 import PanelEditor from './routes/PanelEditor'
 import './App.css'
 
-import { ToastContainer, toast } from 'react-toastify'
+import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/taco-truck">
             <ToastContainer />
             <Routes>
                 <Route index element={<Home />} />
