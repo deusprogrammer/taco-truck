@@ -59,6 +59,7 @@ const PartDesignerRoute = () => {
             if (docSnap.exists()) {
                 const data = docSnap.data()
                 convertPointsObjectsToArrays(data.layout) // <-- Convert points back to nested arrays
+                console.log(JSON.stringify(data.layout, null, 5))
                 setLayout(data.layout)
             } else {
                 console.log('No such document!')
