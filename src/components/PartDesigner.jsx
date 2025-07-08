@@ -190,8 +190,6 @@ const PartDesigner = ({
 
     const saveCloud = async (name, type) => {
         try {
-            let guestId = localStorage.getItem('taco-truck-guest-id')
-
             // Normalize values to zero
             const layoutCopy = {
                 ...layout,
@@ -212,16 +210,12 @@ const PartDesigner = ({
             let component
             if (type === 'customParts') {
                 component = createNew
-                    ? await createProject(layoutCopy, guestId)
-                    : await updateProject(layout.id, layoutCopy, guestId)
+                    ? await createProject(layoutCopy)
+                    : await updateProject(layout.id, layoutCopy)
             } else if (type === 'panelDesigns') {
                 component = createNew
-                    ? await createComponent(layoutCopy, guestId)
-                    : await updateComponent(layout.id, layoutCopy, guestId)
-            }
-
-            if (component.guestId) {
-                localStorage.setItem('taco-truck-guest-id', component.guestId)
+                    ? await createComponent(layoutCopy)
+                    : await updateComponent(layout.id, layoutCopy)
             }
 
             navigate(
