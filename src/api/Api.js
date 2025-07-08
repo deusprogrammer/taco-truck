@@ -17,7 +17,7 @@ export const getComponents = async () => {
 
 export const getComponent = async (id) => {
     const { data } = await axios.get(BASE_URL + `/components/${id}`, getAxiosOptions());
-    return data;
+    return {layout: data};
 }
 
 export const createComponent = async (component) => {
