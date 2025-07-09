@@ -261,7 +261,7 @@ const ComponentManagerRoute = () => {
                                 ) ||
                                 securityContext.username === project.owner ? (
                                     <button
-                                        className="bg-slate-500 p-4 text-white"
+                                        className="h-20 bg-slate-500 p-4 text-white"
                                         onClick={() => {
                                             deleteProject(project.id)
                                         }}
