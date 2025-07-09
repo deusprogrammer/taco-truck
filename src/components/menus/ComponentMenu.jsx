@@ -325,6 +325,8 @@ const ComponentMenu = ({
                         onLayoutChange({ ...layout, name: value })
                     }}
                 />
+                <label>Created By:</label>
+                <div className="ml-3">{layout?.owner}</div>
                 <label>Panel SVG</label>
                 {!layout?.panelModel && (
                     <input type="file" onChange={handlePanelFileChange} />
