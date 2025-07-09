@@ -10,6 +10,18 @@ const getAxiosOptions = () => {
     }
 }
 
+export const getSecurityContext = async () => {
+    try {
+        let { data } = await axios.get(`https://deusprogrammer.com/api/profile-svc/users/~self`, getAxiosOptions());
+
+        return data;
+    } catch (e) {
+        if (e?.response?.status === 404) {
+            return null;
+        }
+    }
+}
+
 export const getComponents = async () => {
     const { data } = await axios.get(BASE_URL + `/components`, getAxiosOptions());
     return data;

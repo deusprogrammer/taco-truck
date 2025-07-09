@@ -53,6 +53,7 @@ import {
     updateComponent,
     updateProject,
 } from '../api/Api'
+import { useSecurity } from '../contexts/SecurityContext'
 
 const SCALE_RATIO = 1000
 
@@ -71,6 +72,7 @@ const PartDesigner = ({
     const [width, height] = useContainerSize(containerRef)
     const [[screenWidth, screenHeight], setScreenSize] = useAtom(screenSizeAtom)
     const [initialLoad, setInitialLoad] = useState(true)
+    const securityContext = useSecurity()
 
     const [workspacePosition, setWorkspacePosition] = useAtom(
         workspacePositionAtom
@@ -610,6 +612,24 @@ const PartDesigner = ({
                         >
                             Transparent
                         </ToggleButton>
+                        {!securityContext ? (
+                            <button
+                                className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
+                                onClick={() => {
+                                    window.localStorage.setItem(
+                                        'twitchRedirect',
+                                        'https://deusprogrammer.com/taco-truck/designer'
+                                    )
+                                    window.location.replace(
+                                        'https://deusprogrammer.com/util/auth/login'
+                                    )
+                                }}
+                            >
+                                Login
+                            </button>
+                        ) : (
+                            <div>Logged in as {securityContext.username}</div>
+                        )}
                     </div>
                 </>
             ) : (

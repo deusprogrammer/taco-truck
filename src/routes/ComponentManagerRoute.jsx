@@ -5,6 +5,7 @@ import LayoutDisplaySvg from '../components/svg/LayoutDisplaySvg'
 import config from '../../package.json'
 import { toast } from 'react-toastify'
 import { getComponents, getProjects } from '../api/Api'
+import { useSecurity } from '../contexts/SecurityContext'
 
 const ComponentManagerRoute = () => {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -19,6 +20,8 @@ const ComponentManagerRoute = () => {
         showPanelsWithoutButtonsOrParts,
         setShowPanelsWithoutButtonsOrParts,
     ] = useState(initialShowBasePanels)
+
+    const securityContext = useSecurity()
 
     useEffect(() => {
         setSearch(searchParams.get('search') || '')
@@ -85,31 +88,31 @@ const ComponentManagerRoute = () => {
     }, [])
 
     const deleteProject = (idToDelete) => {
-        const filtered = [
-            ...combinedProjects.filter(({ id }) => id !== idToDelete),
-        ]
-        setCombinedProjects(filtered)
-        localStorage.setItem(
-            'taco-truck-data',
-            JSON.stringify({
-                panelDesigns: filtered.filter((project) => project.isLocal),
-                customParts,
-            })
-        )
+        // const filtered = [
+        //     ...combinedProjects.filter(({ id }) => id !== idToDelete),
+        // ]
+        // setCombinedProjects(filtered)
+        // localStorage.setItem(
+        //     'taco-truck-data',
+        //     JSON.stringify({
+        //         panelDesigns: filtered.filter((project) => project.isLocal),
+        //         customParts,
+        //     })
+        // )
     }
 
     const deletePart = (idToDelete) => {
-        const filtered = [
-            ...combinedParts.filter(({ id }) => id !== idToDelete),
-        ]
-        setCombinedParts(filtered)
-        localStorage.setItem(
-            'taco-truck-data',
-            JSON.stringify({
-                panelDesigns,
-                customParts: filtered.filter((part) => part.isLocal),
-            })
-        )
+        // const filtered = [
+        //     ...combinedParts.filter(({ id }) => id !== idToDelete),
+        // ]
+        // setCombinedParts(filtered)
+        // localStorage.setItem(
+        //     'taco-truck-data',
+        //     JSON.stringify({
+        //         panelDesigns,
+        //         customParts: filtered.filter((part) => part.isLocal),
+        //     })
+        // )
     }
 
     // Filter projects and parts by search
@@ -252,7 +255,11 @@ const ComponentManagerRoute = () => {
                                         Test
                                     </button>
                                 </Link>
-                                {project.isLocal ? (
+                                {project.isLocal ||
+                                securityContext.roles.includes(
+                                    'TACO_TRUCK_ADMIN'
+                                ) ||
+                                securityContext.username === project.owner ? (
                                     <button
                                         className="bg-slate-500 p-4 text-white"
                                         onClick={() => {
@@ -313,7 +320,11 @@ const ComponentManagerRoute = () => {
                                         Test
                                     </button>
                                 </Link>
-                                {part.isLocal ? (
+                                {part.isLocal ||
+                                securityContext.roles.includes(
+                                    'TACO_TRUCK_ADMIN'
+                                ) ||
+                                securityContext.username === part.owner ? (
                                     <button
                                         className="h-20 bg-slate-500 p-4 text-white"
                                         onClick={() => {

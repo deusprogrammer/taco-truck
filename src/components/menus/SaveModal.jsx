@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import BufferedInput from '../elements/BufferedInput'
+import { useSecurity } from '../../contexts/SecurityContext'
 
 const SaveModal = ({ open, name, componentType, onSaveComplete, onClose }) => {
     const [componentName, setComponentName] = useState('new')
+    const securityContext = useSecurity()
 
     useEffect(() => {
         setComponentName(name)
@@ -34,19 +36,27 @@ const SaveModal = ({ open, name, componentType, onSaveComplete, onClose }) => {
                     >
                         Save (Local)
                     </button>
-                    <button
-                        className="bg-slate-500 p-2"
-                        onClick={() => {
-                            onSaveComplete(componentName, componentType)
-                            onClose()
-                        }}
-                    >
-                        Save (Cloud)
-                    </button>
+                    {securityContext && (
+                        <button
+                            className="bg-slate-500 p-2"
+                            onClick={() => {
+                                onSaveComplete(componentName, componentType)
+                                onClose()
+                            }}
+                        >
+                            Save (Cloud)
+                        </button>
+                    )}
                     <button className="bg-slate-500 p-2" onClick={onClose}>
                         Cancel
                     </button>
                 </div>
+                {!securityContext && (
+                    <p className="m-auto w-[60%]">
+                        *If you would like to share your creation, login or
+                        create an account.
+                    </p>
+                )}
             </div>
         </div>
     )
