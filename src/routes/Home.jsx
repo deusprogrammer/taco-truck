@@ -24,11 +24,11 @@ const Home = () => {
                 Manager
             </Link>
             {securityContext ? (
+                <div>Welcome back ${securityContext.username}</div>
+            ) : (
                 <button className="p-4 text-[1.5rem]" onClick={login}>
                     Login
                 </button>
-            ) : (
-                <div>Welcome back ${securityContext.username}</div>
             )}
             <footer>© 2025 Michael C Main</footer>
         </div>
