@@ -24,7 +24,7 @@ const Home = () => {
                 Manager
             </Link>
             {securityContext ? (
-                <div>Welcome back ${securityContext.username}</div>
+                <div>Welcome back {securityContext.username}</div>
             ) : (
                 <button className="p-4 text-[1.5rem]" onClick={login}>
                     Login
