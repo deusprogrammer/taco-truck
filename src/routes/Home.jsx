@@ -2,8 +2,11 @@ import React from 'react'
 import { Link } from 'react-router'
 import config from '../../package.json'
 import { login } from '../components/utils'
+import { useSecurity } from '../contexts/SecurityContext'
 
 const Home = () => {
+    const securityContext = useSecurity()
+
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-10 bg-slate-600 text-white">
             <img
@@ -20,9 +23,13 @@ const Home = () => {
             <Link className="p-4 text-[1.5rem]" to={`/manager`}>
                 Manager
             </Link>
-            <button className="p-4 text-[1.5rem]" onClick={login}>
-                Login
-            </button>
+            {securityContext ? (
+                <button className="p-4 text-[1.5rem]" onClick={login}>
+                    Login
+                </button>
+            ) : (
+                <div>Welcome back ${securityContext.username}</div>
+            )}
             <footer>© 2025 Michael C Main</footer>
         </div>
     )
