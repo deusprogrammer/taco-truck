@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 import config from '../../package.json'
+import { login } from '../components/utils'
 
 const Home = () => {
     return (
@@ -19,6 +20,9 @@ const Home = () => {
             <Link className="p-4 text-[1.5rem]" to={`/manager`}>
                 Manager
             </Link>
+            <button className="p-4 text-[1.5rem]" onClick={login}>
+                Login
+            </button>
             <footer>© 2025 Michael C Main</footer>
         </div>
     )

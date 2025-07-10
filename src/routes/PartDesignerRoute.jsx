@@ -30,14 +30,14 @@ const PartDesignerRoute = () => {
                 const project = data.panelDesigns.find(
                     (design) => id === design.id
                 )
-                setLayout(project.layout)
+                setLayout(project)
                 break
             }
             case 'parts': {
                 const customPart = data.customParts.find(
                     (part) => id === part.id
                 )
-                setLayout(customPart.layout)
+                setLayout(customPart)
                 break
             }
             default:
@@ -50,6 +50,7 @@ const PartDesignerRoute = () => {
             let component
             if (type === 'parts') {
                 component = await getComponent(id)
+                component = component.layout
             } else {
                 component = await getProject(id)
             }

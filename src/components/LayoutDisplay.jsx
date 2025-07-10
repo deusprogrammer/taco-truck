@@ -295,7 +295,7 @@ const LayoutDisplay = ({
     ])
 
     useEffect(() => {
-        const index = layout.parts.findIndex(({ id }) => id === selected)
+        const index = layout.parts?.findIndex(({ id }) => id === selected)
         setSelectedIndex(index)
     }, [selected, layout.parts, setSelectedIndex])
 

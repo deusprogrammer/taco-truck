@@ -351,7 +351,7 @@ const ComponentMenu = ({
                 <BufferedInput
                     id={`panel-dimension-w`}
                     type="number"
-                    value={layout?.panelDimensions[0] || 0}
+                    value={layout?.panelDimensions?.[0] || 0}
                     onChange={(value) =>
                         updatePanelSize([value, layout?.panelDimensions[1]])
                     }
@@ -360,7 +360,7 @@ const ComponentMenu = ({
                 <BufferedInput
                     id={`panel-dimension-h`}
                     type="number"
-                    value={layout?.panelDimensions[1] || 0}
+                    value={layout?.panelDimensions?.[1] || 0}
                     onChange={(value) =>
                         updatePanelSize([layout?.panelDimensions[0], value])
                     }

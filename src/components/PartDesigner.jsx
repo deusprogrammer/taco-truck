@@ -15,6 +15,7 @@ import ImportModal from './menus/ImportModal'
 import {
     calculateSizeOfPart,
     generateUUID,
+    login,
     normalizePartPositionsToZero,
 } from './utils'
 import { useContainerSize, useRealScaleRatio } from '../hooks/MouseHooks'
@@ -242,6 +243,7 @@ const PartDesigner = ({
         // Normalize values to zero
         const layoutCopy = {
             ...layout,
+            id: generateUUID(),
             name,
             parts:
                 type === 'customParts'
@@ -250,18 +252,13 @@ const PartDesigner = ({
         }
 
         const data = JSON.parse(localStorage.getItem('taco-truck-data'))
-        const newEntry = {
-            id: generateUUID(),
-            name,
-            layout: layoutCopy,
-        }
 
-        setUndefinedToNull(newEntry) // <-- Ensure no undefined fields
+        setUndefinedToNull(layoutCopy) // <-- Ensure no undefined fields
 
-        data[type].push(newEntry)
+        data[type].push(layoutCopy)
         localStorage.setItem('taco-truck-data', JSON.stringify(data))
         navigate(
-            `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${newEntry.id}?isLocal=true`
+            `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${layoutCopy.id}?isLocal=true`
         )
     }
 
@@ -375,11 +372,11 @@ const PartDesigner = ({
 
         let contextWidth = partsWidth
         let contextHeight = partsHeight
-        if (layout.panelDimensions[0]) {
+        if (layout.panelDimensions?.[0]) {
             contextWidth = layout.panelDimensions[0]
         }
 
-        if (layout.panelDimensions[1]) {
+        if (layout.panelDimensions?.[1]) {
             contextHeight = layout.panelDimensions[1]
         }
 
@@ -477,13 +474,13 @@ const PartDesigner = ({
             return []
         }
 
-        for (let part of layout.parts) {
+        layout?.parts?.forEach((part) => {
             if (part.layout) {
                 parts = [...parts, part, ...flattenParts(part.layout)]
             } else {
                 parts.push(part)
             }
-        }
+        })
 
         return parts
     }
@@ -502,8 +499,8 @@ const PartDesigner = ({
                         <SaveModal
                             name={layout.name}
                             componentType={
-                                layout.panelDimensions[0] === 0 ||
-                                layout.panelDimensions[1] === 0
+                                layout.panelDimensions?.[0] === 0 ||
+                                layout.panelDimensions?.[1] === 0
                                     ? 'customParts'
                                     : 'panelDesigns'
                             }
@@ -615,15 +612,7 @@ const PartDesigner = ({
                         {!securityContext ? (
                             <button
                                 className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}
-                                onClick={() => {
-                                    window.localStorage.setItem(
-                                        'twitchRedirect',
-                                        'https://deusprogrammer.com/taco-truck/designer'
-                                    )
-                                    window.location.replace(
-                                        'https://deusprogrammer.com/util/auth/login'
-                                    )
-                                }}
+                                onClick={login}
                             >
                                 Login
                             </button>

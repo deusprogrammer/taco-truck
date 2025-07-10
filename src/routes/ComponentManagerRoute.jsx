@@ -4,7 +4,12 @@ import LayoutDisplaySvg from '../components/svg/LayoutDisplaySvg'
 
 import config from '../../package.json'
 import { toast } from 'react-toastify'
-import { getComponents, getProjects } from '../api/Api'
+import {
+    getComponents,
+    getProjects,
+    deleteProject as deleteCloudProject,
+    deleteComponent as deleteCloudPart,
+} from '../api/Api'
 import { useSecurity } from '../contexts/SecurityContext'
 
 const ComponentManagerRoute = () => {
@@ -61,8 +66,8 @@ const ComponentManagerRoute = () => {
                     isLocal: true,
                 })),
             ].sort((a, b) => {
-                const areaA = a.panelDimensions[0] * a.panelDimensions[1]
-                const areaB = b.panelDimensions[0] * b.panelDimensions[1]
+                const areaA = a.panelDimensions?.[0] * a.panelDimensions?.[1]
+                const areaB = b.panelDimensions?.[0] * b.panelDimensions?.[1]
                 if (areaA !== areaB) return areaA - areaB
                 return a.name.localeCompare(b.name)
             })
@@ -88,31 +93,58 @@ const ComponentManagerRoute = () => {
     }, [])
 
     const deleteProject = (idToDelete) => {
-        // const filtered = [
-        //     ...combinedProjects.filter(({ id }) => id !== idToDelete),
-        // ]
-        // setCombinedProjects(filtered)
-        // localStorage.setItem(
-        //     'taco-truck-data',
-        //     JSON.stringify({
-        //         panelDesigns: filtered.filter((project) => project.isLocal),
-        //         customParts,
-        //     })
-        // )
+        const found = combinedProjects.find(({ id }) => id === idToDelete)
+
+        if (!found) {
+            throw new Error('Could not find project to delete')
+        }
+
+        // If not local, try calling api to delete
+        if (!found.isLocal) {
+            deleteCloudProject(idToDelete)
+        }
+
+        // Filter projects
+        const filtered = [
+            ...combinedProjects.filter(({ id }) => id !== idToDelete),
+        ]
+        setCombinedProjects(filtered)
+
+        // If local, store it back to local storage
+        if (found.isLocal) {
+            localStorage.setItem(
+                'taco-truck-data',
+                JSON.stringify({
+                    panelDesigns: filtered.filter((project) => project.isLocal),
+                    customParts,
+                })
+            )
+        }
     }
 
     const deletePart = (idToDelete) => {
-        // const filtered = [
-        //     ...combinedParts.filter(({ id }) => id !== idToDelete),
-        // ]
-        // setCombinedParts(filtered)
-        // localStorage.setItem(
-        //     'taco-truck-data',
-        //     JSON.stringify({
-        //         panelDesigns,
-        //         customParts: filtered.filter((part) => part.isLocal),
-        //     })
-        // )
+        const found = combinedParts.find(({ id }) => id === idToDelete)
+
+        if (!found) {
+            throw new Error('Could not find part to delete')
+        }
+
+        const filtered = [
+            ...combinedParts.filter(({ id }) => id !== idToDelete),
+        ]
+        setCombinedParts(filtered)
+
+        if (found.isLocal) {
+            localStorage.setItem(
+                'taco-truck-data',
+                JSON.stringify({
+                    panelDesigns,
+                    customParts: filtered.filter((part) => part.isLocal),
+                })
+            )
+        } else {
+            deleteCloudPart(idToDelete)
+        }
     }
 
     // Filter projects and parts by search
@@ -256,10 +288,10 @@ const ComponentManagerRoute = () => {
                                     </button>
                                 </Link>
                                 {project.isLocal ||
-                                securityContext.roles.includes(
+                                securityContext?.roles?.includes(
                                     'TACO_TRUCK_ADMIN'
                                 ) ||
-                                securityContext.username === project.owner ? (
+                                securityContext?.username === project.owner ? (
                                     <button
                                         className="h-20 bg-slate-500 p-4 text-white"
                                         onClick={() => {
@@ -321,10 +353,10 @@ const ComponentManagerRoute = () => {
                                     </button>
                                 </Link>
                                 {part.isLocal ||
-                                securityContext.roles.includes(
+                                securityContext?.roles?.includes(
                                     'TACO_TRUCK_ADMIN'
                                 ) ||
-                                securityContext.username === part.owner ? (
+                                securityContext?.username === part.owner ? (
                                     <button
                                         className="h-20 bg-slate-500 p-4 text-white"
                                         onClick={() => {

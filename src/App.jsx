@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { SecurityProvider } from './contexts/SecurityContext'
 import { useEffect, useState } from 'react'
 import { getSecurityContext } from './api/Api'
+import Dev from './routes/Dev'
 
 const App = () => {
     const [securityContext, setSecurityContext] = useState()
@@ -40,6 +41,9 @@ const App = () => {
                         element={<ComponentManagerRoute />}
                     />
                     <Route path={`/calibration`} element={<Calibration />} />
+                    {process.env.NODE_ENV === 'development' ? (
+                        <Route exact path={`/dev`} element={<Dev />} />
+                    ) : null}
                 </Routes>
             </BrowserRouter>
         </SecurityProvider>

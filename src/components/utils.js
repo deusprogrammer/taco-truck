@@ -234,8 +234,7 @@ export const calculateSizeOfPart = (part) => {
         let maxY = -Infinity
 
         let layout = part.layout
-        // console.log("PARTS for " + part.name + ":");
-        layout.parts.forEach((childPart) => {
+        layout?.parts?.forEach((childPart) => {
             let [x, y] = calculateRelativePosition(
                 childPart,
                 layout.parts,
@@ -544,9 +543,9 @@ export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
             model.models.panel = makerjs.model.mirror(makerifyModelTree(panelModel, options), false, true)
         } else {
             if (cornerRadius) {
-                model.models.panel = new makerjs.models.RoundRectangle(panelDimensions[0], panelDimensions[1], cornerRadius)
+                model.models.panel = new makerjs.models.RoundRectangle(panelDimensions?.[0], panelDimensions?.[1], cornerRadius)
             } else {
-                model.models.panel = new makerjs.models.Rectangle(panelDimensions[0], panelDimensions[1])
+                model.models.panel = new makerjs.models.Rectangle(panelDimensions?.[0], panelDimensions?.[1])
             }
         }
         model.units = simplifiedLayout.units;
@@ -574,4 +573,18 @@ export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
     } 
 
     return model;
+}
+
+export const login = () => {
+    if (process.env.NODE_ENV === "development") {
+        window.location = `https://deusprogrammer.com/util/auth/dev?redirect=${window.location.protocol}//${window.location.hostname}:${window.location.port}${process.env.PUBLIC_URL}/dev`;
+        return;
+    }
+    window.localStorage.setItem(
+        'twitchRedirect',
+        'https://deusprogrammer.com/taco-truck/designer'
+    )
+    window.location.replace(
+        'https://deusprogrammer.com/util/auth/login'
+    )
 }
