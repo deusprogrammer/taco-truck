@@ -147,13 +147,61 @@ const ComponentManagerRoute = () => {
         }
     }
 
-    // Filter projects and parts by search
-    let filteredProjects = combinedProjects.filter((project) =>
-        project.name?.toLowerCase().includes(search.toLowerCase())
-    )
-    const filteredParts = combinedParts.filter((part) =>
-        part.name?.toLowerCase().includes(search.toLowerCase())
-    )
+    // Helper to get a value from an object using a path like "layout.panelDimensions[0]"
+    function getValueByPath(obj, path) {
+        if (!obj || !path) return undefined
+        // Split by . and handle [index]
+        const parts = path.split('.').flatMap((part) => {
+            const matches = [...part.matchAll(/([^\[\]]+)|\[(\d+)\]/g)]
+            return matches.map((m) =>
+                m[1] !== undefined ? m[1] : Number(m[2])
+            )
+        })
+        return parts.reduce(
+            (acc, key) => (acc != null ? acc[key] : undefined),
+            obj
+        )
+    }
+
+    // Enhanced multi-field search logic with path support
+    const fieldRegex = /([\w.\[\]]+):([^\s]+)/g
+    let fieldSearches = {}
+    let nameSearch = search
+
+    // Extract all field:value pairs
+    let match
+    while ((match = fieldRegex.exec(search)) !== null) {
+        fieldSearches[match[1]] = match[2].toLowerCase()
+        nameSearch = nameSearch.replace(match[0], '').trim()
+    }
+
+    // Helper to check if an object matches all fieldSearches (with path support)
+    const matchesFields = (obj) => {
+        return Object.entries(fieldSearches).every(([field, value]) => {
+            const fieldVal = getValueByPath(obj, field)
+            return fieldVal !== undefined && fieldVal !== null
+                ? fieldVal.toString().toLowerCase().includes(value)
+                : false
+        })
+    }
+
+    let filteredProjects = combinedProjects.filter((project) => {
+        const matchesField = matchesFields(project)
+        const matchesName = nameSearch
+            ? (project.name || '')
+                  .toLowerCase()
+                  .includes(nameSearch.toLowerCase())
+            : true
+        return matchesField && matchesName
+    })
+
+    const filteredParts = combinedParts.filter((part) => {
+        const matchesField = matchesFields(part)
+        const matchesName = nameSearch
+            ? (part.name || '').toLowerCase().includes(nameSearch.toLowerCase())
+            : true
+        return matchesField && matchesName
+    })
 
     // Add filter for panels with no buttons or custom parts
     if (showPanelsWithoutButtonsOrParts) {
@@ -180,7 +228,7 @@ const ComponentManagerRoute = () => {
                 <div className="mb-4 flex flex-col items-center justify-center gap-2">
                     <input
                         type="text"
-                        placeholder="Search by name..."
+                        placeholder="Search by name or by field (i.e. owner:anonymous)..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value)
@@ -199,7 +247,7 @@ const ComponentManagerRoute = () => {
                                 return newParams
                             })
                         }}
-                        className="w-80 rounded p-2 text-black"
+                        className="w-[80%] rounded p-2 text-black"
                     />
                     <label className="">
                         <input
@@ -249,6 +297,9 @@ const ComponentManagerRoute = () => {
                                     mm X{' '}
                                     {Math.trunc(project.panelDimensions?.[1])}
                                     mm
+                                    <br />
+                                    <br />
+                                    Created by {project.owner}
                                 </div>
                             </td>
                             <td className="p-8">
@@ -320,6 +371,9 @@ const ComponentManagerRoute = () => {
                                 <div>
                                     {part.name}
                                     {part.isLocal ? '(Local)' : ''}
+                                    <br />
+                                    <br />
+                                    Created by {part.owner}
                                 </div>
                             </td>
                             <td className="items-center justify-center p-8">
