@@ -2,7 +2,14 @@ import React, { useEffect, useState } from 'react'
 import BufferedInput from '../elements/BufferedInput'
 import { useSecurity } from '../../contexts/SecurityContext'
 
-const SaveModal = ({ open, name, componentType, onSaveComplete, onClose }) => {
+const SaveModal = ({
+    open,
+    name,
+    owner,
+    componentType,
+    onSaveComplete,
+    onClose,
+}) => {
     const [componentName, setComponentName] = useState('new')
     const securityContext = useSecurity()
 
@@ -30,11 +37,43 @@ const SaveModal = ({ open, name, componentType, onSaveComplete, onClose }) => {
                     <button
                         className="bg-slate-500 p-2"
                         onClick={() => {
-                            onSaveComplete(componentName, componentType, true)
+                            onSaveComplete(
+                                componentName,
+                                componentType,
+                                true,
+                                true
+                            )
                             onClose()
                         }}
                     >
                         Save (Local)
+                    </button>
+                    {securityContext && securityContext.username === owner && (
+                        <button
+                            className="bg-slate-500 p-2"
+                            onClick={() => {
+                                onSaveComplete(
+                                    componentName,
+                                    componentType,
+                                    false,
+                                    true
+                                )
+                                onClose()
+                            }}
+                        >
+                            Save (Cloud)
+                        </button>
+                    )}
+                </div>
+                <div className="flex flex-row gap-1 text-[1rem]">
+                    <button
+                        className="bg-slate-500 p-2"
+                        onClick={() => {
+                            onSaveComplete(componentName, componentType, true)
+                            onClose()
+                        }}
+                    >
+                        Save As (Local)
                     </button>
                     {securityContext && (
                         <button
@@ -44,13 +83,13 @@ const SaveModal = ({ open, name, componentType, onSaveComplete, onClose }) => {
                                 onClose()
                             }}
                         >
-                            Save (Cloud)
+                            Save As (Cloud)
                         </button>
                     )}
-                    <button className="bg-slate-500 p-2" onClick={onClose}>
-                        Cancel
-                    </button>
                 </div>
+                <button className="bg-slate-500 p-2" onClick={onClose}>
+                    Cancel
+                </button>
                 {!securityContext && (
                     <p className="m-auto w-[60%]">
                         *If you would like to share your creation, login or

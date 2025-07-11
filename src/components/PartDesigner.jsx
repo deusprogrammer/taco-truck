@@ -163,11 +163,11 @@ const PartDesigner = ({
         [zoom, zoomLock, mode, layout, onLayoutChange, setZoom]
     )
 
-    const completeSave = (name, type, isLocal) => {
+    const completeSave = (name, type, isLocal, isUpdate) => {
         if (isLocal) {
-            saveLocal(name, type)
+            saveLocal(name, type, isUpdate)
         } else {
-            saveCloud(name, type)
+            saveCloud(name, type, isUpdate)
         }
     }
 
@@ -191,7 +191,7 @@ const PartDesigner = ({
         }
     }
 
-    const saveCloud = async (name, type) => {
+    const saveCloud = async (name, type, isUpdate) => {
         try {
             // Normalize values to zero
             const layoutCopy = {
@@ -206,19 +206,19 @@ const PartDesigner = ({
             delete layoutCopy._id
 
             // TODO if the current user is the owner, try to update, otherwise create a copy
-            let createNew = true
+            let createNew = !isUpdate
 
             setUndefinedToNull(layoutCopy) // <-- Ensure no undefined fields
 
             let component
             if (type === 'customParts') {
                 component = createNew
-                    ? await createProject(layoutCopy)
-                    : await updateProject(layout.id, layoutCopy)
+                    ? await createComponent(layoutCopy)
+                    : await updateComponent(layout._id, layoutCopy)
             } else if (type === 'panelDesigns') {
                 component = createNew
-                    ? await createComponent(layoutCopy)
-                    : await updateComponent(layout.id, layoutCopy)
+                    ? await createProject(layoutCopy)
+                    : await updateProject(layout._id, layoutCopy)
             }
 
             navigate(
@@ -229,7 +229,7 @@ const PartDesigner = ({
         }
     }
 
-    const saveLocal = (name, type) => {
+    const saveLocal = (name, type, isUpdate) => {
         if (!localStorage.getItem('taco-truck-data')) {
             localStorage.setItem(
                 'taco-truck-data',
@@ -243,7 +243,7 @@ const PartDesigner = ({
         // Normalize values to zero
         const layoutCopy = {
             ...layout,
-            id: generateUUID(),
+            id: isUpdate ? layout.id : generateUUID(),
             name,
             parts:
                 type === 'customParts'
@@ -255,7 +255,13 @@ const PartDesigner = ({
 
         setUndefinedToNull(layoutCopy) // <-- Ensure no undefined fields
 
-        data[type].push(layoutCopy)
+        if (!isUpdate) {
+            data[type].push(layoutCopy)
+        } else {
+            data[type]
+                .filter((entry) => entry.id !== layout.id)
+                .push(layoutCopy)
+        }
         localStorage.setItem('taco-truck-data', JSON.stringify(data))
         navigate(
             `/designer/${type === 'customParts' ? 'parts' : 'projects'}/${layoutCopy.id}?isLocal=true`
@@ -498,6 +504,7 @@ const PartDesigner = ({
                     save: (
                         <SaveModal
                             name={layout.name}
+                            owner={layout.owner}
                             componentType={
                                 layout.panelDimensions?.[0] === 0 ||
                                 layout.panelDimensions?.[1] === 0

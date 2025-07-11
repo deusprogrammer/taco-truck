@@ -365,15 +365,109 @@ const ComponentMenu = ({
                         updatePanelSize([layout?.panelDimensions[0], value])
                     }
                 />
-                <label>Corner Radius:</label>
-                <BufferedInput
-                    id={`panel-corner-radius`}
-                    type="number"
-                    value={layout?.cornerRadius || 0}
-                    onChange={(value) => updateCornerRadius(value)}
-                />
-                <label>Panel Model:</label>
-                {renderPanelModel(layout.panelModel)}
+
+                {!layout.panelModel && (
+                    <>
+                        <label>Corner Radius:</label>
+                        <BufferedInput
+                            id={`panel-corner-radius`}
+                            type="number"
+                            value={layout?.cornerRadius || 0}
+                            onChange={(value) => updateCornerRadius(value)}
+                        />
+                    </>
+                )}
+
+                {layout.panelModel && (
+                    <>
+                        <label>Panel Model Attributes:</label>
+                        <div className="ml-5 flex flex-col">
+                            <label>Width:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
+                                type="number"
+                                value={layout.panelModel?.width}
+                                onChange={(value) => {
+                                    setValuePath(
+                                        'header',
+                                        { width: value },
+                                        layout.panelModel
+                                    )
+                                }}
+                            />
+                            <label>Height:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
+                                type="number"
+                                value={layout.panelModel?.height}
+                                onChange={(value) => {
+                                    setValuePath(
+                                        'header',
+                                        { height: value },
+                                        layout.panelModel
+                                    )
+                                }}
+                            />
+                        </div>
+                        <label>Panel Model View Box:</label>
+                        <div className="ml-5 flex flex-col">
+                            <label>x:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
+                                type="number"
+                                value={layout.panelModel?.header.viewBox.x}
+                                onChange={(value) => {
+                                    setValuePath(
+                                        'header,viewBox',
+                                        { x: value },
+                                        layout.panelModel
+                                    )
+                                }}
+                            />
+                            <label>y:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
+                                type="number"
+                                value={layout.panelModel?.header.viewBox.y}
+                                onChange={(value) => {
+                                    setValuePath(
+                                        'header,viewBox',
+                                        { y: value },
+                                        layout.panelModel
+                                    )
+                                }}
+                            />
+                            <label>Width:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
+                                type="number"
+                                value={layout.panelModel?.header.viewBox.width}
+                                onChange={(value) => {
+                                    setValuePath(
+                                        'header,viewBox',
+                                        { width: value },
+                                        layout.panelModel
+                                    )
+                                }}
+                            />
+                            <label>Height:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
+                                type="number"
+                                value={layout.panelModel?.header.viewBox.height}
+                                onChange={(value) => {
+                                    setValuePath(
+                                        'header,viewBox',
+                                        { height: value },
+                                        layout.panelModel
+                                    )
+                                }}
+                            />
+                        </div>
+                        <label>Panel Model:</label>
+                        {renderPanelModel(layout.panelModel)}
+                    </>
+                )}
                 <label>Parts:</label>
                 {renderParts(layout)}
             </div>

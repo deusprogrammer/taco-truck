@@ -248,7 +248,15 @@ const renderModelTree = (modelTree, path = 'root') => {
 }
 
 const ComplexPart = ({ modelTree, scale }) => {
-    return <Container scale={scale}>{renderModelTree(modelTree)}</Container>
+    return (
+        <Container
+            // x={modelTree?.header?.viewBox?.x}
+            // y={modelTree?.header?.viewBox?.y}
+            scale={scale}
+        >
+            {renderModelTree(modelTree)}
+        </Container>
+    )
 }
 
 export default ComplexPart
