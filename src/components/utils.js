@@ -1,8 +1,6 @@
 import { CIRCLE, partTable, SQUARE } from '../data/parts.table'
 import axios from 'axios';
 
-import Drawing from 'dxf-writer'
-
 import makerjs from 'makerjs'
 
 // Lazy fix for firebase being too primitive to store nested lists 

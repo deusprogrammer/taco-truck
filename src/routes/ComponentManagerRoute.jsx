@@ -21,6 +21,7 @@ const ComponentManagerRoute = () => {
     const [combinedProjects, setCombinedProjects] = useState([])
     const [combinedParts, setCombinedParts] = useState([])
     const [search, setSearch] = useState(initialSearch)
+    const [migrationData, setMigrationData] = useState(null)
     const [
         showPanelsWithoutButtonsOrParts,
         setShowPanelsWithoutButtonsOrParts,
@@ -163,6 +164,24 @@ const ComponentManagerRoute = () => {
         )
     }
 
+    const fileHandler = (event) => {
+        const file = event.target.files[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            try {
+                const jsonData = JSON.parse(e.target.result)
+                setMigrationData(jsonData)
+                toast.success('JSON file loaded successfully')
+            } catch (error) {
+                toast.error('Invalid JSON file')
+                console.error('Error parsing JSON:', error)
+            }
+        }
+        reader.readAsText(file)
+    }
+
     // Enhanced multi-field search logic with path support
     const fieldRegex = /([\w.\[\]]+):([^\s]+)/g
     let fieldSearches = {}
@@ -278,6 +297,20 @@ const ComponentManagerRoute = () => {
                         <label>Show Base Panels</label>
                     </label>
                 </div>
+                {securityContext &&
+                    securityContext.roles.includes('TACO_TRUCK_ADMIN') && (
+                        <div className="mx-auto">
+                            <h2 className="text-center text-[1.8rem]">
+                                Admin Section
+                            </h2>
+                            <label>Migration File</label>
+                            {migrationData ? (
+                                <button>Upload Migration Data</button>
+                            ) : (
+                                <input type="file" onLoad={fileHandler} />
+                            )}
+                        </div>
+                    )}
                 <h2 className="text-center text-[1.8rem]">Panel Designs</h2>
                 <table className="flex flex-col justify-center">
                     {filteredProjects.map((project) => (
