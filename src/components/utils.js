@@ -318,8 +318,8 @@ export const simplify = (layout, parent) => {
                 ...layout.layout,
                 panelDimensions: simplified.dimensions
             }
-        } else if (type === 'svg') {
-            // Do nothing    
+        } else if (type === 'user') {
+            
         } else {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = simplified.dimensions = panelDimensions || [0, 0]
@@ -508,8 +508,12 @@ export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
     children.filter((child) => child.type !== 'custom' && child.type !== 'svg').forEach((child, index) => {
         model.models[`parts-${index}`] = convertPartToPath(child);
     })
-    children.filter((child) => child.type === 'svg').forEach((child, index) => {
-        // Unimplemented
+    children.filter((child) => child.type === 'user').forEach((child, index) => {
+        const [x, y] = child.position;
+        let userModel = makerjs.model.mirror(makerifyModelTree(child.modelTree, options), false, true);
+        userModel = makerjs.model.rotate(userModel, rotation, [0, 0]);
+        userModel = makerjs.model.moveRelative(userModel, [x, y]);
+        model.models[`user-parts-${index}`] = userModel;
     })
 
     if (parent) {
@@ -518,9 +522,7 @@ export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
             const [x, y] = position;
             model = makerjs.model.rotate(model, rotation, [0, 0]);
             model = makerjs.model.moveRelative(model, [x, y]);
-        } else if (type === 'svg') {
-            // Unimplemented
-        }
+        } 
     } 
 
     return model;

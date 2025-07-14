@@ -282,7 +282,6 @@ const ComplexPart = ({
             y={y * scale}
             scale={scale}
             onclick={() => {
-                console.log('PENIS')
                 onClick && onClick(part)
             }}
             onmouseover={() => {

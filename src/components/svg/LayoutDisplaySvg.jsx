@@ -44,6 +44,8 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
     const simplified = simplify(layout)
     const makerified = makerify(simplified, null, { includeGraphical: true })
 
+    console.log('SIMPLIFIED: ' + JSON.stringify(simplified, null, 5))
+
     const svg = makerjs.exporter.toSVG(
         makerjs.model.mirror(makerified, false, true),
         {
