@@ -17,7 +17,10 @@ const Panel = ({ layout, scale, fill, onClick }) => {
     if (layout?.panelModel) {
         return (
             <>
-                <ComplexPart modelTree={layout?.panelModel} scale={scale} />
+                <ComplexPart
+                    part={{ modelTree: layout.panelModel, id: '_panel' }}
+                    scale={scale}
+                />
             </>
         )
     }

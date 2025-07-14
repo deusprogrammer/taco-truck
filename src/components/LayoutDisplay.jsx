@@ -18,6 +18,7 @@ import Panel from './parts/Panel'
 import { CIRCLE, partTable } from '../data/parts.table'
 import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
+import { nextPow2 } from '@pixi/utils'
 
 export const ButtonStatusContext = createContext()
 
@@ -104,6 +105,7 @@ const LayoutDisplay = ({
                 ) {
                     let updatedParts = [...layout.parts]
                     let found = { ...layout.parts[selectedIndex] }
+
                     if (found && !found?.relativeTo) {
                         if (
                             !partTable[found.type] ||
@@ -229,7 +231,7 @@ const LayoutDisplay = ({
             }
 
             const partsCopy = [...layout.parts]
-            partsCopy.push({
+            let newPart = {
                 id: generateUUID(),
                 name: `${placingPartType}-${placingPartId}`,
                 type: placingPartType,
@@ -243,7 +245,13 @@ const LayoutDisplay = ({
                     ),
                 ],
                 origin: [0, 0],
-            })
+            }
+
+            if (placingPartType === 'user') {
+                newPart = { ...partTable['user'][placingPartId], ...newPart }
+            }
+
+            partsCopy.push(newPart)
             const updatedLayout = { ...layout, parts: partsCopy }
             onLayoutChange(updatedLayout)
         },

@@ -187,7 +187,7 @@ export const normalizePartPositionsToZero = (parts) => {
         let yAdj = 0
 
         // If the part is not a custom part.
-        if (part.type && part.type !== 'custom') {
+        if (part.type && part.type !== 'custom' && part.type !== 'user') {
             const { size, shape } = partTable[part.type][part.partId]
             xAdj = size
             yAdj = size
@@ -243,7 +243,7 @@ export const calculateSizeOfPart = (part) => {
             // If the part is not a custom part.
             let xAdj = 0
             let yAdj = 0
-            if (childPart.type && childPart.type !== 'custom') {
+            if (childPart.type && childPart.type !== 'custom' && childPart.type !== 'user') {
                 const { size, shape } =
                     partTable[childPart.type][childPart.partId]
                 xAdj = size
@@ -271,6 +271,11 @@ export const calculateSizeOfPart = (part) => {
         })
 
         return [maxX - minX, maxY - minY]
+    } else if (part.type === 'user') {
+        let { viewBox } = part?.modelTree?.header || { viewBox: {} };
+        let { width, height } = viewBox;
+
+        return [width, height]
     } else {
         let { size } = partTable?.[part.type]?.[part.partId]
 

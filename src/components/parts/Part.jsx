@@ -18,6 +18,7 @@ import {
 import { useButtonStatus } from '../LayoutDisplay'
 import { ART_ADJUST } from '../elements/Modes'
 import { MAPPINGS } from '../elements/Constants'
+import ComplexPart from './ComplexPart'
 
 const Part = ({
     scale,
@@ -163,6 +164,18 @@ const Part = ({
                 selectedPartId={selectedPartId}
                 hoveredPartId={hoveredPartId}
                 parent={parent}
+                onHoverPart={onHoverPart}
+                onClick={onClick}
+                onClickPart={onClickPart}
+            />
+        )
+    } else if (type === 'user') {
+        return (
+            <ComplexPart
+                scale={scale}
+                part={part}
+                selectedPartId={selectedPartId}
+                hoveredPartId={hoveredPartId}
                 onHoverPart={onHoverPart}
                 onClick={onClick}
                 onClickPart={onClickPart}

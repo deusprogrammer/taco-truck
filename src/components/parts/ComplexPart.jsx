@@ -1,5 +1,8 @@
 import { Container, Graphics } from '@pixi/react'
 import { convertPathToInstructions } from '../svg-utils'
+import { partTable } from '../../data/parts.table'
+import { Rectangle } from 'pixi.js'
+import { calculateSizeOfPart } from '../utils'
 
 const getColor = (node) => {
     const { graphical, hovered } = node
@@ -152,6 +155,7 @@ const renderModelTree = (modelTree, path = 'root') => {
             <Graphics
                 key={`${path}-path`}
                 draw={(g) => drawPath(g, d, modelTree)}
+                interactive={true}
             />
         )
     } else if (type === 'circle') {
@@ -167,6 +171,7 @@ const renderModelTree = (modelTree, path = 'root') => {
                     g.drawCircle(cx, cy, r)
                     g.endFill()
                 }}
+                interactive={true}
             />
         )
     } else if (type === 'rectangle') {
@@ -185,6 +190,7 @@ const renderModelTree = (modelTree, path = 'root') => {
                         modelTree
                     )
                 }}
+                interactive={true}
             />
         )
     } else if (type === 'polyline') {
@@ -204,6 +210,7 @@ const renderModelTree = (modelTree, path = 'root') => {
                         }
                     }
                 }}
+                interactive={true}
             />
         )
     } else if (type === 'polygon') {
@@ -223,6 +230,7 @@ const renderModelTree = (modelTree, path = 'root') => {
                         g.lineTo(pts[0][0], pts[0][1]) // Close the shape
                     }
                 }}
+                interactive={true}
             />
         )
     }
@@ -247,14 +255,84 @@ const renderModelTree = (modelTree, path = 'root') => {
     )
 }
 
-const ComplexPart = ({ modelTree, scale }) => {
+const ComplexPart = ({
+    part,
+    scale,
+    selectedPartId,
+    hoveredPartId,
+    onClick,
+    onHoverPart,
+    onClickPart,
+}) => {
+    if (!part) {
+        return null
+    }
+
+    let partToRender = { ...part, type: 'user' }
+    if (!part.modelTree) {
+        partToRender = { ...partTable['user'][part.partId], type: 'user' }
+    }
+
+    const [x, y] = [part.position?.[0] || 0, part.position?.[1] || 0]
+    const [width, height] = calculateSizeOfPart(partToRender)
+
     return (
         <Container
-            // x={modelTree?.header?.viewBox?.x}
-            // y={modelTree?.header?.viewBox?.y}
+            x={x * scale}
+            y={y * scale}
             scale={scale}
+            onclick={() => {
+                console.log('PENIS')
+                onClick && onClick(part)
+            }}
+            onmouseover={() => {
+                onHoverPart && onHoverPart(part)
+            }}
+            onmouseout={() => {
+                onHoverPart && onHoverPart(null)
+            }}
+            onpointerdown={() => {
+                onClick && onClick(part)
+                onClickPart && onClickPart(part, 'DOWN')
+            }}
+            onpointerup={() => {
+                onClickPart && onClickPart(part, 'UP')
+            }}
+            interactive={true}
         >
-            {renderModelTree(modelTree)}
+            <Graphics
+                alpha={0}
+                onclick={() => onClick && onClick(part)}
+                onmouseover={() => onHoverPart && onHoverPart(part)}
+                onmouseout={() => onHoverPart && onHoverPart(null)}
+                onpointerdown={() => {
+                    onClick && onClick(part)
+                    onClickPart && onClickPart(part, 'DOWN')
+                }}
+                onpointerup={() => {
+                    onClick && onClick(null)
+                    onClickPart && onClickPart(part, 'UP')
+                }}
+                interactive={true}
+                draw={(g) => {
+                    g.clear()
+                    g.beginFill('green')
+                    g.lineStyle({ width: 2, color: 'green' })
+                    g.drawRoundedRect(0, 0, width, height, 0)
+                    g.endFill()
+                }}
+            />
+            {selectedPartId === part.id || hoveredPartId === part.id ? (
+                <Graphics
+                    draw={(g) => {
+                        g.clear()
+                        g.lineStyle({ width: 2, color: 'green' })
+                        g.drawRoundedRect(0, 0, width, height, 0)
+                        g.endFill()
+                    }}
+                />
+            ) : null}
+            {renderModelTree(partToRender?.modelTree)}
         </Container>
     )
 }

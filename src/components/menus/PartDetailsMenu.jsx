@@ -106,7 +106,10 @@ const PartDetailsMenu = ({
                                 name: `${type}-${partId.join('-')}`,
                             })
                         }}
-                        disabled={selectedPart.type === 'custom'}
+                        disabled={
+                            selectedPart.type === 'custom' ||
+                            selectedPart.type === 'user'
+                        }
                     >
                         {[
                             ...Object.keys(partTable.button).map((partId) => ({
@@ -130,6 +133,12 @@ const PartDetailsMenu = ({
                             value={`custom-${selectedPart.partId}`}
                         >
                             custom: {selectedPart.partId}
+                        </option>
+                        <option
+                            key={`${selectedPart?.id}-part-type-custom`}
+                            value={`user-${selectedPart.partId}`}
+                        >
+                            user: {selectedPart.partId}
                         </option>
                     </select>
                 </div>

@@ -1,6 +1,15 @@
 export const CIRCLE = 'CIRCLE'
 export const SQUARE = 'SQUARE'
 export const CUSTOM = 'CUSTOM'
+export const VECTOR = 'VECTOR'
+
+const customPartsString = localStorage.getItem('taco-truck-parts')
+const customParts = JSON.parse(customPartsString)
+
+const partMap = {};
+customParts?.forEach((customPart) => {
+    partMap[customPart.name] = {...customPart, shape: VECTOR}
+})
 
 export const partTable = {
     button: {
@@ -22,4 +31,5 @@ export const partTable = {
         'Joystick-24mm': { shape: CIRCLE, size: 24, rim: 0 },
         'Joystick-35mm': { shape: CIRCLE, size: 35, rim: 0 },
     },
+    user: partMap
 }
