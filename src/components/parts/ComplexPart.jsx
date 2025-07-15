@@ -2,7 +2,7 @@ import { Container, Graphics } from '@pixi/react'
 import { convertPathToInstructions } from '../svg-utils'
 import { partTable } from '../../data/parts.table'
 import { Rectangle } from 'pixi.js'
-import { calculateSizeOfPart } from '../utils'
+import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 
 const getColor = (node) => {
     const { graphical, hovered } = node
@@ -258,6 +258,7 @@ const renderModelTree = (modelTree, path = 'root') => {
 const ComplexPart = ({
     part,
     scale,
+    parent,
     selectedPartId,
     hoveredPartId,
     onClick,
@@ -273,13 +274,24 @@ const ComplexPart = ({
         partToRender = { ...partTable['user'][part.partId], type: 'user' }
     }
 
-    const [x, y] = [part.position?.[0] || 0, part.position?.[1] || 0]
     const [width, height] = calculateSizeOfPart(partToRender)
+
+    let [fixedX, fixedY] = [part.position?.[0] || 0, part.position?.[1] || 0]
+    if (parent) {
+        const { parts, panelDimensions } = parent
+        const [panelWidth, panelHeight] = panelDimensions || [0, 0]
+        ;[fixedX, fixedY] = calculateRelativePosition(
+            { ...part, dimensions: [width, height] },
+            parts,
+            panelWidth,
+            panelHeight
+        )
+    }
 
     return (
         <Container
-            x={x * scale}
-            y={y * scale}
+            x={fixedX * scale}
+            y={fixedY * scale}
             scale={scale}
             onclick={() => {
                 onClick && onClick(part)

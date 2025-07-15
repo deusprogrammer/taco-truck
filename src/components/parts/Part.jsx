@@ -176,6 +176,7 @@ const Part = ({
                 part={part}
                 selectedPartId={selectedPartId}
                 hoveredPartId={hoveredPartId}
+                parent={parent}
                 onHoverPart={onHoverPart}
                 onClick={onClick}
                 onClickPart={onClickPart}

@@ -223,9 +223,7 @@ export const calculateSizeOfPart = (part) => {
         return [0, 0];
     }
 
-    if (part.type === 'svg') {
-        return [part.header.width, part.header.height]
-    } else if (part.type === 'custom') {
+    if (part.type === 'custom') {
         let minX = Infinity
         let maxX = -Infinity
         let minY = Infinity
@@ -319,7 +317,21 @@ export const simplify = (layout, parent) => {
                 panelDimensions: simplified.dimensions
             }
         } else if (type === 'user') {
-            
+            const { parts, panelDimensions } = parent
+            const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
+            simplified.dimensions = clean(calculateSizeOfPart(layout)) 
+            simplified.position = clean(calculateRelativePosition(
+                { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
+                parts,
+                panelWidth,
+                panelHeight
+            )).slice(0, 2)
+            delete simplified.panelDimensions
+
+            parent = {
+                ...layout.layout,
+                panelDimensions: simplified.dimensions
+            }
         } else {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = simplified.dimensions = panelDimensions || [0, 0]
