@@ -2,6 +2,7 @@ import BufferedInput from '../elements/BufferedInput'
 import { toast } from 'react-toastify'
 import { parseSvgStructure } from '../svg-utils'
 import { parse } from 'svgson'
+import { convertPartModel } from '../utils'
 
 export const PAN_TOOL = 'pan'
 export const LINE_TOOL = 'line'
@@ -57,12 +58,20 @@ const ComplexPartMenu = ({
                 <label>Import SVG</label>
                 <input type="file" onChange={fileHandler} />
                 <h2 className="text-center text-[1rem] font-bold">Actions</h2>
-                <div>
-                    <button
-                        className="w-[50px] bg-white text-black"
-                        onClick={onSave}
-                    >
+                <div className="flex w-full flex-col gap-2">
+                    <button className="bg-white text-black" onClick={onSave}>
                         Save
+                    </button>
+                    <button
+                        className="bg-white text-black"
+                        onClick={() => {
+                            navigator.clipboard.writeText(
+                                JSON.stringify(convertPartModel(part), null, 5)
+                            )
+                            toast.success('Copied Taco Truck JSON to Clipboard')
+                        }}
+                    >
+                        Copy Taco Truck
                     </button>
                 </div>
                 <h2 className="text-center text-[1rem] font-bold">Tools</h2>

@@ -41,6 +41,11 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
         toast.success('Copied Makerjs JSON to Clipboard')
     }
 
+    const copyTacoTruck = () => {
+        navigator.clipboard.writeText(JSON.stringify(layout, null, 5))
+        toast.success('Copied Taco Truck JSON to Clipboard')
+    }
+
     const simplified = simplify(layout)
     const makerified = makerify(simplified, null, { includeGraphical: true })
 
@@ -77,6 +82,12 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
                         className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                     >
                         Copy Makerjs JSON
+                    </button>
+                    <button
+                        onClick={copyTacoTruck}
+                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
+                        Copy Taco Truck JSON
                     </button>
                 </>
             ) : null}

@@ -18,7 +18,10 @@ const Home = () => {
                 Project Taco Truck v{config.version}
             </h1>
             <Link className="p-4 text-[1.5rem]" to={`/designer`}>
-                Designer
+                Layout/Panel Designer
+            </Link>
+            <Link className="p-4 text-[1.5rem]" to={`/designer/complex-parts`}>
+                Part Designer
             </Link>
             <Link className="p-4 text-[1.5rem]" to={`/manager`}>
                 Manager

@@ -553,3 +553,50 @@ export const login = () => {
         'https://deusprogrammer.com/util/auth/login'
     )
 }
+
+export const convertPartModel = (oldData) => {
+    const { name, modelTree, lines, points, curves, geometry, owner } =
+        oldData
+
+    const newGeometry = []
+
+    // Convert lines to geometry objects
+    if (lines && points) {
+        lines.forEach(([startIndex, endIndex]) => {
+            newGeometry.push({
+                type: 'line',
+                attributes: {
+                    start: points[startIndex],
+                    end: points[endIndex],
+                },
+            })
+        })
+    }
+
+    // Convert existing curves to geometry objects
+    if (curves) {
+        curves.forEach((curve) => {
+            newGeometry.push({
+                type: 'curve',
+                attributes: curve,
+            })
+        })
+    }
+
+    // Convert existing geometry to new format
+    if (geometry) {
+        geometry.forEach((geom) => {
+            newGeometry.push({
+                type: geom.shape || 'rectangle',
+                attributes: geom,
+            })
+        })
+    }
+
+    return {
+        name,
+        geometry: newGeometry,
+        modelTree,
+        owner,
+    }
+}

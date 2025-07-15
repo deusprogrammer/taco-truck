@@ -347,6 +347,16 @@ const ComponentMenu = ({
                         </button>
                     </>
                 )}
+                <label>Units:</label>
+                <select
+                    value={layout?.units}
+                    onChange={(value) => {
+                        onLayoutChange({ ...layout, units: value })
+                    }}
+                >
+                    <option value="mm">millimeters</option>
+                    <option value="in">inches</option>
+                </select>
                 <label>Width:</label>
                 <BufferedInput
                     id={`panel-dimension-w`}
@@ -385,8 +395,8 @@ const ComponentMenu = ({
                             <label>Width:</label>
                             <BufferedInput
                                 id={`panel-corner-radius`}
-                                type="number"
-                                value={layout.panelModel?.width}
+                                type="string"
+                                value={layout.panelModel?.header.width}
                                 onChange={(value) => {
                                     setValuePath(
                                         'header',
@@ -398,8 +408,8 @@ const ComponentMenu = ({
                             <label>Height:</label>
                             <BufferedInput
                                 id={`panel-corner-radius`}
-                                type="number"
-                                value={layout.panelModel?.height}
+                                type="string"
+                                value={layout.panelModel?.header.height}
                                 onChange={(value) => {
                                     setValuePath(
                                         'header',
