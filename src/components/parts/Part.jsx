@@ -61,6 +61,8 @@ const Part = ({
             }
 
             if (rim > 0) {
+                g.beginFill(0x000000, 0)
+                g.lineStyle(1, 0xffffff)
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
@@ -74,6 +76,8 @@ const Part = ({
                 )
                 g.endFill()
             } else {
+                g.beginFill(0x000000, 0)
+                g.lineStyle(1, 0xffffff)
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
@@ -108,7 +112,8 @@ const Part = ({
                     renderScale * (size[1] + rim * 2 + 4)
                 )
             }
-            g.beginFill(0xffffff)
+            g.beginFill(0x000000, 0)
+            g.lineStyle(1, 0xffffff)
             g.drawRect(
                 renderScale * (x - rim),
                 renderScale * (y - rim),
