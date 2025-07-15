@@ -13,13 +13,14 @@ customParts?.forEach((customPart) => {
 
 export const partTable = {
     button: {
-        'SANWA-24mm': { name: 'SANWA-24mm', shape: CIRCLE, size: 24, rim: 2 },
-        'SANWA-30mm': { name: 'SANWA-30mm', shape: CIRCLE, size: 30, rim: 2 },
-        'HAPP-28mm': { name: 'HAPP-28mm', shape: CIRCLE, size: 28, rim: 2 },
-        'WICO-28mm': { name: 'WICO-28mm', shape: CIRCLE, size: 28, rim: 3 },
-        'GEN-Menu-20mm': { name: 'GEN-Menu-20mm', shape: CIRCLE, size: 20, rim: 2 },
-        'GEN-Menu-12mm': { name: 'GEN-Menu-12mm', shape: CIRCLE, size: 12, rim: 2 },
-        'CHERRY-Keyboard': { name: 'CHERRY-Keyboard', shape: SQUARE, size: [18, 18], rim: 1 },
+        'SANWA-24mm': { name: 'SANWA 24mm', shape: CIRCLE, size: 24, rim: 2 },
+        'SANWA-30mm': { name: 'SANWA 30mm', shape: CIRCLE, size: 30, rim: 2 },
+        'HAPP-28mm': { name: 'HAPP 28mm', shape: CIRCLE, size: 28, rim: 2 },
+        'WICO-28mm': { name: 'WICO 28mm', shape: CIRCLE, size: 28, rim: 3 },
+        'GEN-Menu-20mm': { name: 'GEN Menu 20mm', shape: CIRCLE, size: 20, rim: 2 },
+        'GEN-Menu-12mm': { name: 'GEN Menu 12mm', shape: CIRCLE, size: 12, rim: 2 },
+        'CHERRY-Keyboard': { name: 'CHERRY Keyboard', shape: SQUARE, size: [18, 18], rim: 1 },
+        'IIDX-Key': { name: 'IIDX Key', shape: SQUARE, size: [33, 50], rim: 1 },
     },
     hole: {
         M3: { name: 'M3', shape: CIRCLE, size: 3, rim: 0 },
@@ -28,8 +29,8 @@ export const partTable = {
         M6: { name: 'M6', shape: CIRCLE, size: 6, rim: 0 },
         M7: { name: 'M7', shape: CIRCLE, size: 7, rim: 0 },
         M8: { name: 'M8', shape: CIRCLE, size: 8, rim: 0 },
-        'Joystick-24mm': { name: 'Joystick-24mm', shape: CIRCLE, size: 24, rim: 0 },
-        'Joystick-35mm': { name: 'Joystick-35mm', shape: CIRCLE, size: 35, rim: 0 },
+        'Joystick-24mm': { name: 'Joystick 24mm', shape: CIRCLE, size: 24, rim: 0 },
+        'Joystick-35mm': { name: 'Joystick 35mm', shape: CIRCLE, size: 35, rim: 0 },
     },
     user: partMap
 }
