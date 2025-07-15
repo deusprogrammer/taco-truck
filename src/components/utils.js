@@ -270,9 +270,13 @@ export const calculateSizeOfPart = (part) => {
 
         return [maxX - minX, maxY - minY]
     } else if (part.type === 'user') {
-        let { viewBox } = part?.modelTree?.header || { viewBox: {} };
-        let { width, height } = viewBox;
+        let { width, height, viewBox } = part?.modelTree?.header || { viewBox: {} };
+        width = removeUnits(width || "0mm");
+        height = removeUnits(height || "0mm");
 
+        if (!width && !height) {
+            ({width, height} = viewBox); 
+        }
         return [width, height]
     } else {
         let { size } = partTable?.[part.type]?.[part.partId]
@@ -599,4 +603,18 @@ export const convertPartModel = (oldData) => {
         modelTree,
         owner,
     }
+}
+
+export const decimalToRatio = (decimal) => {
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    
+    const denominator = 1000; // Precision level
+    const numerator = Math.round(decimal * denominator);
+    const divisor = gcd(numerator, denominator);
+    
+    return `${numerator / divisor}:${denominator / divisor}`;
+}
+
+export const removeUnits = (str) => {
+    return parseFloat(str.replace(/[a-zA-Z%]+$/, ''));
 }

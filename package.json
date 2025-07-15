@@ -20,6 +20,7 @@
         "fast-xml-parser": "^5.2.3",
         "file-saver": "^2.0.5",
         "jotai": "^2.11.0",
+        "lodash": "^4.17.21",
         "makerjs": "^0.18.1",
         "pixi.js": "^7.4.2",
         "react": "^18.3.1",

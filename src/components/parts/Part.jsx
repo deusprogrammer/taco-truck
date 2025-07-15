@@ -30,6 +30,8 @@ const Part = ({
     onClick,
     onClickPart,
 }) => {
+    console.log('PART: ' + JSON.stringify(part, null, 2))
+
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
     const [buttonOpacity] = useAtom(buttonOpacityAtom)
     const [mode] = useAtom(modeAtom)

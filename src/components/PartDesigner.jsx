@@ -55,6 +55,7 @@ import {
     updateProject,
 } from '../api/Api'
 import { useSecurity } from '../contexts/SecurityContext'
+import PartPaletteMenu from './menus/PartPaletteMenu'
 
 const SCALE_RATIO = 1000
 
@@ -556,11 +557,6 @@ const PartDesigner = ({
                             </ModalButton>
                             <ModalButton modalKey="about">About</ModalButton>
                         </div>
-                        <PartMenu
-                            active={mode === ADD}
-                            currentPart={placingPartId}
-                            onChange={selectPlacingPart}
-                        />
                     </div>
                     <ComponentMenu
                         layout={layout}
@@ -569,13 +565,24 @@ const PartDesigner = ({
                         onHover={setHovered}
                         onLayoutChange={onLayoutChange}
                     />
-                    <PartDetailsMenu
-                        layout={layout}
-                        selectedPart={selectedPart}
-                        onUpdatePart={handleUpdatePart}
-                        onSecondarySelectPart={afterSelect}
-                        onSetSecondarySelect={setAfterSelect}
-                    />
+                    {mode === 'SELECT' && (
+                        <PartDetailsMenu
+                            layout={layout}
+                            selectedPart={selectedPart}
+                            onUpdatePart={handleUpdatePart}
+                            onSecondarySelectPart={afterSelect}
+                            onSetSecondarySelect={setAfterSelect}
+                        />
+                    )}
+                    {mode === 'ADD' && (
+                        <PartPaletteMenu
+                            currentPart={placingPartId}
+                            onChangePart={(partType, partId) => {
+                                setPlacingPartType(partType)
+                                setPlacingPartId(partId)
+                            }}
+                        />
+                    )}
                     <div
                         id="menu-bottom"
                         className="absolute bottom-0 left-0 hidden h-[80px] w-screen flex-row items-center justify-center gap-9 lg:flex"

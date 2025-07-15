@@ -292,7 +292,9 @@ const ComplexPart = ({
         <Container
             x={fixedX * scale}
             y={fixedY * scale}
-            scale={scale}
+            // scale={scale}
+            width={width * scale}
+            height={height * scale}
             onclick={() => {
                 onClick && onClick(part)
             }}

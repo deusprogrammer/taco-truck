@@ -18,7 +18,6 @@ import Panel from './parts/Panel'
 import { CIRCLE, partTable } from '../data/parts.table'
 import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
-import { nextPow2 } from '@pixi/utils'
 
 export const ButtonStatusContext = createContext()
 

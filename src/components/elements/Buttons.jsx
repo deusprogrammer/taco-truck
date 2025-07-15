@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router'
 import { useRealScaleRatio } from '../../hooks/MouseHooks'
+import LayoutDisplaySvg from '../svg/LayoutDisplaySvg'
+import { partTable } from '../../data/parts.table'
 
 export const NewButton = () => {
     const navigate = useNavigate()
@@ -78,10 +80,28 @@ export const PartSelectionButton = ({
     onClick,
 }) => (
     <button
-        className={`block h-20 min-w-[100px] text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
+        className={`flex min-h-[150px] w-[100px] flex-col justify-around text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
         onClick={() => onClick(partType, partId)}
     >
-        {name}
+        <LayoutDisplaySvg
+            scale={1}
+            layout={{
+                panelDimensions: [0, 0],
+                parts: [
+                    {
+                        ...partTable[partType][partId],
+                        type: partType,
+                        partId,
+                        position: [0, 0],
+                        origin: [0, 0],
+                        anchor: [0, 0],
+                        relativeTo: null,
+                    },
+                ],
+            }}
+            hideButton={true}
+        />
+        {partTable[partType][partId].name}
     </button>
 )
 

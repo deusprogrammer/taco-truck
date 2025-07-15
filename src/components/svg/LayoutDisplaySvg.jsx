@@ -4,7 +4,7 @@ import { makerify, simplify } from '../utils'
 import makerjs from 'makerjs'
 import { toast } from 'react-toastify'
 
-const LayoutDisplaySvg = ({ layout, hideButton }) => {
+const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
     const svgRef = createRef()
     const [makerModel, setMakerModel] = useState()
 
@@ -51,12 +51,35 @@ const LayoutDisplaySvg = ({ layout, hideButton }) => {
 
     console.log('SIMPLIFIED: ' + JSON.stringify(simplified, null, 5))
 
+    const addPadding = (model, padding) => {
+        const bounds = makerjs.measure.modelExtents(model)
+        const paddedWidth = bounds.width + padding * 2
+        const paddedHeight = bounds.height + padding * 2
+
+        const boundary = new makerjs.models.Rectangle(paddedWidth, paddedHeight)
+        boundary.layer = 'transparent'
+
+        return {
+            models: {
+                content: makerjs.model.moveRelative(model, [
+                    padding - bounds.low[0],
+                    padding - bounds.low[1],
+                ]),
+                boundary: boundary,
+            },
+        }
+    }
+
     const svg = makerjs.exporter.toSVG(
-        makerjs.model.mirror(makerified, false, true),
+        addPadding(makerjs.model.mirror(makerified, false, true), 10),
         {
             units: 'px',
             strokeWidth: '1mm',
             stroke: 'white',
+            scale,
+            layerOptions: {
+                transparent: { stroke: 'transparent' },
+            },
         }
     )
 

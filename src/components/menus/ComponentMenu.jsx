@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
-import { getImageDimensions } from '../utils'
+import { decimalToRatio, getImageDimensions, removeUnits } from '../utils'
 import { useAtom } from 'jotai'
 import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
 import { useResize } from '../../hooks/ContainerHooks'
 import { parseSvgStructure } from '../svg-utils'
 import { parse } from 'svgson'
+
+import _ from 'lodash'
 
 const ComponentMenu = ({
     layout,
@@ -206,6 +208,13 @@ const ComponentMenu = ({
         }
     }
 
+    // Simple patch function
+    const patchObjectAtPath = (obj, path, value) => {
+        const copy = _.cloneDeep(obj)
+        _.set(copy, path, value)
+        return copy
+    }
+
     const setValuePath = (path, patch, modelTree) => {
         const [parent, key] = getNodeByPath(path, modelTree)
         if (
@@ -216,6 +225,14 @@ const ComponentMenu = ({
             patch !== null
         ) {
             Object.assign(parent.children[Number(key)], patch)
+            console.log(
+                'AFTER SAVE: ' +
+                    JSON.stringify(
+                        { ...layout, panelModel: modelTree },
+                        null,
+                        2
+                    )
+            )
             onLayoutChange({ ...layout, panelModel: modelTree })
         }
     }
@@ -395,21 +412,63 @@ const ComponentMenu = ({
                             <label>Width:</label>
                             <BufferedInput
                                 id={`panel-corner-radius`}
-                                type="string"
-                                value={layout.panelModel?.header.width}
+                                type="number"
+                                value={removeUnits(
+                                    layout.panelModel?.header.width
+                                )}
                                 onChange={(value) => {
-                                    setValuePath(
-                                        'header',
-                                        { width: value },
-                                        layout.panelModel
+                                    let updated = patchObjectAtPath(
+                                        layout.panelModel,
+                                        'header.width',
+                                        value + layout.units
                                     )
+                                    updated = patchObjectAtPath(
+                                        updated,
+                                        'header.viewBox.width',
+                                        value
+                                    )
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelModel: updated,
+                                    })
                                 }}
                             />
                             <label>Height:</label>
                             <BufferedInput
                                 id={`panel-corner-radius`}
+                                type="number"
+                                value={removeUnits(
+                                    layout.panelModel?.header.height
+                                )}
+                                onChange={(value) => {
+                                    let updated = patchObjectAtPath(
+                                        layout.panelModel,
+                                        'header.height',
+                                        value + layout.units
+                                    )
+                                    updated = patchObjectAtPath(
+                                        updated,
+                                        'header.viewBox.height',
+                                        value
+                                    )
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelModel: updated,
+                                    })
+                                }}
+                            />
+                            <label>Ratio:</label>
+                            <BufferedInput
+                                id={`panel-corner-radius`}
                                 type="string"
-                                value={layout.panelModel?.header.height}
+                                value={decimalToRatio(
+                                    removeUnits(
+                                        layout.panelModel?.header.width
+                                    ) /
+                                        removeUnits(
+                                            layout.panelModel?.header.height
+                                        )
+                                )}
                                 onChange={(value) => {
                                     setValuePath(
                                         'header',
@@ -417,6 +476,7 @@ const ComponentMenu = ({
                                         layout.panelModel
                                     )
                                 }}
+                                disabled
                             />
                         </div>
                         <label>Panel Model View Box:</label>
@@ -427,11 +487,15 @@ const ComponentMenu = ({
                                 type="number"
                                 value={layout.panelModel?.header.viewBox.x}
                                 onChange={(value) => {
-                                    setValuePath(
-                                        'header,viewBox',
-                                        { x: value },
-                                        layout.panelModel
+                                    let updated = patchObjectAtPath(
+                                        layout.panelModel,
+                                        'header.viewBox.x',
+                                        value
                                     )
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelModel: updated,
+                                    })
                                 }}
                             />
                             <label>y:</label>
@@ -440,11 +504,15 @@ const ComponentMenu = ({
                                 type="number"
                                 value={layout.panelModel?.header.viewBox.y}
                                 onChange={(value) => {
-                                    setValuePath(
-                                        'header,viewBox',
-                                        { y: value },
-                                        layout.panelModel
+                                    let updated = patchObjectAtPath(
+                                        layout.panelModel,
+                                        'header.viewBox.y',
+                                        value
                                     )
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelModel: updated,
+                                    })
                                 }}
                             />
                             <label>Width:</label>
@@ -453,11 +521,15 @@ const ComponentMenu = ({
                                 type="number"
                                 value={layout.panelModel?.header.viewBox.width}
                                 onChange={(value) => {
-                                    setValuePath(
-                                        'header,viewBox',
-                                        { width: value },
-                                        layout.panelModel
+                                    let updated = patchObjectAtPath(
+                                        layout.panelModel,
+                                        'header.viewBox.width',
+                                        value
                                     )
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelModel: updated,
+                                    })
                                 }}
                             />
                             <label>Height:</label>
@@ -466,11 +538,15 @@ const ComponentMenu = ({
                                 type="number"
                                 value={layout.panelModel?.header.viewBox.height}
                                 onChange={(value) => {
-                                    setValuePath(
-                                        'header,viewBox',
-                                        { height: value },
-                                        layout.panelModel
+                                    let updated = patchObjectAtPath(
+                                        layout.panelModel,
+                                        'header.viewBox.height',
+                                        value
                                     )
+                                    onLayoutChange({
+                                        ...layout,
+                                        panelModel: updated,
+                                    })
                                 }}
                             />
                         </div>

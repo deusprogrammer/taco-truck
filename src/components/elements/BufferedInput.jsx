@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { usePrevious } from '../../hooks/MouseHooks'
 
-const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
+const BufferedInput = ({
+    id,
+    value,
+    className,
+    type,
+    immediate,
+    onChange,
+    disabled = false,
+}) => {
     const [buffer, setBuffer] = useState()
     const previousId = usePrevious(id)
 
@@ -42,6 +50,7 @@ const BufferedInput = ({ id, value, className, type, immediate, onChange }) => {
                 type={type}
                 className={className}
                 value={buffer}
+                disabled={disabled}
                 onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
