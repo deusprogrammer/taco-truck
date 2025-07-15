@@ -80,7 +80,7 @@ export const PartSelectionButton = ({
     onClick,
 }) => (
     <button
-        className={`flex min-h-[150px] w-[100px] flex-col justify-around text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black`}
+        className={`flex min-h-[150px] flex-col justify-around text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black hover:bg-slate-800 hover:text-white`}
         onClick={() => onClick(partType, partId)}
     >
         <LayoutDisplaySvg
