@@ -279,11 +279,11 @@ const ComponentManagerRoute = () => {
                     </label>
                 </div>
                 <h2 className="text-center text-[1.8rem]">Panel Designs</h2>
-                <table className="flex flex-col justify-center">
+                <table className="flex w-full flex-col justify-center">
                     {filteredProjects.map((project) => (
                         <tr
                             key={project.id}
-                            className={`flex flex-col justify-center border-b-2 border-solid border-black lg:flex-row`}
+                            className={`flex flex-col justify-center border-b-2 border-solid border-black lg:flex-row lg:justify-between`}
                         >
                             <td
                                 className={`flex w-full flex-col p-2 lg:w-52 ${project.isLocal ? 'bg-teal-500 text-white' : ''} items-center justify-center`}
@@ -331,6 +331,17 @@ const ComponentManagerRoute = () => {
                                 >
                                     Share
                                 </button>
+                                <button
+                                    className="h-20 bg-slate-500 p-4 text-white"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(
+                                            `https://deusprogrammer.com/api/taco-truck/projects/${project.id}/file.png`
+                                        )
+                                        toast.success('Copied URL to Clipboard')
+                                    }}
+                                >
+                                    Get Image Link
+                                </button>
                                 <Link
                                     to={`/designer/projects/${project.id}?preview${project.isLocal ? '&isLocal=true' : ''}`}
                                 >
@@ -357,13 +368,13 @@ const ComponentManagerRoute = () => {
                     ))}
                 </table>
             </div>
-            <div>
+            <div className="mx-auto flex w-[90%] flex-col justify-center">
                 <h2 className="text-center text-[1.8rem]">Custom Parts</h2>
-                <table>
+                <table className="flex w-full flex-col justify-center">
                     {filteredParts.map((part) => (
                         <tr
                             key={part.id}
-                            className={`flex flex-col border-b-2 border-solid border-black lg:flex-row ${part.isLocal ? 'bg-lightblue' : ''} items-center justify-center`}
+                            className={`flex flex-col border-b-2 border-solid border-black lg:flex-row lg:justify-between ${part.isLocal ? 'bg-lightblue' : ''} items-center justify-center`}
                         >
                             <td
                                 className={`flex w-full flex-col p-2 lg:w-52 ${part.isLocal ? 'bg-teal-500 text-white' : ''} items-center justify-center`}
@@ -398,6 +409,17 @@ const ComponentManagerRoute = () => {
                                     }}
                                 >
                                     Share
+                                </button>
+                                <button
+                                    className="h-20 bg-slate-500 p-4 text-white"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(
+                                            `https://deusprogrammer.com/api/taco-truck/components/${part.id}/file.png`
+                                        )
+                                        toast.success('Copied URL to Clipboard')
+                                    }}
+                                >
+                                    Get Image Link
                                 </button>
                                 <Link
                                     to={`/designer/parts/${part.id}?preview${part.isLocal ? '&isLocal' : ''}`}
