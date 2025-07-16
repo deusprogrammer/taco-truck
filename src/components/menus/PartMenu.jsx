@@ -1,8 +1,10 @@
 import React from 'react'
-import { partTable } from '../../data/parts.table'
 import { PartSelectionButton } from '../elements/Buttons'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const PartMenu = ({ active, currentPart, onChange }) => {
+    const { partTable } = usePartTable()
+
     if (!active) {
         return null
     }

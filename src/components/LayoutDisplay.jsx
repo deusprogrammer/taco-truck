@@ -15,9 +15,10 @@ import { useMousePosition } from '../hooks/MouseHooks'
 import { ADD, ART_ADJUST, SELECT } from './elements/Modes'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
-import { CIRCLE, partTable } from '../data/parts.table'
+import { CIRCLE } from '../data/parts.table'
 import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
+import { usePartTable } from '../hooks/PartTableHooks'
 
 export const ButtonStatusContext = createContext()
 
@@ -52,6 +53,7 @@ const LayoutDisplay = ({
     onSecondarySelectPart,
     onLayoutChange,
 }) => {
+    const { partTable } = usePartTable()
     const componentRef = createRef()
 
     const websocket = useRef()
@@ -118,7 +120,10 @@ const LayoutDisplay = ({
                                     Math.trunc(
                                         (xy[0] -
                                             workspacePosition[0] -
-                                            (calculateSizeOfPart(found)[0] *
+                                            (calculateSizeOfPart(
+                                                found,
+                                                partTable
+                                            )[0] *
                                                 currentScale) /
                                                 2) /
                                             currentScale
@@ -126,7 +131,10 @@ const LayoutDisplay = ({
                                     Math.trunc(
                                         (xy[1] -
                                             workspacePosition[1] -
-                                            (calculateSizeOfPart(found)[1] *
+                                            (calculateSizeOfPart(
+                                                found,
+                                                partTable
+                                            )[1] *
                                                 currentScale) /
                                                 2) /
                                             currentScale
@@ -262,6 +270,7 @@ const LayoutDisplay = ({
             placingPartId,
             placingPartType,
             workspacePosition,
+            partTable,
         ]
     )
 

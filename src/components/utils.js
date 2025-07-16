@@ -1,4 +1,4 @@
-import { CIRCLE, partTable, SQUARE } from '../data/parts.table'
+import { CIRCLE, SQUARE } from '../data/parts.table'
 import axios from 'axios';
 
 import makerjs from 'makerjs'
@@ -110,6 +110,10 @@ export const calculateRelativePosition = (
     panelWidth,
     panelHeight
 ) => {
+    if (!part || !part.position || !part.origin) {
+        return [0, 0, 0, 0]
+    }
+
     const {
         position: [x, y],
         origin: [originX, originY],
@@ -177,7 +181,7 @@ export const calculateTextPositionAndRotation = (
     return { x: midX + offsetX, y: midY + offsetY, rotation: angle }
 }
 
-export const normalizePartPositionsToZero = (parts) => {
+export const normalizePartPositionsToZero = (parts, partTable) => {
     // Find the minimum x and y values
     let minX = Infinity
     let minY = Infinity
@@ -217,7 +221,7 @@ export const normalizePartPositionsToZero = (parts) => {
     return parts
 }
 
-export const calculateSizeOfPart = (part) => {
+export const calculateSizeOfPart = (part, partTable) => {
     // console.log(JSON.stringify(part, null, 5));
     if (!part || part?.type === undefined) {
         return [0, 0];
@@ -243,7 +247,7 @@ export const calculateSizeOfPart = (part) => {
             let yAdj = 0
             if (childPart.type && childPart.type !== 'custom' && childPart.type !== 'user') {
                 const { size, shape } =
-                    partTable[childPart.type][childPart.partId]
+                    partTable?.[childPart.type]?.[childPart?.partId] || {size: 0, shape: CIRCLE}
                 xAdj = size
                 yAdj = size
                 if (Array.isArray(size)) {
@@ -260,7 +264,7 @@ export const calculateSizeOfPart = (part) => {
                 maxX = Math.max(maxX, x + xAdj)
                 maxY = Math.max(maxY, y + yAdj)
             } else {
-                ;[xAdj, yAdj] = calculateSizeOfPart(childPart)
+                ;[xAdj, yAdj] = calculateSizeOfPart(childPart, partTable)
                 minX = Math.min(minX, x)
                 minY = Math.min(minY, y)
                 maxX = Math.max(maxX, x + xAdj)
@@ -299,7 +303,7 @@ const clean = (arr) => {
     return arr?.map(value => Number(value));
 }
 
-export const simplify = (layout, parent) => {
+export const simplify = (layout, parent, partTable) => {
     if (!layout) {
         return null
     }
@@ -312,7 +316,7 @@ export const simplify = (layout, parent) => {
         if (type === 'custom') {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
-            simplified.dimensions = clean(calculateSizeOfPart(layout)) 
+            simplified.dimensions = clean(calculateSizeOfPart(layout, partTable)) 
             simplified.position = clean(calculateRelativePosition(
                 { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
                 parts,
@@ -331,7 +335,7 @@ export const simplify = (layout, parent) => {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
             simplified = { ...simplified, modelTree, geometry }
-            simplified.dimensions = clean(calculateSizeOfPart({...layout, modelTree, geometry})) 
+            simplified.dimensions = clean(calculateSizeOfPart({...layout, modelTree, geometry}, partTable)) 
             simplified.position = clean(calculateRelativePosition(
                 { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
                 parts,
@@ -347,7 +351,7 @@ export const simplify = (layout, parent) => {
         } else {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = simplified.dimensions = panelDimensions || [0, 0]
-            simplified.dimensions = clean(calculateSizeOfPart(layout))
+            simplified.dimensions = clean(calculateSizeOfPart(layout, partTable))
             simplified.position = clean(calculateRelativePosition(
                 layout,
                 parts,
@@ -364,7 +368,7 @@ export const simplify = (layout, parent) => {
 
     simplified.children = [];
     partsToFlatten?.forEach((part) => {
-        const simplifiedChild = simplify(part, parent)
+        const simplifiedChild = simplify(part, parent, partTable)
         simplified.children.push(simplifiedChild)
     });
 
@@ -377,7 +381,7 @@ export const simplify = (layout, parent) => {
     return simplified
 }
 
-const convertPartToPath = ({type, partId, position}) => {
+const convertPartToPath = ({type, partId, position}, partTable) => {
     const { shape, size } = partTable[type]?.[partId] || {};
 
     switch (shape) {
@@ -503,7 +507,7 @@ export const makerifyModelTree = (modelTree, options = {}) => {
     return model;
 }
 
-export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
+export const makerify = (simplifiedLayout, parent, partTable, options = {}, layer = 0) => {
     const { panelDimensions, panelModel, type, position, rotation, cornerRadius, children } = simplifiedLayout
 
     let model = {
@@ -527,10 +531,10 @@ export const makerify = (simplifiedLayout, parent, options = {}, layer = 0) => {
     }
 
     children.filter((child) => child.type === 'custom').forEach((child, index) => {
-        model.models[`customs-${index}`] = makerify(child, parent, options, layer++);
+        model.models[`customs-${index}`] = makerify(child, parent, partTable, options, layer++);
     })
     children.filter((child) => child.type !== 'custom' && child.type !== 'svg').forEach((child, index) => {
-        model.models[`parts-${index}`] = convertPartToPath(child);
+        model.models[`parts-${index}`] = convertPartToPath(child, partTable);
     })
     children.filter((child) => child.type === 'user').forEach((child, index) => {
         const [x, y] = child.position;

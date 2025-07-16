@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router'
 import { useRealScaleRatio } from '../../hooks/MouseHooks'
 import LayoutDisplaySvg from '../svg/LayoutDisplaySvg'
-import { partTable } from '../../data/parts.table'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 export const NewButton = () => {
     const navigate = useNavigate()
@@ -78,32 +78,35 @@ export const PartSelectionButton = ({
     partType,
     placingPart,
     onClick,
-}) => (
-    <button
-        className={`flex min-h-[150px] flex-col justify-around text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black hover:bg-slate-800 hover:text-white`}
-        onClick={() => onClick(partType, partId)}
-    >
-        <LayoutDisplaySvg
-            scale={1}
-            layout={{
-                panelDimensions: [0, 0],
-                parts: [
-                    {
-                        ...partTable[partType][partId],
-                        type: partType,
-                        partId,
-                        position: [0, 0],
-                        origin: [0, 0],
-                        anchor: [0, 0],
-                        relativeTo: null,
-                    },
-                ],
-            }}
-            hideButton={true}
-        />
-        {partTable[partType][partId].name}
-    </button>
-)
+}) => {
+    const { partTable } = usePartTable()
+    return (
+        <button
+            className={`flex min-h-[150px] flex-col justify-around text-white ${placingPart === partId ? 'bg-black' : 'bg-slate-600'} border-2 border-solid border-black hover:bg-slate-800 hover:text-white`}
+            onClick={() => onClick(partType, partId)}
+        >
+            <LayoutDisplaySvg
+                scale={1}
+                layout={{
+                    panelDimensions: [0, 0],
+                    parts: [
+                        {
+                            ...partTable[partType][partId],
+                            type: partType,
+                            partId,
+                            position: [0, 0],
+                            origin: [0, 0],
+                            anchor: [0, 0],
+                            relativeTo: null,
+                        },
+                    ],
+                }}
+                hideButton={true}
+            />
+            {partTable[partType][partId].name}
+        </button>
+    )
+}
 
 export const ZoomButton = ({ currentZoom, onZoomChange }) => (
     <div className="flex flex-row items-center justify-center">

@@ -56,6 +56,7 @@ import {
 } from '../api/Api'
 import { useSecurity } from '../contexts/SecurityContext'
 import PartPaletteMenu from './menus/PartPaletteMenu'
+import { usePartTable } from '../hooks/PartTableHooks'
 
 const SCALE_RATIO = 1000
 
@@ -66,6 +67,7 @@ const PartDesigner = ({
     onLayoutChange,
 }) => {
     const containerRef = createRef()
+    const { partTable } = usePartTable()
     useKeyShortcuts({ layout, containerRef })
 
     const navigate = useNavigate()
@@ -172,10 +174,13 @@ const PartDesigner = ({
         }
     }
 
-    const [partsWidth, partsHeight] = calculateSizeOfPart({
-        type: 'custom',
-        layout,
-    })
+    const [partsWidth, partsHeight] = calculateSizeOfPart(
+        {
+            type: 'custom',
+            layout,
+        },
+        partTable
+    )
 
     console.log('FUCK: ', partsWidth, partsHeight)
 
@@ -202,7 +207,10 @@ const PartDesigner = ({
                 name,
                 parts:
                     type === 'customParts'
-                        ? normalizePartPositionsToZero([...layout.parts])
+                        ? normalizePartPositionsToZero(
+                              [...layout.parts],
+                              partTable
+                          )
                         : layout.parts,
             }
 
@@ -250,7 +258,7 @@ const PartDesigner = ({
             name,
             parts:
                 type === 'customParts'
-                    ? normalizePartPositionsToZero([...layout.parts])
+                    ? normalizePartPositionsToZero([...layout.parts], partTable)
                     : layout.parts,
         }
 

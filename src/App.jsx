@@ -13,17 +13,29 @@ import ComplexPartDesigner from './routes/ComplexPartDesigner'
 
 import 'react-toastify/dist/ReactToastify.css'
 import './App.css'
+import { usePartTable } from './hooks/PartTableHooks'
+import Interstitial from './components/elements/Interstitial'
 
 const App = () => {
     const [securityContext, setSecurityContext] = useState()
+    const { loadParts, loading } = usePartTable()
 
     useEffect(() => {
         const fetchSecurityContext = async () => {
             setSecurityContext(await getSecurityContext())
         }
-
+        loadParts() // This triggers the data loading
         fetchSecurityContext()
-    }, [])
+    }, [loadParts])
+
+    if (loading) {
+        return (
+            <Interstitial
+                title="Loading Part Data..."
+                message="Please wait while we fetch the latest parts information."
+            />
+        )
+    }
 
     return (
         <SecurityProvider value={securityContext}>

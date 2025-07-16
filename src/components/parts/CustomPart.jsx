@@ -6,6 +6,7 @@ import Part from './Part'
 import { useAtom } from 'jotai'
 import { modeAtom } from '../../atoms/ViewOptions.atom'
 import { ART_ADJUST } from '../elements/Modes'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const CustomPart = ({
     scale,
@@ -17,9 +18,10 @@ const CustomPart = ({
     onClick,
     onClickPart,
 }) => {
+    const { partTable } = usePartTable()
     const containerRef = createRef()
     const [mode] = useAtom(modeAtom)
-    const [width, height] = calculateSizeOfPart(part)
+    const [width, height] = calculateSizeOfPart(part, partTable)
 
     const { parts, panelDimensions } = parent
     const [panelWidth, panelHeight] = panelDimensions || [0, 0]

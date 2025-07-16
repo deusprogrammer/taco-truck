@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { decimalToRatio, getImageDimensions, removeUnits } from '../utils'
 import { useAtom } from 'jotai'
@@ -9,6 +8,7 @@ import { parseSvgStructure } from '../svg-utils'
 import { parse } from 'svgson'
 
 import _ from 'lodash'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const ComponentMenu = ({
     layout,
@@ -23,6 +23,8 @@ const ComponentMenu = ({
     const bind = useResize()
 
     const [toggleMenu, setToggleMenu] = useState(false)
+
+    const { partTable } = usePartTable()
 
     const updatePanelSize = (dimensions) => {
         onLayoutChange({ ...layout, panelDimensions: dimensions })
@@ -117,7 +119,7 @@ const ComponentMenu = ({
     }, [layout, loadImageDimensions])
 
     const renderParts = (layout) => {
-        return [...Object.keys(partTable), 'custom'].map((key) => (
+        return [...Object.keys(partTable || {}), 'custom'].map((key) => (
             <React.Fragment key={`part-type-${key}`}>
                 {layout?.parts?.filter(({ type }) => key === type).length >
                 0 ? (

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { partTable, VECTOR } from '../data/parts.table';
 
 const BASE_URL = 'https://deusprogrammer.com/api/taco-truck';
 
@@ -20,6 +21,45 @@ export const getSecurityContext = async () => {
             return null;
         }
     }
+}
+
+export const getParts = async (includeLocal) => {
+    const { data } = await axios.get(BASE_URL + `/parts`, getAxiosOptions());
+
+    const partMap = {};
+    data?.forEach((customPart) => {
+        partMap[customPart._id] = {...customPart, shape: VECTOR}
+    })
+
+    if (includeLocal) {
+        return {
+            ...partTable,
+            user: partMap
+        }
+    }
+
+    return {
+        user: partMap
+    };
+}
+
+export const getPart = async (id) => {
+    const { data } = await axios.get(BASE_URL + `/parts/${id}`, getAxiosOptions());
+    return {layout: data};
+}
+
+export const createPart = async (part) => {
+    const { data } = await axios.post(BASE_URL + `/parts`, part, getAxiosOptions())
+    return data;
+}
+
+export const deletePart = async (id) => {
+    await axios.delete(BASE_URL + `/parts/${id}`, getAxiosOptions());
+}
+
+export const updatePart = async (id, part) => {
+    const { data } = await axios.put(BASE_URL + `/parts/${id}`, part, getAxiosOptions())
+    return data;
 }
 
 export const getComponents = async () => {

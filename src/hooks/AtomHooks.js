@@ -3,12 +3,14 @@ import { useCallback, useEffect } from "react"
 import { buttonOpacityAtom, editLockComponentAtom, mappingStyleAtom, modeAtom, previewAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
 import { useContainerSize, useRealScaleRatio } from "./MouseHooks"
 import { calculateSizeOfPart } from "../components/utils"
+import { usePartTable } from "./PartTableHooks"
 
-export const useKeyShortcuts = ({layout, containerRef}) => {
+export const useKeyShortcuts = ({ layout, containerRef }) => {
+    const {partTable} = usePartTable()
     const [partsWidth, partsHeight] = calculateSizeOfPart({
             type: 'custom',
             layout: layout,
-    })
+    }, partTable)
     
     const [width, height] = useContainerSize(containerRef)
 

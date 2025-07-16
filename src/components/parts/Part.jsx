@@ -7,7 +7,7 @@ import {
     calculateRelativePosition,
     calculateTextPositionAndRotation,
 } from '../utils'
-import { CIRCLE, SQUARE, partTable } from '../../data/parts.table'
+import { CIRCLE, SQUARE } from '../../data/parts.table'
 import { useAtom } from 'jotai'
 import {
     buttonOpacityAtom,
@@ -19,6 +19,7 @@ import { useButtonStatus } from '../LayoutDisplay'
 import { ART_ADJUST } from '../elements/Modes'
 import { MAPPINGS } from '../elements/Constants'
 import ComplexPart from './ComplexPart'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const Part = ({
     scale,
@@ -30,8 +31,7 @@ const Part = ({
     onClick,
     onClickPart,
 }) => {
-    console.log('PART: ' + JSON.stringify(part, null, 2))
-
+    const { partTable } = usePartTable()
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
     const [buttonOpacity] = useAtom(buttonOpacityAtom)
     const [mode] = useAtom(modeAtom)
@@ -191,7 +191,9 @@ const Part = ({
         )
     }
 
-    if (!partTable[type]?.[partId]) {
+    console.log('PART TABLE: ' + JSON.stringify(partTable, null, 2))
+
+    if (!partTable?.[type]?.[partId]) {
         return <></>
     }
 

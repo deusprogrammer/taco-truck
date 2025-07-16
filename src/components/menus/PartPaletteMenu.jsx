@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { partTable } from '../../data/parts.table'
 import { useResize } from '../../hooks/ContainerHooks'
 import { PartSelectionButton } from '../elements/Buttons'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const PartPaletteMenu = ({ currentPart, onChangePart }) => {
+    const { partTable } = usePartTable()
     const bind = useResize()
     const [sectionsOpen, setSectionsOpen] = useState({})
 

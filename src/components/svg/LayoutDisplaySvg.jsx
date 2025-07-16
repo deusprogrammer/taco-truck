@@ -3,19 +3,23 @@ import { saveAs } from 'file-saver'
 import { makerify, simplify } from '../utils'
 import makerjs from 'makerjs'
 import { toast } from 'react-toastify'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
+    const { partTable } = usePartTable()
     const svgRef = createRef()
     const [makerModel, setMakerModel] = useState()
 
     useEffect(() => {
-        const simplified = simplify(layout)
-        const makerified = makerify(simplified)
+        const simplified = simplify(layout, null, partTable)
+        const makerified = makerify(simplified, null, partTable)
         setMakerModel(makerjs.model.mirror(makerified, false, true))
-    }, [layout])
+    }, [layout, partTable])
 
-    const simplified = simplify(layout)
-    const makerified = makerify(simplified, null, { includeGraphical: true })
+    const simplified = simplify(layout, null, partTable)
+    const makerified = makerify(simplified, null, partTable, {
+        includeGraphical: true,
+    })
 
     const downloadSvg = () => {
         const blob = new Blob(

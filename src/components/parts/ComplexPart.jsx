@@ -1,7 +1,7 @@
 import { Container, Graphics } from '@pixi/react'
 import { convertPathToInstructions } from '../svg-utils'
-import { partTable } from '../../data/parts.table'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const getColor = (node) => {
     const { graphical, hovered } = node
@@ -264,6 +264,8 @@ const ComplexPart = ({
     onHoverPart,
     onClickPart,
 }) => {
+    const { partTable } = usePartTable()
+
     if (!part) {
         return null
     }
@@ -273,7 +275,7 @@ const ComplexPart = ({
         partToRender = { ...partTable['user'][part.partId], type: 'user' }
     }
 
-    const [width, height] = calculateSizeOfPart(partToRender)
+    const [width, height] = calculateSizeOfPart(partToRender, partTable)
 
     let [fixedX, fixedY] = [part.position?.[0] || 0, part.position?.[1] || 0]
     if (parent) {

@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect } from 'react'
 import { useAtom } from 'jotai'
 import { calculateRelativePosition } from '../utils'
-import { partTable } from '../../data/parts.table'
 import BufferedInput from '../elements/BufferedInput'
 import { useResize } from '../../hooks/ContainerHooks'
 import { mappingStyleAtom } from '../../atoms/ViewOptions.atom'
 import { MAPPINGS } from '../elements/Constants'
+import { usePartTable } from '../../hooks/PartTableHooks'
 
 const PartDetailsMenu = ({
     layout,
@@ -17,6 +17,7 @@ const PartDetailsMenu = ({
     const bind = useResize()
 
     const [mappingStyle] = useAtom(mappingStyleAtom)
+    const { partTable } = usePartTable()
 
     const onKeyDown = useCallback(
         (evt) => {

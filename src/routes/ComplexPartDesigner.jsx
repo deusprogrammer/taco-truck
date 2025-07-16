@@ -8,6 +8,7 @@ import ComplexPartMenu, { PAN_TOOL } from '../components/menus/ComplexPartMenu'
 import ComplexPart from '../components/parts/ComplexPart'
 import { toast } from 'react-toastify'
 import { convertPartModel } from '../components/utils'
+import { createPart } from '../api/Api'
 
 const getYCoordinate = (x, x1, y1, x2, y2) => {
     // Calculate the slope (m) of the line
@@ -312,15 +313,8 @@ const ComplexPartDesigner = () => {
                 selectedTool={selectedTool}
                 onPartChange={setPart}
                 onToolChange={setSelectedTool}
-                onSave={() => {
-                    const converted = convertPartModel(part)
-                    const customPartsString =
-                        localStorage.getItem('taco-truck-parts') || '[]'
-                    const customParts = JSON.parse(customPartsString)
-                    localStorage.setItem(
-                        'taco-truck-parts',
-                        JSON.stringify([...customParts, converted])
-                    )
+                onSave={async () => {
+                    await createPart(part)
                     toast('Saved custom part!')
                 }}
             />
