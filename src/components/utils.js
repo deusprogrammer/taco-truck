@@ -563,10 +563,10 @@ export const login = () => {
     }
     window.localStorage.setItem(
         'twitchRedirect',
-        'https://deusprogrammer.com/taco-truck/designer'
+        window.location.href
     )
     window.location.replace(
-        'https://deusprogrammer.com/util/auth/login'
+        'https://deusprogrammer.com/util/auth/login/standard'
     )
 }
 
