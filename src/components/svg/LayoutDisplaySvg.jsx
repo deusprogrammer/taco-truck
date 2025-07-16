@@ -14,6 +14,9 @@ const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
         setMakerModel(makerjs.model.mirror(makerified, false, true))
     }, [layout])
 
+    const simplified = simplify(layout)
+    const makerified = makerify(simplified, null, { includeGraphical: true })
+
     const downloadSvg = () => {
         const blob = new Blob(
             [makerjs.exporter.toSVG(makerModel, { units: layout.units })],
@@ -46,8 +49,10 @@ const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
         toast.success('Copied Taco Truck JSON to Clipboard')
     }
 
-    const simplified = simplify(layout)
-    const makerified = makerify(simplified, null, { includeGraphical: true })
+    const copySimplified = () => {
+        navigator.clipboard.writeText(JSON.stringify(simplified, null, 5))
+        toast.success('Copied Taco Truck JSON to Clipboard')
+    }
 
     console.log('SIMPLIFIED: ' + JSON.stringify(simplified, null, 5))
 
@@ -111,6 +116,12 @@ const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
                         className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                     >
                         Copy Taco Truck JSON
+                    </button>
+                    <button
+                        onClick={copySimplified}
+                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
+                        Copy Simplified JSON
                     </button>
                 </>
             ) : null}

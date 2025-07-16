@@ -304,7 +304,7 @@ export const simplify = (layout, parent) => {
         return null
     }
 
-    const { panelDimensions, type } = layout
+    const { panelDimensions, type, partId } = layout
     let simplified = { ...layout }
  
     let partsToFlatten = [];
@@ -327,9 +327,11 @@ export const simplify = (layout, parent) => {
                 panelDimensions: simplified.dimensions
             }
         } else if (type === 'user') {
+            const {modelTree, geometry} = partTable.user[partId]
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
-            simplified.dimensions = clean(calculateSizeOfPart(layout)) 
+            simplified = { ...simplified, modelTree, geometry }
+            simplified.dimensions = clean(calculateSizeOfPart({...layout, modelTree, geometry})) 
             simplified.position = clean(calculateRelativePosition(
                 { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
                 parts,
@@ -399,7 +401,7 @@ const convertPartToPath = ({type, partId, position}) => {
 }
 
 export const makerifyModelTree = (modelTree, options = {}) => {
-    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical } = modelTree;
+    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical } = modelTree || {};
     const { translate, rotate, scale, skewX, skewY } = transform || {};
     const { includeGraphical } = options;
     

@@ -1,7 +1,6 @@
 import { Container, Graphics } from '@pixi/react'
 import { convertPathToInstructions } from '../svg-utils'
 import { partTable } from '../../data/parts.table'
-import { Rectangle } from 'pixi.js'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 
 const getColor = (node) => {
@@ -10,9 +9,9 @@ const getColor = (node) => {
     if (hovered) {
         return 0x00ff00
     } else if (graphical) {
-        return 0xffffff
+        return 0x0000ff
     } else {
-        return 0x000000
+        return 0xffffff
     }
 }
 

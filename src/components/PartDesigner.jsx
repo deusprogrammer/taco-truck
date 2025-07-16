@@ -374,6 +374,14 @@ const PartDesigner = ({
     const centerWorkPiece = useCallback(() => {
         setScreenSize([window.innerWidth, window.innerHeight])
 
+        if (
+            !layout.panelDimensions?.[0] &&
+            !layout.panelDimensions?.[1] &&
+            !initialLoad
+        ) {
+            return
+        }
+
         let contextWidth = partsWidth
         let contextHeight = partsHeight
         if (layout.panelDimensions?.[0]) {
@@ -399,6 +407,7 @@ const PartDesigner = ({
         setScreenSize,
         width,
         zoom,
+        initialLoad,
     ])
 
     useEffect(() => {
