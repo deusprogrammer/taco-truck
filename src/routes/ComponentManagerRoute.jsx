@@ -215,11 +215,13 @@ const ComponentManagerRoute = () => {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-10 bg-slate-600 text-white">
             <div className="flex flex-row items-center justify-center gap-10">
-                <img
-                    className="w-[100px]"
-                    alt="logo"
-                    src={`${process.env.PUBLIC_URL}/logo.png`}
-                />
+                <Link to="/">
+                    <img
+                        className="w-[100px]"
+                        alt="logo"
+                        src={`${process.env.PUBLIC_URL}/logo.png`}
+                    />
+                </Link>
                 <h1 className="text-[2rem]">
                     Project Taco Truck v{config.version}
                 </h1>
