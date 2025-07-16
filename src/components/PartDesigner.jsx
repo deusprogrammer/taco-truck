@@ -174,8 +174,10 @@ const PartDesigner = ({
 
     const [partsWidth, partsHeight] = calculateSizeOfPart({
         type: 'custom',
-        layout: layout,
+        layout,
     })
+
+    console.log('FUCK: ', partsWidth, partsHeight)
 
     // Helper to recursively set all undefined fields to null
     function setUndefinedToNull(obj) {
@@ -310,11 +312,6 @@ const PartDesigner = ({
         })
     }
 
-    const selectPlacingPart = (partType, partId) => {
-        setPlacingPartType(partType)
-        setPlacingPartId(partId)
-    }
-
     const selectPart = (selectedPart) => {
         let currentMode = mode
         if (currentMode === null) {
@@ -386,8 +383,6 @@ const PartDesigner = ({
         if (layout.panelDimensions?.[1]) {
             contextHeight = layout.panelDimensions[1]
         }
-
-        console.log(`${contextWidth} x ${contextHeight}`)
 
         if (width > 0 && height > 0) {
             setWorkspacePosition([
@@ -497,6 +492,8 @@ const PartDesigner = ({
 
     const screenX = workspacePosition[0]
     const screenY = workspacePosition[1]
+
+    console.log('SCREEN: ', screenX, screenY)
 
     return (
         <div className="bg-[#1099bb]">

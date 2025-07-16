@@ -268,7 +268,13 @@ export const calculateSizeOfPart = (part) => {
             }
         })
 
-        return [maxX - minX, maxY - minY]
+        let width = maxX - minX;
+        let height = maxY - minY;
+
+        width = Math.abs(width) === Infinity ? 0 : width
+        height = Math.abs(height) === Infinity ? 0 : height
+
+        return [width, height]
     } else if (part.type === 'user') {
         let { width, height, viewBox } = part?.modelTree?.header || { viewBox: {} };
         width = removeUnits(width || "0mm");
@@ -371,20 +377,20 @@ export const simplify = (layout, parent) => {
 
 const convertPartToPath = ({type, partId, position}) => {
     const { shape, size } = partTable[type]?.[partId] || {};
-    const makerjsPos = position;
 
     switch (shape) {
         case CIRCLE: {
             const model = {
                 paths: {
-                    circle: new makerjs.paths.Circle(makerjsPos, size / 2)
+                    circle: new makerjs.paths.Circle(position, size / 2)
                 }
             }
             return model;
         }
         case SQUARE: {
             const model = new makerjs.models.Rectangle(size[0], size[1])
-            model.origin = makerjsPos
+            const [x, y] = position
+            model.origin = [x - size[0]/2, y - size[1]/2]
             return model;
         }
         default:
