@@ -4,6 +4,19 @@ import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 
+import axios from 'axios';
+
+axios.interceptors.response.use(function (response) {
+    return response;
+}, function (error) {
+    if (error.response && error.response.status === 401) {
+        localStorage.removeItem('accessToken');
+        window.location.reload();
+        return;
+    }
+    return Promise.reject(error);
+});
+
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
     <React.StrictMode>
