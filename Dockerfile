@@ -6,8 +6,6 @@ COPY package.json /app/package.json
 RUN npm install --silent
 RUN npm install react-scripts@5.0.1 -g --silent
 COPY . /app
-RUN ls -al .
-RUN ls -al /app
 RUN npm run build
 
 # production environment
