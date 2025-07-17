@@ -12,9 +12,9 @@ const Home = () => {
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-1 bg-slate-600 text-white">
             <img
-                className="w-[200px]"
+                className="w-[500px]"
                 alt="logo"
-                src={`${process.env.PUBLIC_URL}/logo.png`}
+                src={`${process.env.PUBLIC_URL}/bgg-logo.png`}
             />
             <h1 className="text-[2rem]">
                 Project Taco Truck v{config.version}
