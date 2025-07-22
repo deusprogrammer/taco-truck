@@ -77,7 +77,7 @@ const PartPaletteMenu = ({ currentPart, onChangePart }) => {
                                             )
                                         }
                                     )}
-                                    {partType === 'user' && (
+                                    {/* {partType === 'user' && (
                                         <>
                                             <button
                                                 className={`flex min-h-[150px] flex-col justify-around border-2 border-solid border-black bg-slate-600 text-white hover:bg-slate-800 hover:text-white`}
@@ -93,7 +93,7 @@ const PartPaletteMenu = ({ currentPart, onChangePart }) => {
                                                 className="hidden"
                                             />
                                         </>
-                                    )}
+                                    )} */}
                                 </div>
                             )}
                         </>
