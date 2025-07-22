@@ -566,7 +566,7 @@ export const login = () => {
         window.location.href
     )
     window.location.replace(
-        'https://deusprogrammer.com/util/auth/login/standard'
+        `https://deusprogrammer.com/util/auth/login?redirect=${encodeURI(window.location.href)}`
     )
 }
 

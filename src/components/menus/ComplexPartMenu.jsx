@@ -56,7 +56,7 @@ const ComplexPartMenu = ({
                     onChange={(name) => onPartChange({ ...part, name })}
                 />
                 <label>Import SVG</label>
-                <input type="file" onChange={fileHandler} />
+                <input type="file" accept=".svg" onChange={fileHandler} />
                 <h2 className="text-center text-[1rem] font-bold">Actions</h2>
                 <div className="flex w-full flex-col gap-2">
                     <button className="bg-white text-black" onClick={onSave}>

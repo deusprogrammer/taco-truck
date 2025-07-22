@@ -1,12 +1,42 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useResize } from '../../hooks/ContainerHooks'
 import { PartSelectionButton } from '../elements/Buttons'
 import { usePartTable } from '../../hooks/PartTableHooks'
+import { parseSvgStructure } from '../svg-utils'
+import { parse } from 'svgson'
+import { toast } from 'react-toastify'
 
 const PartPaletteMenu = ({ currentPart, onChangePart }) => {
     const { partTable } = usePartTable()
     const bind = useResize()
     const [sectionsOpen, setSectionsOpen] = useState({})
+    const fileInputRef = useRef(null)
+
+    const handleNewPartClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = null // reset so same file can be chosen again
+            fileInputRef.current.click()
+        }
+    }
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = async (e) => {
+            try {
+                const svgString = e.target.result
+                const svgJSON = await parse(svgString)
+                const modelTree = parseSvgStructure(svgJSON)
+                // TODO Add model tree to user parts somehow
+                toast.success('SVG file loaded successfully')
+            } catch (error) {
+                toast.error('Invalid JSON file')
+            }
+        }
+        reader.readAsText(file)
+    }
 
     return (
         <div
@@ -46,6 +76,23 @@ const PartPaletteMenu = ({ currentPart, onChangePart }) => {
                                                 />
                                             )
                                         }
+                                    )}
+                                    {partType === 'user' && (
+                                        <>
+                                            <button
+                                                className={`flex min-h-[150px] flex-col justify-around border-2 border-solid border-black bg-slate-600 text-white hover:bg-slate-800 hover:text-white`}
+                                                onClick={handleNewPartClick}
+                                            >
+                                                New Part
+                                            </button>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept=".svg"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                        </>
                                     )}
                                 </div>
                             )}

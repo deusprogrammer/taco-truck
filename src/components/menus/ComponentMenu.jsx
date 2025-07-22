@@ -348,7 +348,11 @@ const ComponentMenu = ({
                 <div className="ml-3">{layout?.owner}</div>
                 <label>Panel SVG</label>
                 {!layout?.panelModel && (
-                    <input type="file" onChange={handlePanelFileChange} />
+                    <input
+                        type="file"
+                        accept=".svg"
+                        onChange={handlePanelFileChange}
+                    />
                 )}
                 {layout?.panelModel && (
                     <>
