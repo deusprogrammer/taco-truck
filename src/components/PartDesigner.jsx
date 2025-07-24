@@ -510,8 +510,6 @@ const PartDesigner = ({
     const screenX = workspacePosition[0]
     const screenY = workspacePosition[1]
 
-    console.log('SCREEN: ', screenX, screenY)
-
     return (
         <div className="bg-[#1099bb]">
             <ModalContainer

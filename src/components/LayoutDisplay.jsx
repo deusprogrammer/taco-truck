@@ -372,7 +372,7 @@ const LayoutDisplay = ({
             <Stage
                 width={screenWidth}
                 height={screenHeight}
-                renderOnComponentChange={false}
+                renderOnComponentChange={true}
                 options={{ background: 0x1099bb }}
                 {...bind()}
             >
