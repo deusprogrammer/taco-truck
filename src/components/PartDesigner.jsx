@@ -378,6 +378,8 @@ const PartDesigner = ({
     }
 
     const centerWorkPiece = useCallback(() => {
+        console.log('CENTER WORKPIECE')
+
         setScreenSize([window.innerWidth, window.innerHeight])
 
         if (
@@ -385,6 +387,7 @@ const PartDesigner = ({
             !layout.panelDimensions?.[1] &&
             !initialLoad
         ) {
+            console.log('INITIAL LOAD OVER AND NOT A PROJECT')
             return
         }
 
@@ -397,6 +400,8 @@ const PartDesigner = ({
         if (layout.panelDimensions?.[1]) {
             contextHeight = layout.panelDimensions[1]
         }
+
+        console.log('WIDTH, HEIGHT ', width, height)
 
         if (width > 0 && height > 0) {
             setWorkspacePosition([
