@@ -132,13 +132,10 @@ const ComponentMenu = ({
                             { id, type, partId, name, layout: subLayout },
                             index
                         ) => (
-                            <>
+                            <React.Fragment key={id || `${key}-${index}`}>
                                 <div
                                     className="flex flex-row gap-0"
-                                    key={`part-${index}`}
-                                    onMouseLeave={() => {
-                                        onHover(null)
-                                    }}
+                                    key={`part-div-${id || index}`}
                                 >
                                     <button
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
@@ -171,12 +168,15 @@ const ComponentMenu = ({
                                         X
                                     </button>
                                 </div>
-                                <div className="ml-2">
+                                <div
+                                    className="ml-2"
+                                    key={`part-ml2-${id || index}`}
+                                >
                                     {type === 'custom'
                                         ? renderParts(subLayout)
                                         : null}
                                 </div>
-                            </>
+                            </React.Fragment>
                         )
                     )}
             </React.Fragment>
@@ -309,9 +309,11 @@ const ComponentMenu = ({
                     </div>
                 </div>
                 <div className="ml-3">
-                    {panelModel.children?.map((child, index) =>
-                        renderPanelModel(child, `${path},${index}`)
-                    )}
+                    {panelModel.children?.map((child, index) => (
+                        <React.Fragment key={child?.id || `${path},${index}`}>
+                            {renderPanelModel(child, `${path},${index}`)}
+                        </React.Fragment>
+                    ))}
                 </div>
             </div>
         )

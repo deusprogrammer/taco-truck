@@ -182,8 +182,6 @@ const PartDesigner = ({
         partTable
     )
 
-    console.log('FUCK: ', partsWidth, partsHeight)
-
     // Helper to recursively set all undefined fields to null
     function setUndefinedToNull(obj) {
         if (Array.isArray(obj)) {

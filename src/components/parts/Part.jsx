@@ -191,8 +191,6 @@ const Part = ({
         )
     }
 
-    console.log('PART TABLE: ' + JSON.stringify(partTable, null, 2))
-
     if (!partTable?.[type]?.[partId]) {
         return <></>
     }

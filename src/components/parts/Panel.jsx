@@ -14,6 +14,8 @@ const Panel = ({ layout, scale, fill, onClick }) => {
         clearTextureCache()
     }, [scale])
 
+    console.log('SCALE: ' + scale)
+
     if (layout?.panelModel) {
         return (
             <>

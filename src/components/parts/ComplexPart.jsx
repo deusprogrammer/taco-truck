@@ -248,6 +248,7 @@ const renderModelTree = (modelTree, path = 'root') => {
             x={transform?.translate?.x || 0}
             y={transform?.translate?.y || 0}
             scale={{ x: transform?.scale?.x || 1, y: transform?.scale?.y || 1 }}
+            key={`${path}-container`}
         >
             {graphicsToDraw}
         </Container>
