@@ -290,8 +290,6 @@ const ComplexPart = ({
         )
     }
 
-    console.log(width, height)
-
     return (
         <Container
             x={fixedX * scale}
@@ -318,7 +316,7 @@ const ComplexPart = ({
             interactive={true}
         >
             <Graphics
-                alpha={0}
+                alpha={1}
                 onclick={() => onClick && onClick(part)}
                 onmouseover={() => onHoverPart && onHoverPart(part)}
                 onmouseout={() => onHoverPart && onHoverPart(null)}
