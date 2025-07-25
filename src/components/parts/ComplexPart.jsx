@@ -290,6 +290,8 @@ const ComplexPart = ({
         )
     }
 
+    console.log(width, height)
+
     return (
         <Container
             x={fixedX * scale}
