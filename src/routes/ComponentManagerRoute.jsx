@@ -324,7 +324,7 @@ const ComponentManagerRoute = () => {
                                     className="h-20 bg-slate-500 p-4 text-white"
                                     onClick={() => {
                                         navigator.clipboard.writeText(
-                                            `${window.location.origin}/designer/projects/${project.id}`
+                                            `${window.location.origin}/taco-truck/designer/projects/${project.id}`
                                         )
                                         toast.success('Copied URL to Clipboard')
                                     }}
@@ -404,7 +404,7 @@ const ComponentManagerRoute = () => {
                                     className="h-20 bg-slate-500 p-4 text-white"
                                     onClick={() => {
                                         navigator.clipboard.writeText(
-                                            `${window.location.origin}/designer/parts/${part.id}`
+                                            `${window.location.origin}/taco-truck/designer/parts/${part.id}`
                                         )
                                     }}
                                 >
