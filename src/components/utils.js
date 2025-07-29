@@ -308,7 +308,7 @@ export const simplify = (layout, parent, partTable) => {
         return null
     }
 
-    const { panelDimensions, type, partId } = layout
+    let { panelDimensions, type, partId, modelTree, geometry } = layout
     let simplified = { ...layout }
  
     let partsToFlatten = [];
@@ -331,7 +331,12 @@ export const simplify = (layout, parent, partTable) => {
                 panelDimensions: simplified.dimensions
             }
         } else if (type === 'user') {
-            const { modelTree, geometry } = partTable.user[partId] || { modelTree: {}, geometry: {}}
+            if (!geometry) {
+                geometry = partTable.user[partId]?.geometry || {}
+            }
+            if (!modelTree) {
+                modelTree = partTable.user[partId]?.modelTree || {}
+            }
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
             simplified = { ...simplified, modelTree, geometry }
