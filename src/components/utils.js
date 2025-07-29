@@ -192,7 +192,7 @@ export const normalizePartPositionsToZero = (parts, partTable) => {
 
         // If the part is not a custom part.
         if (part.type && part.type !== 'custom' && part.type !== 'user') {
-            const { size, shape } = partTable[part.type][part.partId]
+            const { size, shape } = partTable[part.type][part.partId] || {size: 0, shape: CIRCLE}
             xAdj = size
             yAdj = size
             if (Array.isArray(size)) {
@@ -289,7 +289,7 @@ export const calculateSizeOfPart = (part, partTable) => {
         }
         return [width, height]
     } else {
-        let { size } = partTable?.[part.type]?.[part.partId]
+        let { size } = partTable?.[part.type]?.[part.partId]  || {size: 0, shape: CIRCLE}
 
         if (Array.isArray(size)) {
             return size
@@ -331,7 +331,7 @@ export const simplify = (layout, parent, partTable) => {
                 panelDimensions: simplified.dimensions
             }
         } else if (type === 'user') {
-            const {modelTree, geometry} = partTable.user[partId]
+            const { modelTree, geometry } = partTable.user[partId] || { modelTree: {}, geometry: {} }
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
             simplified = { ...simplified, modelTree, geometry }
@@ -382,7 +382,7 @@ export const simplify = (layout, parent, partTable) => {
 }
 
 const convertPartToPath = ({type, partId, position}, partTable) => {
-    const { shape, size } = partTable[type]?.[partId] || {};
+    const { shape, size } = partTable[type]?.[partId] || {shape: CIRCLE, size: 0};
 
     switch (shape) {
         case CIRCLE: {
