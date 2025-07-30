@@ -444,18 +444,18 @@ export const makerifyModelTree = (modelTree, options = {}) => {
         })
     } else if (type === 'rectangle') {
         if (rx && ry) {
-            model = new makerjs.models.RoundRectangle(width, height, (rx + ry) / 2);
+            model = makerjs.model.mirror(new makerjs.models.RoundRectangle(width, height, (rx + ry) / 2), false, true);
         } else {
-            model = new makerjs.models.Rectangle(width, height);
+            model = makerjs.model.mirror(new makerjs.models.Rectangle(width, height), false, true);
             model.origin = [x, y];
         }
     } else if (type === 'circle') {
         // Expect radius and origin in the modelTree
-        model = {
+        model = makerjs.model.mirror({
             paths: {
                 circle: new makerjs.paths.Circle([cx, cy], r)
             }
-        };
+        }, false, true);
     } else if (type === 'polygon') {
         // modelTree.points is expected to be an array of [x, y] pairs
         if (Array.isArray(modelTree.points) && modelTree.points.length > 1) {

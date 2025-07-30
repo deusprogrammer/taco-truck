@@ -1,4 +1,4 @@
-import { Container, Graphics } from '@pixi/react'
+import { Container, Graphics, Sprite } from '@pixi/react'
 import { convertPathToInstructions } from '../svg-utils'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { usePartTable } from '../../hooks/PartTableHooks'
@@ -147,6 +147,7 @@ const renderModelTree = (modelTree, path = 'root') => {
         ry,
         width,
         height,
+        href, // for images
     } = modelTree
 
     if (type === 'path') {
@@ -232,6 +233,18 @@ const renderModelTree = (modelTree, path = 'root') => {
                 interactive={true}
             />
         )
+    } else if (type === 'image' && href) {
+        graphicsToDraw.push(
+            <Sprite
+                key={`${path}-image`}
+                image={href}
+                x={x || 0}
+                y={y || 0}
+                width={width}
+                height={height}
+                anchor={0}
+            />
+        )
     }
 
     if (children) {
@@ -289,10 +302,6 @@ const ComplexPart = ({
             panelHeight
         )
     }
-
-    console.log('X, Y ' + fixedX, fixedY)
-    console.log('WIDTH, HEIGHT ', width, height)
-    console.log('SCALE ', scale)
 
     return (
         <Container

@@ -389,84 +389,140 @@ const parsePoints = (pointsStr) => {
   return points;
 };
 
-export const parseSvgStructure = (svgData) => {
+// Helper to parse a value as a number, stripping any units (e.g. "100px" => 100)
+export const parseNumber = (val) => {
+  if (val == null) return undefined;
+  if (typeof val === 'number') return val;
+  const match = String(val).match(/-?\d*\.?\d+/);
+  return match ? Number(match[0]) : undefined;
+};
+
+export const parseSvgStructure = (svgData, defs = null) => {
   if (!svgData) return null;
 
-  const { name, children } = svgData;
+  const { name, children = [], attributes = {} } = svgData;
+
+  // On the first call, extract all <defs> into a defs object before parsing the rest
+  if (!defs) {
+    defs = {};
+    // Recursively collect all <defs> children by id
+    const collectDefs = (node) => {
+      if (!node) return;
+      if (node.name === 'defs' && node.children && node.children.length) {
+        node.children.forEach(child => {
+          if (child.attributes && child.attributes.id) {
+            defs[child.attributes.id] = child;
+          }
+        });
+      }
+      if (node.children && node.children.length) {
+        node.children.forEach(collectDefs);
+      }
+    };
+    collectDefs(svgData);
+  }
 
   switch (name) {
     case 'svg':
+      // Recursively parse children, passing defs
       return {
         header: {
-          viewBox: extractViewBox(svgData.attributes.viewBox),
-          width: svgData.attributes.width,
-          height: svgData.attributes.height,
+          viewBox: extractViewBox(attributes.viewBox),
+          width: attributes.width,
+          height: attributes.height,
         },
-        children: children.map(parseSvgStructure).filter((child) => child !== null),
+        children: children.map(child => parseSvgStructure(child, defs)).filter(Boolean),
       };
     case 'g':
       return {
         type: 'group',
-        transform: extractTransform(svgData.attributes.transform),
-        children: children.map(parseSvgStructure).filter((child) => child !== null),
+        transform: extractTransform(attributes.transform),
+        children: children.map(child => parseSvgStructure(child, defs)).filter(Boolean),
       };
     case 'path':
       return {
         type: 'path',
-        transform: extractTransform(svgData.attributes.transform),
-        d: svgData.attributes.d.replace(/(?<![eE])-/g, ' -'),
-        // instructions: convertPathToInstructions(
-        //   svgData.attributes.d.replace(/(?<![eE])-/g, ' -'),
-        //   extractTransform(svgData.attributes.transform)
-        // ),
-        fill: svgData.attributes.fill,
-        stroke: svgData.attributes.stroke,
-        strokeWidth: svgData.attributes['stroke-width'],
+        transform: extractTransform(attributes.transform),
+        d: attributes.d ? attributes.d.replace(/(?<![eE])-/g, ' -') : '',
+        fill: attributes.fill,
+        stroke: attributes.stroke,
+        strokeWidth: attributes['stroke-width'],
       };
     case 'rect':
       return {
         type: 'rectangle',
-        transform: extractTransform(svgData.attributes.transform),
-        attributes: svgData.attributes,
-        x: Number(svgData.attributes.x),
-        y: Number(svgData.attributes.y),
-        rx: Number(svgData.attributes.rx),
-        ry: Number(svgData.attributes.ry),
-        width: Number(svgData.attributes.width),
-        height: Number(svgData.attributes.height),
-        fill: svgData.attributes.fill,
-        stroke: svgData.attributes.stroke,
-        strokeWidth: svgData.attributes['stroke-width'],
+        transform: extractTransform(attributes.transform),
+        attributes,
+        x: parseNumber(attributes.x),
+        y: parseNumber(attributes.y),
+        rx: parseNumber(attributes.rx),
+        ry: parseNumber(attributes.ry),
+        width: parseNumber(attributes.width),
+        height: parseNumber(attributes.height),
+        fill: attributes.fill,
+        stroke: attributes.stroke,
+        strokeWidth: attributes['stroke-width'],
       };
     case 'circle':
       return {
         type: 'circle',
-        transform: extractTransform(svgData.attributes.transform),
-        cx: Number(svgData.attributes.cx),
-        cy: Number(svgData.attributes.cy),
-        r: Number(svgData.attributes.r),
-        fill: svgData.attributes.fill,
-        stroke: svgData.attributes.stroke,
-        strokeWidth: svgData.attributes['stroke-width'],
+        transform: extractTransform(attributes.transform),
+        cx: parseNumber(attributes.cx),
+        cy: parseNumber(attributes.cy),
+        r: parseNumber(attributes.r),
+        fill: attributes.fill,
+        stroke: attributes.stroke,
+        strokeWidth: attributes['stroke-width'],
       };
     case 'polygon':
       return {
         type: 'polygon',
-        transform: extractTransform(svgData.attributes.transform),
-        points: parsePoints(svgData.attributes.points),
-        fill: svgData.attributes.fill,
-        stroke: svgData.attributes.stroke,
-        strokeWidth: svgData.attributes['stroke-width'],
+        transform: extractTransform(attributes.transform),
+        points: parsePoints(attributes.points),
+        fill: attributes.fill,
+        stroke: attributes.stroke,
+        strokeWidth: attributes['stroke-width'],
       };
     case 'polyline':
       return {
         type: 'polyline',
-        transform: extractTransform(svgData.attributes.transform),
-        points: parsePoints(svgData.attributes.points),
-        fill: svgData.attributes.fill,
-        stroke: svgData.attributes.stroke,
-        strokeWidth: svgData.attributes['stroke-width'],
+        transform: extractTransform(attributes.transform),
+        points: parsePoints(attributes.points),
+        fill: attributes.fill,
+        stroke: attributes.stroke,
+        strokeWidth: attributes['stroke-width'],
       };
+    case 'image':
+      return {
+        type: 'image',
+        transform: extractTransform(attributes.transform),
+        href: attributes['href'] || attributes['xlink:href'],
+        x: parseNumber(attributes.x),
+        y: parseNumber(attributes.y),
+        width: parseNumber(attributes.width),
+        height: parseNumber(attributes.height),
+        preserveAspectRatio: attributes.preserveAspectRatio,
+      };
+    case 'use': {
+      // If <use> references an <image> in <defs>, pull its href into our object
+      const hrefAttr = attributes['href'] || attributes['xlink:href'];
+      const refId = hrefAttr && hrefAttr.startsWith('#') ? hrefAttr.slice(1) : hrefAttr;
+      const def = defs[refId];
+      let imageObj = null;
+      if (def && def.name === 'image') {
+        imageObj = {
+          type: 'image',
+          transform: extractTransform(attributes.transform),
+          href: def.attributes['href'] || def.attributes['xlink:href'],
+          x: parseNumber(attributes.x) || parseNumber(def.attributes.x) || 0,
+          y: parseNumber(attributes.y) || parseNumber(def.attributes.y) || 0,
+          width: parseNumber(attributes.width) || parseNumber(def.attributes.width),
+          height: parseNumber(attributes.height) || parseNumber(def.attributes.height),
+          preserveAspectRatio: attributes.preserveAspectRatio || def.attributes.preserveAspectRatio,
+        };
+      }
+      return imageObj;
+    }
     default:
       return null;
   }

@@ -7,7 +7,6 @@ import GeometryMenu from '../components/menus/GeometryMenu'
 import ComplexPartMenu, { PAN_TOOL } from '../components/menus/ComplexPartMenu'
 import ComplexPart from '../components/parts/ComplexPart'
 import { toast } from 'react-toastify'
-import { convertPartModel } from '../components/utils'
 import { createPart } from '../api/Api'
 
 const getYCoordinate = (x, x1, y1, x2, y2) => {

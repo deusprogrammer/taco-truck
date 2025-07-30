@@ -1,8 +1,9 @@
 import BufferedInput from '../elements/BufferedInput'
 import { toast } from 'react-toastify'
-import { parseSvgStructure } from '../svg-utils'
+import { parseNumber, parseSvgStructure } from '../svg-utils'
 import { parse } from 'svgson'
 import { convertPartModel } from '../utils'
+import { useState } from 'react'
 
 export const PAN_TOOL = 'pan'
 export const LINE_TOOL = 'line'
@@ -18,6 +19,14 @@ const ComplexPartMenu = ({
     onPartChange,
     onSave,
 }) => {
+    // Local state for units and actualDimensions
+    const [units, setUnits] = useState(part.units || 'mm')
+    const [actualDimensions, setActualDimensions] = useState(
+        part.actualDimensions && part.actualDimensions.length === 2
+            ? part.actualDimensions
+            : [100, 100]
+    )
+
     const fileHandler = (event) => {
         const file = event.target.files[0]
         if (!file) return
@@ -28,9 +37,24 @@ const ComplexPartMenu = ({
                 const svgString = e.target.result
                 const svgJSON = await parse(svgString)
                 const modelTree = parseSvgStructure(svgJSON)
+                // If the SVG has width/height in its header, use those as initial actualDimensions
+                let newActualDimensions = actualDimensions
+                if (
+                    modelTree?.header?.width &&
+                    modelTree?.header?.height &&
+                    (!part.actualDimensions ||
+                        part.actualDimensions.length !== 2)
+                ) {
+                    newActualDimensions = [
+                        parseNumber(modelTree.header.width) || 100,
+                        parseNumber(modelTree.header.height) || 100,
+                    ]
+                    setActualDimensions(newActualDimensions)
+                }
                 onPartChange({
                     ...part,
                     modelTree,
+                    actualDimensions: newActualDimensions,
                 })
                 toast.success('SVG file loaded successfully')
             } catch (error) {
@@ -43,6 +67,15 @@ const ComplexPartMenu = ({
     const selectedToolStyle =
         'w-[50px] bg-gray text-black border-white border-solid border-2'
     const unselectedToolStyle = 'w-[50px] bg-white text-black'
+
+    // Handler for saving, including actualDimensions and units in the root object
+    const handleSave = () => {
+        onSave({
+            ...part,
+            units,
+            actualDimensions,
+        })
+    }
 
     return (
         <>
@@ -57,16 +90,55 @@ const ComplexPartMenu = ({
                 />
                 <label>Import SVG</label>
                 <input type="file" accept=".svg" onChange={fileHandler} />
+
+                {/* Units and dimensions form */}
+                <label>Units</label>
+                <select
+                    value={units}
+                    onChange={(e) => setUnits(e.target.value)}
+                    className="mb-2"
+                >
+                    <option value="mm">millimeters</option>
+                    <option value="in">inches</option>
+                </select>
+                <label>Width</label>
+                <BufferedInput
+                    type="number"
+                    value={actualDimensions[0]}
+                    onChange={(w) =>
+                        setActualDimensions([Number(w), actualDimensions[1]])
+                    }
+                />
+                <label>Height</label>
+                <BufferedInput
+                    type="number"
+                    value={actualDimensions[1]}
+                    onChange={(h) =>
+                        setActualDimensions([actualDimensions[0], Number(h)])
+                    }
+                />
+
                 <h2 className="text-center text-[1rem] font-bold">Actions</h2>
                 <div className="flex w-full flex-col gap-2">
-                    <button className="bg-white text-black" onClick={onSave}>
+                    <button
+                        className="bg-white text-black"
+                        onClick={handleSave}
+                    >
                         Save
                     </button>
                     <button
                         className="bg-white text-black"
                         onClick={() => {
                             navigator.clipboard.writeText(
-                                JSON.stringify(convertPartModel(part), null, 5)
+                                JSON.stringify(
+                                    {
+                                        ...convertPartModel(part),
+                                        units,
+                                        actualDimensions,
+                                    },
+                                    null,
+                                    5
+                                )
                             )
                             toast.success('Copied Taco Truck JSON to Clipboard')
                         }}
