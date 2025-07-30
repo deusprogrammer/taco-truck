@@ -114,29 +114,32 @@ const LayoutDisplay = ({
                                 found.partId
                             ].shape.toUpperCase() !== CIRCLE
                         ) {
+                            const partSize = calculateSizeOfPart(
+                                found,
+                                partTable
+                            )
+
+                            console.log(
+                                'FOUND: ' + JSON.stringify(found, null, 2)
+                            )
+                            console.log(
+                                'PART SIZE: ' +
+                                    JSON.stringify(partSize, null, 2)
+                            )
+
                             found = {
                                 ...found,
                                 position: [
                                     Math.trunc(
                                         (xy[0] -
                                             workspacePosition[0] -
-                                            (calculateSizeOfPart(
-                                                found,
-                                                partTable
-                                            )[0] *
-                                                currentScale) /
-                                                2) /
+                                            (partSize[0] * currentScale) / 2) /
                                             currentScale
                                     ),
                                     Math.trunc(
                                         (xy[1] -
                                             workspacePosition[1] -
-                                            (calculateSizeOfPart(
-                                                found,
-                                                partTable
-                                            )[1] *
-                                                currentScale) /
-                                                2) /
+                                            (partSize[1] * currentScale) / 2) /
                                             currentScale
                                     ),
                                 ],
@@ -237,10 +240,12 @@ const LayoutDisplay = ({
                 return
             }
 
+            const name = partTable?.[placingPartType]?.[placingPartId].name
+
             const partsCopy = [...layout.parts]
             let newPart = {
                 id: generateUUID(),
-                name: `${placingPartType}-${placingPartId}`,
+                name,
                 type: placingPartType,
                 partId: placingPartId,
                 position: [
@@ -254,9 +259,9 @@ const LayoutDisplay = ({
                 origin: [0, 0],
             }
 
-            if (placingPartType === 'user') {
-                newPart = { ...partTable['user'][placingPartId], ...newPart }
-            }
+            // if (placingPartType === 'user') {
+            //     newPart = { ...partTable['user'][placingPartId], ...newPart }
+            // }
 
             partsCopy.push(newPart)
             const updatedLayout = { ...layout, parts: partsCopy }
@@ -270,7 +275,6 @@ const LayoutDisplay = ({
             placingPartId,
             placingPartType,
             workspacePosition,
-            partTable,
         ]
     )
 

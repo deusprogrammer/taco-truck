@@ -280,7 +280,13 @@ export const calculateSizeOfPart = (part, partTable) => {
 
         return [width, height]
     } else if (part.type === 'user') {
-        let { width, height, viewBox } = part?.modelTree?.header || { viewBox: {} };
+        let modelTree = part?.modelTree;
+
+        if (!modelTree) {
+            modelTree = partTable?.[part.type]?.[part.partId]?.modelTree;
+        }
+
+        let { width, height, viewBox } = modelTree.header || { viewBox: {} };
         width = removeUnits(width || "0mm");
         height = removeUnits(height || "0mm");
 

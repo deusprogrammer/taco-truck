@@ -147,7 +147,6 @@ const ComponentMenu = ({
                                         }}
                                     >
                                         <b>{name}</b>
-                                        {partId ? `(${partId})` : null}
                                     </button>
                                     {type === 'custom' ? (
                                         <button
