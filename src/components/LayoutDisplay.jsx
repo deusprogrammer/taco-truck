@@ -119,14 +119,6 @@ const LayoutDisplay = ({
                                 partTable
                             )
 
-                            console.log(
-                                'FOUND: ' + JSON.stringify(found, null, 2)
-                            )
-                            console.log(
-                                'PART SIZE: ' +
-                                    JSON.stringify(partSize, null, 2)
-                            )
-
                             found = {
                                 ...found,
                                 position: [
@@ -159,6 +151,8 @@ const LayoutDisplay = ({
                                             currentScale
                                     ),
                                 ],
+                                origin: [0, 0],
+                                anchor: [0, 0],
                             }
                         }
 
