@@ -523,6 +523,18 @@ export const parseSvgStructure = (svgData, defs = null) => {
       }
       return imageObj;
     }
+    case 'ellipse':
+      return {
+        type: 'ellipse',
+        transform: extractTransform(attributes.transform),
+        cx: parseNumber(attributes.cx),
+        cy: parseNumber(attributes.cy),
+        rx: parseNumber(attributes.rx),
+        ry: parseNumber(attributes.ry),
+        fill: attributes.fill,
+        stroke: attributes.stroke,
+        strokeWidth: attributes['stroke-width'],
+      };
     default:
       return null;
   }

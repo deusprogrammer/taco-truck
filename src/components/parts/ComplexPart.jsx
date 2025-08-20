@@ -174,6 +174,24 @@ const renderModelTree = (modelTree, path = 'root') => {
                 interactive={true}
             />
         )
+    } else if (type === 'ellipse') {
+        graphicsToDraw.push(
+            <Graphics
+                key={`${path}-ellipse`}
+                draw={(g) => {
+                    g.clear()
+                    const color = getColor(modelTree)
+                    const opacity = getOpacity(modelTree)
+                    g.lineStyle(2, color, opacity)
+                    g.beginFill(0x000000)
+                    // PixiJS ellipse: drawEllipse(x, y, width, height)
+                    // SVG ellipse: cx, cy, rx, ry
+                    g.drawEllipse(cx, cy, rx, ry)
+                    g.endFill()
+                }}
+                interactive={true}
+            />
+        )
     } else if (type === 'rectangle') {
         graphicsToDraw.push(
             <Graphics

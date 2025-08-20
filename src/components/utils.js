@@ -462,6 +462,9 @@ export const makerifyModelTree = (modelTree, options = {}) => {
                 circle: new makerjs.paths.Circle([cx, cy], r)
             }
         }, false, true);
+    } else if (type === 'ellipse') {
+        // Expect cx, cy, rx, ry in the modelTree
+        model = makerjs.model.mirror(new makerjs.models.Ellipse([cx, cy], rx, ry), false, true);
     } else if (type === 'polygon') {
         // modelTree.points is expected to be an array of [x, y] pairs
         if (Array.isArray(modelTree.points) && modelTree.points.length > 1) {

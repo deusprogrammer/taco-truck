@@ -1,5 +1,6 @@
 export const CIRCLE = 'CIRCLE'
 export const SQUARE = 'SQUARE'
+export const ELLIPSE = 'ELLIPSE';
 export const CUSTOM = 'CUSTOM'
 export const VECTOR = 'VECTOR'
 

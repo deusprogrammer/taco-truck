@@ -482,9 +482,9 @@ const PartDesigner = ({
         }
     }, [centerWorkPiece])
 
-    useEffect(() => {
-        centerWorkPiece()
-    }, [centerWorkPiece, layout])
+    // useEffect(() => {
+    //     centerWorkPiece()
+    // }, [centerWorkPiece, layout])
 
     const flattenParts = (layout) => {
         let parts = []
