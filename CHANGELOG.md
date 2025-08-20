@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v3.4.0-alpha
+
+- Added support for ellipses in svg
+- Bug fixes
+
 ## v1.5.1-beta
 
 ### Changes
