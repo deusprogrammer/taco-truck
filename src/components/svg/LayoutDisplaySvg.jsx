@@ -5,20 +5,28 @@ import makerjs from 'makerjs'
 import { toast } from 'react-toastify'
 import { usePartTable } from '../../hooks/PartTableHooks'
 
-const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
+const LayoutDisplaySvg = ({
+    layout,
+    hideButton,
+    scale = 1,
+    drillingGuide = false,
+}) => {
     const { partTable } = usePartTable()
     const svgRef = createRef()
     const [makerModel, setMakerModel] = useState()
 
     useEffect(() => {
         const simplified = simplify(layout, null, partTable)
-        const makerified = makerify(simplified, null, partTable)
+        const makerified = makerify(simplified, null, partTable, {
+            drillingGuide,
+        })
         setMakerModel(makerjs.model.mirror(makerified, false, true))
-    }, [layout, partTable])
+    }, [layout, partTable, drillingGuide])
 
     const simplified = simplify(layout, null, partTable)
     const makerified = makerify(simplified, null, partTable, {
         includeGraphical: true,
+        drillingGuide,
     })
 
     const downloadSvg = () => {
@@ -57,8 +65,6 @@ const LayoutDisplaySvg = ({ layout, hideButton, scale = 1 }) => {
         navigator.clipboard.writeText(JSON.stringify(simplified, null, 5))
         toast.success('Copied Taco Truck JSON to Clipboard')
     }
-
-    console.log('SIMPLIFIED: ' + JSON.stringify(simplified, null, 5))
 
     const addPadding = (model, padding) => {
         const bounds = makerjs.measure.modelExtents(model)

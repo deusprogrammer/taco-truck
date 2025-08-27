@@ -392,14 +392,43 @@ export const simplify = (layout, parent, partTable) => {
     return simplified
 }
 
-const convertPartToPath = ({type, partId, position}, partTable) => {
+const convertPartToPath = ({type, partId, position, rx, ry, cx, cy}, partTable, options) => {
     const { shape, size } = partTable[type]?.[partId] || {};
+    const { drillingGuide } = options;
 
     switch (shape) {
         case CIRCLE: {
             const model = {
                 paths: {
-                    circle: new makerjs.paths.Circle(position, size / 2)
+                    circle: new makerjs.paths.Circle(position, size / 2),
+                    hLine: drillingGuide ? new makerjs.paths.Line(
+                        [position[0] - size / 2, position[1]],
+                        [position[0] + size / 2, position[1]]
+                    ) : null,
+                    vLine: drillingGuide ? new makerjs.paths.Line(
+                        [position[0], position[1] - size / 2],
+                        [position[0], position[1] + size / 2]
+                    ) : null
+                }
+            }
+            return model;
+        }
+        case 'ellipse': {
+            // Use cx, cy, rx, ry if available, otherwise fallback to position and size
+            const center = cx !== undefined && cy !== undefined ? [cx, cy] : position;
+            const radiusX = rx !== undefined ? rx : (Array.isArray(size) ? size[0] / 2 : size / 2);
+            const radiusY = ry !== undefined ? ry : (Array.isArray(size) ? size[1] / 2 : size / 2);
+            const model = {
+                paths: {
+                    ellipse: new makerjs.paths.Ellipse(center, radiusX, radiusY),
+                    hLine: drillingGuide ? new makerjs.paths.Line(
+                        [center[0] - radiusX, center[1]],
+                        [center[0] + radiusX, center[1]]
+                    ) : null,
+                    vLine: drillingGuide ? new makerjs.paths.Line(
+                        [center[0], center[1] - radiusY],
+                        [center[0], center[1] + radiusY]
+                    ) : null
                 }
             }
             return model;
@@ -418,7 +447,7 @@ const convertPartToPath = ({type, partId, position}, partTable) => {
 export const makerifyModelTree = (modelTree, options = {}) => {
     const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical } = modelTree || {};
     const { translate, rotate, scale, skewX, skewY } = transform || {};
-    const { includeGraphical } = options;
+    const { includeGraphical, drillingGuide } = options;
     
     let model = {};
 
@@ -457,9 +486,20 @@ export const makerifyModelTree = (modelTree, options = {}) => {
         }
     } else if (type === 'circle') {
         // Expect radius and origin in the modelTree
+        const center = [cx, cy];
         model = makerjs.model.mirror({
             paths: {
-                circle: new makerjs.paths.Circle([cx, cy], r)
+                circle: new makerjs.paths.Circle(center, r),
+                // Horizontal line
+                hLine: drillingGuide ? new makerjs.paths.Line(
+                    [cx - r, cy],
+                    [cx + r, cy]
+                ) : null,
+                // Vertical line
+                vLine: drillingGuide ? new makerjs.paths.Line(
+                    [cx, cy - r],
+                    [cx, cy + r]
+                ) : null
             }
         }, false, true);
     } else if (type === 'ellipse') {
@@ -548,7 +588,7 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         model.models[`customs-${index}`] = makerify(child, parent, partTable, options, layer++);
     })
     children.filter((child) => child.type !== 'custom' && child.type !== 'svg').forEach((child, index) => {
-        model.models[`parts-${index}`] = convertPartToPath(child, partTable);
+        model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
     })
     children.filter((child) => child.type === 'user').forEach((child, index) => {
         const [x, y] = child.position;

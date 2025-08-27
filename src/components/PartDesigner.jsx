@@ -44,7 +44,6 @@ import {
     ZoomButton,
 } from './elements/Buttons'
 import AboutModal from './menus/About'
-import PartMenu from './menus/PartMenu'
 import { useKeyShortcuts } from '../hooks/AtomHooks'
 import ExportModal from './menus/ExportModal'
 import {
