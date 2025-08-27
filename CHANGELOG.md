@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v3.4.1-alpha
+
+- Added back drilling guide
+- Fixed preview lock not unlocking
+
 ## v3.4.0-alpha
 
 - Added support for ellipses in svg
