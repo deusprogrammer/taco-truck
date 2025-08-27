@@ -269,6 +269,7 @@ const LayoutDisplay = ({
             placingPartId,
             placingPartType,
             workspacePosition,
+            partTable,
         ]
     )
 

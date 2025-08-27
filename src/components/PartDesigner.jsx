@@ -419,6 +419,7 @@ const PartDesigner = ({
 
     useEffect(() => {
         if (!preview) {
+            setMode('SELECT')
             return () => {}
         }
 
