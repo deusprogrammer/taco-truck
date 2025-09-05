@@ -562,7 +562,7 @@ export const makerifyModelTree = (modelTree, options = {}) => {
 }
 
 export const makerify = (simplifiedLayout, parent, partTable, options = {}, layer = 0) => {
-    const { panelDimensions, panelModel, type, position, rotation, cornerRadius, children } = simplifiedLayout
+    const { panelDimensions, panelModel, type, position, rotation, cornerRadius, children, flipX, flipY } = simplifiedLayout
 
     let model = {
         models: {},
@@ -604,8 +604,23 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
             const [x, y] = position;
             model = makerjs.model.rotate(model, rotation, [0, 0]);
             model = makerjs.model.moveRelative(model, [x, y]);
+            // Flip using mirror, then translate back to center
+            if (flipX || flipY) {
+                const bbox = makerjs.measure.modelExtents(model);
+                if (bbox) {
+                    const centerX = (bbox.high[0] + bbox.low[0]) / 2;
+                    const centerY = (bbox.high[1] + bbox.low[1]) / 2;
+                    model = makerjs.model.mirror(model, flipX, flipY);
+                    const tx = flipX ? 2 * centerX : 0;
+                    const ty = flipY ? 2 * centerY : 0;
+                    model = makerjs.model.moveRelative(model, [tx, ty]);
+                } else {
+                    // If no bounding box, just mirror
+                    model = makerjs.model.mirror(model, flipX, flipY);
+                }
+            }
         } 
-    } 
+    }
 
     return model;
 }
