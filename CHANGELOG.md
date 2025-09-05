@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v3.5.0-alpha
+
+- Added the ability to flip parts on the x and/or y axis.
+
 ## v3.4.1-alpha
 
 - Added back drilling guide

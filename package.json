@@ -1,6 +1,6 @@
 {
     "name": "taco-truck",
-    "version": "3.4.1-alpha",
+    "version": "3.5.0-alpha",
     "private": true,
     "homepage": "/taco-truck",
     "dependencies": {
