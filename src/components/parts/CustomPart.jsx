@@ -32,12 +32,15 @@ const CustomPart = ({
         panelHeight
     )
 
+    const flipOffsetX = part.flipX ? width * scale : 0
+    const flipOffsetY = part.flipY ? height * scale : 0
+
     return (
         <>
             <Container
                 ref={containerRef}
-                x={fixedX * scale}
-                y={fixedY * scale}
+                x={fixedX * scale + flipOffsetX}
+                y={fixedY * scale + flipOffsetY}
                 scale={[1 * (part.flipX ? -1 : 1), 1 * (part.flipY ? -1 : 1)]}
                 angle={part.rotation || 0}
                 onclick={() => onClick && onClick(part)}
