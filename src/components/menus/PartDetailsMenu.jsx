@@ -341,6 +341,32 @@ const PartDetailsMenu = ({
                         }}
                     />
                 </div>
+                <div className="flex flex-row gap-1">
+                    <label>flip x:</label>
+                    <input
+                        type="checkbox"
+                        checked={selectedPart?.flipX}
+                        onChange={({ target: { checked } }) => {
+                            onUpdatePart(selectedPart.id, {
+                                ...selectedPart,
+                                flipX: checked,
+                            })
+                        }}
+                    />
+                </div>
+                <div className="flex flex-row gap-1">
+                    <label>flip y:</label>
+                    <input
+                        type="checkbox"
+                        checked={selectedPart?.flipY}
+                        onChange={({ target: { checked } }) => {
+                            onUpdatePart(selectedPart.id, {
+                                ...selectedPart,
+                                flipY: checked,
+                            })
+                        }}
+                    />
+                </div>
                 <h3 className="text-center text-[0.8rem] font-bold">
                     Quick Alignment
                 </h3>

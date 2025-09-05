@@ -325,7 +325,10 @@ const ComplexPart = ({
         <Container
             x={fixedX * scale}
             y={fixedY * scale}
-            scale={scale}
+            scale={[
+                scale * (part.flipX ? -1 : 1),
+                scale * (part.flipY ? -1 : 1),
+            ]}
             width={width * scale}
             height={height * scale}
             onclick={() => {

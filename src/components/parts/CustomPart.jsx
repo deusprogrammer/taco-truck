@@ -38,6 +38,7 @@ const CustomPart = ({
                 ref={containerRef}
                 x={fixedX * scale}
                 y={fixedY * scale}
+                scale={[1 * (part.flipX ? -1 : 1), 1 * (part.flipY ? -1 : 1)]}
                 angle={part.rotation || 0}
                 onclick={() => onClick && onClick(part)}
                 onmouseover={() => onHoverPart && onHoverPart(part)}
