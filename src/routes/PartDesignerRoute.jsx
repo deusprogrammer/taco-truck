@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import PartDesigner from '../components/PartDesigner'
+import { augmentLayoutWithAbsolutePositions } from '../components/utils'
 import { getComponent, getProject } from '../api/Api'
+import { usePartTable } from '../hooks/PartTableHooks'
 
 const PartDesignerRoute = () => {
     const { type, id } = useParams()
     const [searchParams] = useSearchParams()
+    const { partTable } = usePartTable()
 
     const [layout, setLayout] = useState({
         units: 'mm',
@@ -16,50 +19,65 @@ const PartDesignerRoute = () => {
     const [preview, setPreview] = useState(false)
     const [isNew, setIsNew] = useState(false)
 
-    const loadLocal = (type, id) => {
-        let dataJSON = localStorage.getItem('taco-truck-data')
+    const loadLocal = useCallback(
+        (type, id) => {
+            let dataJSON = localStorage.getItem('taco-truck-data')
 
-        if (!dataJSON) {
-            return
-        }
+            if (!dataJSON) {
+                return
+            }
 
-        const data = JSON.parse(dataJSON)
+            const data = JSON.parse(dataJSON)
 
-        switch (type) {
-            case 'projects': {
-                const project = data.panelDesigns.find(
-                    (design) => id === design.id
+            switch (type) {
+                case 'projects': {
+                    const project = data.panelDesigns.find(
+                        (design) => id === design.id
+                    )
+                    setLayout(
+                        augmentLayoutWithAbsolutePositions(project, partTable)
+                    )
+                    break
+                }
+                case 'parts': {
+                    const customPart = data.customParts.find(
+                        (part) => id === part.id
+                    )
+                    setLayout(
+                        augmentLayoutWithAbsolutePositions(
+                            customPart,
+                            partTable
+                        )
+                    )
+                    break
+                }
+                default:
+                    break
+            }
+        },
+        [partTable]
+    )
+
+    const loadCloud = useCallback(
+        async (type, id) => {
+            try {
+                let component
+                if (type === 'parts') {
+                    component = await getComponent(id)
+                    component = component.layout
+                } else {
+                    component = await getProject(id)
+                }
+
+                setLayout(
+                    augmentLayoutWithAbsolutePositions(component, partTable)
                 )
-                setLayout(project)
-                break
+            } catch (e) {
+                console.error('Error getting document:', e)
             }
-            case 'parts': {
-                const customPart = data.customParts.find(
-                    (part) => id === part.id
-                )
-                setLayout(customPart)
-                break
-            }
-            default:
-                break
-        }
-    }
-
-    const loadCloud = async (type, id) => {
-        try {
-            let component
-            if (type === 'parts') {
-                component = await getComponent(id)
-                component = component.layout
-            } else {
-                component = await getProject(id)
-            }
-
-            setLayout(component)
-        } catch (e) {
-            console.error('Error getting document:', e)
-        }
-    }
+        },
+        [partTable]
+    )
 
     useEffect(() => {
         if (!type || !id) {
@@ -74,7 +92,9 @@ const PartDesignerRoute = () => {
                 cachedLayout = JSON.parse(cacheJSON)
             }
 
-            setLayout(cachedLayout)
+            setLayout(
+                augmentLayoutWithAbsolutePositions(cachedLayout, partTable)
+            )
             setIsNew(true)
             return
         }
@@ -88,7 +108,7 @@ const PartDesignerRoute = () => {
         if (searchParams.has('preview')) {
             setPreview(true)
         }
-    }, [type, id, searchParams])
+    }, [type, id, searchParams, partTable, loadLocal, loadCloud])
 
     return (
         <div style={{ overscrollBehavior: 'none', userSelect: 'none' }}>
@@ -96,11 +116,17 @@ const PartDesignerRoute = () => {
                 layout={layout}
                 isNew={isNew}
                 onLayoutChange={(layout) => {
+                    // Augment layout with absolute positions before storing/setting
+                    const augmentedLayout = augmentLayoutWithAbsolutePositions(
+                        layout,
+                        partTable
+                    )
+
                     localStorage.setItem(
                         'taco-truck-cache',
-                        JSON.stringify(layout)
+                        JSON.stringify(layout) // Store original for persistence
                     )
-                    setLayout(layout)
+                    setLayout(augmentedLayout) // Use augmented for rendering
                 }}
                 preview={preview}
             />

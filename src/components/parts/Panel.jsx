@@ -32,7 +32,7 @@ const Panel = ({ layout, scale, fill, onClick }) => {
             <Graphics
                 draw={(g) => {
                     g.clear()
-                    g.beginFill(fill)
+                    g.lineStyle(2, 0xffffff) // White edges, 2px width
                     g.drawRoundedRect(
                         0,
                         0,
@@ -40,10 +40,9 @@ const Panel = ({ layout, scale, fill, onClick }) => {
                         layout?.panelDimensions?.[1] * scale,
                         layout?.cornerRadius * scale || 0
                     )
-                    g.endFill()
                 }}
             />
-            {layout.artwork && (
+            {/* {layout.artwork && (
                 <>
                     <Graphics
                         draw={(g) => {
@@ -76,27 +75,6 @@ const Panel = ({ layout, scale, fill, onClick }) => {
                         interactive={mode === ART_ADJUST}
                     />
                 </>
-            )}
-            {/* {panelSvg ? (
-                <Sprite
-                    image={panelSvg}
-                    width={panelDimensions[0] * scale}
-                    height={panelDimensions[1] * scale}
-                />
-            ) : (
-                <Graphics
-                    draw={(g) => {
-                        g.clear()
-                        g.lineStyle({ width: 2, color: '#FFFFFF' })
-                        g.drawRoundedRect(
-                            0,
-                            0,
-                            layout?.panelDimensions?.[0] * scale,
-                            layout?.panelDimensions?.[1] * scale,
-                            layout?.cornerRadius * scale || 0
-                        )
-                    }}
-                />
             )} */}
         </>
     )

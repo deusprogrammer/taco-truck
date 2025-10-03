@@ -313,12 +313,15 @@ const ComplexPart = ({
     if (parent) {
         const { parts, panelDimensions } = parent
         const [panelWidth, panelHeight] = panelDimensions || [0, 0]
-        ;[fixedX, fixedY] = calculateRelativePosition(
-            { ...part, dimensions: [width, height] },
-            parts,
-            panelWidth,
-            panelHeight
-        )
+        // Use absolutePosition if available, otherwise calculate it
+        ;[fixedX, fixedY] =
+            part.absolutePosition ||
+            calculateRelativePosition(
+                { ...part, dimensions: [width, height] },
+                parts,
+                panelWidth,
+                panelHeight
+            )
     }
 
     return (

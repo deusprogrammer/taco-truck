@@ -104,6 +104,158 @@ export const generateUUID = () => {
     )
 }
 
+export const wouldCreateCircularDependency = (
+    partId,
+    targetRelativeToId,
+    parts
+) => {
+    if (!targetRelativeToId || partId === targetRelativeToId) {
+        return true // Self-reference is circular
+    }
+
+    // Track visited parts to detect cycles
+    const visited = new Set()
+    let currentPartId = targetRelativeToId
+
+    while (currentPartId) {
+        if (visited.has(currentPartId)) {
+            return true // Cycle detected in existing chain
+        }
+        
+        if (currentPartId === partId) {
+            return true // Would create cycle back to original part
+        }
+
+        visited.add(currentPartId)
+        
+        // Find the current part and get its relativeTo
+        let currentPart = null
+        for (let i = 0; i < parts.length; i++) {
+            if (parts[i].id === currentPartId) {
+                currentPart = parts[i]
+                break
+            }
+        }
+        
+        if (!currentPart) {
+            break // Part not found, chain ends
+        }
+        
+        currentPartId = currentPart.relativeTo
+    }
+
+    return false // No circular dependency detected
+}
+
+export const transformChildPartsToGlobalCoordinates = (
+    customPart,
+    parentParts,
+    parentPanelDimensions,
+    partTable
+) => {
+    const [parentPanelWidth, parentPanelHeight] = parentPanelDimensions
+    const [customPartWidth, customPartHeight] = calculateSizeOfPart(customPart, partTable)
+    
+    // Get the custom part's absolute position in the parent panel
+    const [customPartGlobalX, customPartGlobalY] = calculateRelativePosition(
+        { ...customPart, dimensions: [customPartWidth, customPartHeight] },
+        parentParts,
+        parentPanelWidth,
+        parentPanelHeight
+    )
+
+    // Create a mapping of old IDs to new IDs to preserve relative relationships
+    const idMapping = {}
+    customPart.layout.parts.forEach((childPart) => {
+        idMapping[childPart.id] = generateUUID()
+    })
+
+    // Separate parts into root parts (no relativeTo) and relative parts
+    const rootParts = customPart.layout.parts.filter(part => !part.relativeTo)
+    const relativeParts = customPart.layout.parts.filter(part => part.relativeTo)
+
+    // Transform root parts to global coordinates
+    const transformedRootParts = rootParts.map((childPart) => {
+        // Calculate child's position within the custom part's coordinate system
+        const [childLocalX, childLocalY] = calculateRelativePosition(
+            childPart,
+            customPart.layout.parts,
+            customPartWidth,
+            customPartHeight
+        )
+
+        // Apply custom part's transformations (rotation, flipping)
+        let transformedX = childLocalX
+        let transformedY = childLocalY
+
+        // Apply flipping transformations if present
+        if (customPart.flipX) {
+            transformedX = customPartWidth - transformedX
+        }
+        if (customPart.flipY) {
+            transformedY = customPartHeight - transformedY
+        }
+
+        // Apply rotation if present
+        if (customPart.rotation) {
+            const rad = (customPart.rotation * Math.PI) / 180
+            const cos = Math.cos(rad)
+            const sin = Math.sin(rad)
+            const centerX = customPartWidth / 2
+            const centerY = customPartHeight / 2
+            
+            // Translate to center, rotate, translate back
+            const relX = transformedX - centerX
+            const relY = transformedY - centerY
+            transformedX = centerX + (relX * cos - relY * sin)
+            transformedY = centerY + (relX * sin + relY * cos)
+        }
+
+        // Convert to global coordinates by adding the custom part's global position
+        const globalX = customPartGlobalX + transformedX
+        const globalY = customPartGlobalY + transformedY
+
+        // Convert global coordinates back to panel-relative origin/position format
+        const originX = globalX / parentPanelWidth
+        const originY = globalY / parentPanelHeight
+
+        return {
+            ...childPart,
+            position: [0, 0], // Reset position since we're using origin coordinates
+            origin: [originX, originY],
+            relativeTo: null, // Root parts don't have relativeTo
+            id: idMapping[childPart.id], // Use new ID
+        }
+    })
+
+    // Transform relative parts by updating their relativeTo references and adjusting for coordinate system change
+    const transformedRelativeParts = relativeParts.map((childPart) => {
+        return {
+            ...childPart,
+            id: idMapping[childPart.id], // Use new ID
+            relativeTo: idMapping[childPart.relativeTo], // Update relativeTo to use new ID
+            // Keep the same position and origin - the relative positioning will handle the rest
+        }
+    })
+
+    return [...transformedRootParts, ...transformedRelativeParts]
+}
+
+export const isRootPart = (partId, allParts) => {
+    const part = allParts.find(p => p.id === partId)
+    return part && !part.relativeTo
+}
+
+export const isRootPartWithDependents = (partId, allParts) => {
+    // First check if it's a root part
+    if (!isRootPart(partId, allParts)) {
+        return false
+    }
+    
+    // Then check if any other parts are relative to this one
+    return allParts.some(part => part.relativeTo === partId)
+}
+
 export const calculateRelativePosition = (
     part,
     parts,
@@ -699,3 +851,85 @@ export const decimalToRatio = (decimal) => {
 export const removeUnits = (str) => {
     return parseFloat(str.replace(/[a-zA-Z%]+$/, ''));
 }
+
+/**
+ * Augments the layout by adding absolutePosition properties to all parts.
+ * This resolves all relative positioning, origins, and anchors in-place.
+ * 
+ * @param {Object} layout - The layout object to augment
+ * @returns {Object} The same layout object with absolutePosition added to each part
+ */
+export const augmentLayoutWithAbsolutePositions = (layout, partTable) => {
+    if (!layout || !layout.parts || !layout.panelDimensions || !partTable) {
+        return layout;
+    }
+
+    const { parts, panelDimensions } = layout;
+    const [panelWidth, panelHeight] = panelDimensions;
+
+    // Clear any existing absolutePosition properties to force recalculation
+    parts.forEach(part => {
+        delete part.absolutePosition;
+    });
+
+    // Process parts in dependency order to handle relative positioning
+    const processed = new Set();
+    const processing = new Set();
+
+    const processPart = (part) => {
+        if (processed.has(part.id)) {
+            return;
+        }
+
+        if (processing.has(part.id)) {
+            // Circular dependency - calculate position as fallback
+            console.warn(`Circular dependency detected for part ${part.id}`);
+            // Calculate dimensions for this part
+            const [width, height] = calculateSizeOfPart(part, partTable);
+            const [x, y] = calculateRelativePosition(
+                { ...part, dimensions: [width, height] }, 
+                parts, 
+                panelWidth, 
+                panelHeight
+            );
+            part.absolutePosition = [x, y];
+            processed.add(part.id);
+            return;
+        }
+
+        processing.add(part.id);
+
+        // If this part is relative to another, process that first
+        if (part.relativeTo) {
+            const relativePart = parts.find(p => p.id === part.relativeTo);
+            if (relativePart && !processed.has(relativePart.id)) {
+                processPart(relativePart);
+            }
+        }
+
+        // Calculate dimensions for this part
+        const [width, height] = calculateSizeOfPart(part, partTable);
+        
+        // Calculate and store absolute position with proper dimensions
+        const [x, y] = calculateRelativePosition(
+            { ...part, dimensions: [width, height] }, 
+            parts, 
+            panelWidth, 
+            panelHeight
+        );
+        part.absolutePosition = [x, y];
+
+        // If this is a custom part with nested layout, recursively augment its children
+        if (part.type === 'custom' && part.layout && part.layout.parts) {
+            augmentLayoutWithAbsolutePositions(part.layout, partTable);
+        }
+
+        processed.add(part.id);
+        processing.delete(part.id);
+    };
+
+    // Process all parts
+    parts.forEach(processPart);
+
+    return layout;
+};

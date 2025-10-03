@@ -6,6 +6,7 @@ import '@pixi/events'
 import {
     calculateRelativePosition,
     calculateTextPositionAndRotation,
+    isRootPartWithDependents,
 } from '../utils'
 import { CIRCLE, SQUARE } from '../../data/parts.table'
 import { useAtom } from 'jotai'
@@ -41,34 +42,40 @@ const Part = ({
 
     const { parts, panelDimensions } = parent
     const [panelWidth, panelHeight] = panelDimensions || [0, 0]
-    const [fixedX, fixedY] = calculateRelativePosition(
-        part,
-        parts,
-        panelWidth,
-        panelHeight
-    )
+    // Use absolutePosition if available, otherwise calculate it
+    const [fixedX, fixedY] =
+        part.absolutePosition ||
+        calculateRelativePosition(part, parts, panelWidth, panelHeight)
 
     const drawCircle = useCallback(
         (x, y, radius, rim, renderScale, g) => {
             g.clear()
+            const isRootWithDependents = isRootPartWithDependents(id, parts)
+
+            // Determine the base color for this part
+            let baseColor = 0xffffff // Default white
+            let rimColor = 0xffffff // Default white rim
+
             if (
                 (selectedPartId === id || hoveredPartId === id) &&
                 (selectedPartId || hoveredPartId)
             ) {
-                g.beginFill(selectedPartId === id ? 0x00ff00 : 0xff0000)
-            } else {
-                g.beginFill(0xffffff)
+                baseColor = selectedPartId === id ? 0x00ff00 : 0xff0000
+                rimColor = 0xffffff
+            } else if (isRootWithDependents) {
+                baseColor = 0xffffff // Keep background white
+                rimColor = 0x8b0000 // Dark red rim for root parts with dependents
             }
 
             if (rim > 0) {
                 g.beginFill(0x000000, 0)
-                g.lineStyle(1, 0xffffff)
+                g.lineStyle(1, rimColor) // Colored rim
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
                     renderScale * (radius + rim)
                 )
-                g.beginFill(buttonPressed ? 0x00ff00 : 0x000000)
+                g.beginFill(buttonPressed ? 0x00ff00 : baseColor)
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
@@ -77,13 +84,13 @@ const Part = ({
                 g.endFill()
             } else {
                 g.beginFill(0x000000, 0)
-                g.lineStyle(1, 0xffffff)
+                g.lineStyle(1, rimColor) // Colored rim
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
                     renderScale * radius
                 )
-                g.beginFill(buttonPressed ? 0x00ff00 : 0x000000)
+                g.beginFill(buttonPressed ? 0x00ff00 : baseColor)
                 g.drawCircle(
                     renderScale * x,
                     renderScale * y,
@@ -92,7 +99,7 @@ const Part = ({
                 g.endFill()
             }
         },
-        [id, selectedPartId, hoveredPartId, buttonPressed]
+        [id, selectedPartId, hoveredPartId, buttonPressed, parts]
     )
 
     const drawRectangle = useCallback(
@@ -100,11 +107,36 @@ const Part = ({
             x = x - size[0] / 2
             y = y - size[1] / 2
             g.clear()
+            const isRootWithDependents = isRootPartWithDependents(id, parts)
+
+            // Determine the base color for this part
+            let baseColor = 0xffffff // Default white
+            let rimColor = 0xffffff // Default white rim
+
             if (
                 (selectedPartId === id || hoveredPartId === id) &&
                 (selectedPartId || hoveredPartId)
             ) {
-                g.beginFill(selectedPartId === id ? 0x00ff00 : 0x00ffff)
+                baseColor = selectedPartId === id ? 0x00ff00 : 0x00ffff
+                rimColor = 0xffffff
+            } else if (isRootWithDependents) {
+                baseColor = 0xffffff // Keep background white
+                rimColor = 0x8b0000 // Dark red rim for root parts with dependents
+            }
+
+            if (
+                (selectedPartId === id || hoveredPartId === id) &&
+                (selectedPartId || hoveredPartId)
+            ) {
+                g.beginFill(baseColor)
+                g.drawRect(
+                    renderScale * (x - rim - 2),
+                    renderScale * (y - rim - 2),
+                    renderScale * (size[0] + rim * 2 + 4),
+                    renderScale * (size[1] + rim * 2 + 4)
+                )
+            } else if (isRootWithDependents) {
+                g.beginFill(baseColor)
                 g.drawRect(
                     renderScale * (x - rim - 2),
                     renderScale * (y - rim - 2),
@@ -113,23 +145,22 @@ const Part = ({
                 )
             }
             g.beginFill(0x000000, 0)
-            g.lineStyle(1, 0xffffff)
+            g.lineStyle(1, rimColor) // Colored rim
             g.drawRect(
                 renderScale * (x - rim),
                 renderScale * (y - rim),
                 renderScale * (size[0] + 2 * rim),
                 renderScale * (size[1] + 2 * rim)
             )
-            g.beginFill(buttonPressed ? 0x00ff00 : 0x000000)
+            g.beginFill(buttonPressed ? 0x00ff00 : baseColor)
             g.drawRect(
                 renderScale * x,
                 renderScale * y,
                 renderScale * size[0],
                 renderScale * size[1]
             )
-            g.beginFill(0xff0000)
         },
-        [id, selectedPartId, hoveredPartId, buttonPressed]
+        [id, selectedPartId, hoveredPartId, buttonPressed, parts]
     )
 
     const drawLine = useCallback(
@@ -153,11 +184,44 @@ const Part = ({
                     panelHeight
                 )
 
-                g.lineStyle(1, '#FF0000')
+                // Enhanced line styling with better visibility
+                const lineWidth = Math.max(1, 2 / renderScale) // Thicker lines that scale properly
+
+                // Draw horizontal measurement line with shadow for better visibility
+                g.lineStyle(lineWidth + 1, 0x000000, 0.3) // Black shadow
                 g.moveTo(renderScale * x, renderScale * y)
                 g.lineTo(renderScale * x2, renderScale * y)
-                g.lineStyle(1, '#00FF00')
+
+                g.lineStyle(lineWidth, 0xff6600, 1) // Orange instead of red for better contrast
+                g.moveTo(renderScale * x, renderScale * y)
+                g.lineTo(renderScale * x2, renderScale * y)
+
+                // Draw vertical measurement line with shadow
+                g.lineStyle(lineWidth + 1, 0x000000, 0.3) // Black shadow
                 g.lineTo(renderScale * x2, renderScale * y2)
+
+                g.lineStyle(lineWidth, 0x00cc00, 1) // Brighter green for better contrast
+                g.moveTo(renderScale * x2, renderScale * y)
+                g.lineTo(renderScale * x2, renderScale * y2)
+
+                // Add small arrows/markers at endpoints for better visual clarity
+                const arrowSize = Math.max(2, 4 / renderScale)
+
+                // Arrow at start point
+                g.beginFill(0xff6600)
+                g.drawCircle(renderScale * x, renderScale * y, arrowSize)
+                g.endFill()
+
+                // Arrow at end point
+                g.beginFill(0x00cc00)
+                g.drawCircle(renderScale * x2, renderScale * y2, arrowSize)
+                g.endFill()
+
+                // Arrow at corner point
+                g.beginFill(0xffffff)
+                g.lineStyle(1, 0x000000)
+                g.drawCircle(renderScale * x2, renderScale * y, arrowSize * 0.7)
+                g.endFill()
             }
         },
         [part, parts, panelHeight, panelWidth]
@@ -213,27 +277,36 @@ const Part = ({
             x: text1X,
             y: text1Y,
             rotation: text1Rotation,
-        } = calculateTextPositionAndRotation(xMin, yMin, xMax, yMin, 10)
+        } = calculateTextPositionAndRotation(xMin, yMin, xMax, yMin, 0)
         const {
             x: text2X,
             y: text2Y,
             rotation: text2Rotation,
-        } = calculateTextPositionAndRotation(xMin, yMin, xMin, yMax, 10)
+        } = calculateTextPositionAndRotation(xMin, yMin, xMin, yMax, 0)
         if (xMax - xMin !== 0) {
             textComponents.push(
                 <Text
                     key="text1"
                     x={text1X * scale}
                     y={text1Y * scale}
-                    anchor={{ x: 1, y: 0.5 }}
+                    anchor={{ x: 0.5, y: 0.5 }}
                     rotation={text1Rotation}
+                    zIndex={50}
                     style={
                         new TextStyle({
-                            fill: '#FF0000',
-                            fontSize: 5 * scale,
+                            fill: '#FF6600',
+                            fontSize: Math.max(8, (12 / scale) * scale), // Better scaling
+                            fontWeight: 'bold',
+                            stroke: '#000000',
+                            strokeThickness: 2,
+                            dropShadow: true,
+                            dropShadowColor: '#000000',
+                            dropShadowBlur: 2,
+                            dropShadowAngle: Math.PI / 6,
+                            dropShadowDistance: 1,
                         })
                     }
-                    text={`${xMax - xMin}mm`}
+                    text={`${Math.round((xMax - xMin) * 10) / 10}mm`}
                 />
             )
         }
@@ -243,15 +316,24 @@ const Part = ({
                     key="text2"
                     x={text2X * scale}
                     y={text2Y * scale}
-                    anchor={{ x: 1, y: 0.5 }}
+                    anchor={{ x: 0.5, y: 0.5 }}
                     rotation={text2Rotation}
+                    zIndex={50}
                     style={
                         new TextStyle({
-                            fill: '#00FF00',
-                            fontSize: 5 * scale,
+                            fill: '#00CC00',
+                            fontSize: Math.max(8, (12 / scale) * scale), // Better scaling
+                            fontWeight: 'bold',
+                            stroke: '#000000',
+                            strokeThickness: 2,
+                            dropShadow: true,
+                            dropShadowColor: '#000000',
+                            dropShadowBlur: 2,
+                            dropShadowAngle: Math.PI / 6,
+                            dropShadowDistance: 1,
                         })
                     }
-                    text={`${Math.abs(y2 - fixedY)}mm`}
+                    text={`${Math.round(Math.abs(y2 - fixedY) * 10) / 10}mm`}
                 />
             )
         }
@@ -268,7 +350,7 @@ const Part = ({
                         }}
                         alpha={buttonOpacity}
                         angle={rotation || 0}
-                        zIndex={0}
+                        zIndex={1}
                         interactive={mode !== ART_ADJUST}
                         onmouseover={() => onHoverPart && onHoverPart(part)}
                         onmouseout={() => onHoverPart && onHoverPart(null)}
@@ -307,7 +389,7 @@ const Part = ({
                         }}
                         alpha={buttonOpacity}
                         angle={rotation || 0}
-                        zIndex={0}
+                        zIndex={1}
                         interactive={mode !== ART_ADJUST}
                         onmouseover={() => onHoverPart && onHoverPart(part)}
                         onmouseout={() => onHoverPart && onHoverPart(null)}
@@ -345,7 +427,7 @@ const Part = ({
                 <>
                     <Graphics
                         draw={(g) => drawLine(fixedX, fixedY, scale, g)}
-                        zIndex={5}
+                        zIndex={999}
                     />
                     {textComponents}
                 </>

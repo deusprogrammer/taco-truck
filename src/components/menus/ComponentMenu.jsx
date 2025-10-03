@@ -1,6 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import BufferedInput from '../elements/BufferedInput'
-import { decimalToRatio, getImageDimensions, removeUnits } from '../utils'
+import {
+    decimalToRatio,
+    getImageDimensions,
+    removeUnits,
+    transformChildPartsToGlobalCoordinates,
+} from '../utils'
 import { useAtom } from 'jotai'
 import { renderMeasurementsAtom } from '../../atoms/ViewOptions.atom'
 import { useResize } from '../../hooks/ContainerHooks'
@@ -21,10 +26,23 @@ const ComponentMenu = ({
         renderMeasurementsAtom
     )
     const bind = useResize()
+    const scrollContainerRef = useRef(null)
+    const selectedElementRef = useRef(null)
 
     const [toggleMenu, setToggleMenu] = useState(false)
 
     const { partTable } = usePartTable()
+
+    // Auto-scroll to selected part when selectedPartId changes
+    useEffect(() => {
+        if (selectedPartId && selectedElementRef.current) {
+            selectedElementRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+            })
+        }
+    }, [selectedPartId])
 
     const updatePanelSize = (dimensions) => {
         onLayoutChange({ ...layout, panelDimensions: dimensions })
@@ -36,10 +54,14 @@ const ComponentMenu = ({
 
     const ungroupCustomPart = (ungroupedPartId) => {
         const customPart = layout.parts.find(({ id }) => id === ungroupedPartId)
-        const translatedParts = [...customPart.layout.parts].map((part) => ({
-            ...part,
-            position: [part.position[0], part.position[1]],
-        }))
+
+        // Transform child parts from custom part's local coordinates to global coordinates
+        const translatedParts = transformChildPartsToGlobalCoordinates(
+            customPart,
+            layout.parts,
+            layout.panelDimensions,
+            partTable
+        )
 
         const updatedParts = layout.parts.filter(
             (part) => part.id !== ungroupedPartId
@@ -138,6 +160,11 @@ const ComponentMenu = ({
                                     key={`part-div-${id || index}`}
                                 >
                                     <button
+                                        ref={
+                                            selectedPartId === id
+                                                ? selectedElementRef
+                                                : null
+                                        }
                                         className={`p-3 ${selectedPartId === id ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black hover:bg-slate-600 hover:text-white`}
                                         onClick={() => {
                                             onSelect(id)
@@ -321,6 +348,7 @@ const ComponentMenu = ({
     return !toggleMenu ? (
         <div
             className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:block"
+            ref={scrollContainerRef}
             {...bind()}
         >
             <div className="flex flex-row items-center gap-1">

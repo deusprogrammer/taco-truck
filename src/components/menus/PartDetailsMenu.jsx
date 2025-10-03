@@ -1,11 +1,15 @@
 import React, { useCallback, useEffect } from 'react'
 import { useAtom } from 'jotai'
-import { calculateRelativePosition } from '../utils'
+import {
+    calculateRelativePosition,
+    wouldCreateCircularDependency,
+} from '../utils'
 import BufferedInput from '../elements/BufferedInput'
 import { useResize } from '../../hooks/ContainerHooks'
 import { mappingStyleAtom } from '../../atoms/ViewOptions.atom'
 import { MAPPINGS } from '../elements/Constants'
 import { usePartTable } from '../../hooks/PartTableHooks'
+import { toast } from 'react-toastify'
 
 const PartDetailsMenu = ({
     layout,
@@ -68,15 +72,28 @@ const PartDetailsMenu = ({
     const adjustPositionToRelative = (part, referencePart) => {
         let copy = { ...part }
 
-        const relativePartPosition = calculateRelativePosition(
-            referencePart,
-            layout.parts,
-            0,
-            0
-        )
+        // Use absolutePosition if available, otherwise calculate it
+        const relativePartPosition =
+            referencePart.absolutePosition ||
+            calculateRelativePosition(
+                referencePart,
+                layout.parts,
+                layout.panelDimensions?.width || 0,
+                layout.panelDimensions?.height || 0
+            )
 
-        copy.position[0] -= relativePartPosition[0]
-        copy.position[1] -= relativePartPosition[1]
+        // Also use absolutePosition for the current part if available
+        const currentPartPosition =
+            part.absolutePosition ||
+            calculateRelativePosition(
+                part,
+                layout.parts,
+                layout.panelDimensions?.width || 0,
+                layout.panelDimensions?.height || 0
+            )
+
+        copy.position[0] = currentPartPosition[0] - relativePartPosition[0]
+        copy.position[1] = currentPartPosition[1] - relativePartPosition[1]
 
         return copy
     }
@@ -187,16 +204,29 @@ const PartDetailsMenu = ({
                     <button
                         className={`h-8 min-w-20 p-1 ${onSecondarySelectPart ? 'bg-black text-white' : 'bg-white'} border-2 border-solid border-black`}
                         onClick={() => {
-                            onSetSecondarySelect(
-                                () => (relativePart) =>
-                                    onUpdatePart(selectedPart.id, {
-                                        ...adjustPositionToRelative(
-                                            selectedPart,
-                                            relativePart
-                                        ),
-                                        relativeTo: relativePart.id,
-                                    })
-                            )
+                            onSetSecondarySelect(() => (relativePart) => {
+                                // Check for circular dependency before setting the relationship
+                                if (
+                                    wouldCreateCircularDependency(
+                                        selectedPart.id,
+                                        relativePart.id,
+                                        layout.parts
+                                    )
+                                ) {
+                                    toast.error(
+                                        'Cannot set this relationship: it would create a circular dependency.'
+                                    )
+                                    return
+                                }
+
+                                onUpdatePart(selectedPart.id, {
+                                    ...adjustPositionToRelative(
+                                        selectedPart,
+                                        relativePart
+                                    ),
+                                    relativeTo: relativePart.id,
+                                })
+                            })
                         }}
                     >
                         {selectedPart?.relativeTo

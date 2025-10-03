@@ -25,12 +25,15 @@ const CustomPart = ({
 
     const { parts, panelDimensions } = parent
     const [panelWidth, panelHeight] = panelDimensions || [0, 0]
-    const [fixedX, fixedY] = calculateRelativePosition(
-        { ...part, dimensions: [width, height] },
-        parts,
-        panelWidth,
-        panelHeight
-    )
+    // Use absolutePosition if available, otherwise calculate it
+    const [fixedX, fixedY] =
+        part.absolutePosition ||
+        calculateRelativePosition(
+            { ...part, dimensions: [width, height] },
+            parts,
+            panelWidth,
+            panelHeight
+        )
 
     const flipOffsetX = part.flipX ? width * scale : 0
     const flipOffsetY = part.flipY ? height * scale : 0
