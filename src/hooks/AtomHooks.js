@@ -5,7 +5,7 @@ import { useContainerSize, useRealScaleRatio } from "./MouseHooks"
 import { calculateSizeOfPart } from "../components/utils"
 import { usePartTable } from "./PartTableHooks"
 
-export const useKeyShortcuts = ({ layout, containerRef }) => {
+export const useKeyShortcuts = ({ layout, containerRef, onEscape }) => {
     const {partTable} = usePartTable()
     const [partsWidth, partsHeight] = calculateSizeOfPart({
             type: 'custom',
@@ -67,6 +67,8 @@ export const useKeyShortcuts = ({ layout, containerRef }) => {
                 if (evt.key === 'Escape') {
                     setSelected(null)
                     setMode(null)
+                    // Clear any secondary selection mode (like relative positioning)
+                    onEscape && onEscape()
                 } else if (evt.key === 'c') {
                     centerWorkPiece()
                 } else if (evt.key === 'p') {
@@ -123,7 +125,7 @@ export const useKeyShortcuts = ({ layout, containerRef }) => {
                     }
                 }
             },
-            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition, mappingStyle, setMappingStyle]
+            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition, mappingStyle, setMappingStyle, onEscape]
     )
     
     useEffect(() => {

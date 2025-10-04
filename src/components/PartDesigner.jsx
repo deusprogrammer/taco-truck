@@ -1,6 +1,6 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react'
 import { useGesture } from '@use-gesture/react'
-import { ADD, ART_ADJUST, EXPORT, SELECT } from './elements/Modes'
+import { ART_ADJUST, EXPORT, SELECT } from './elements/Modes'
 import ComponentMenu from './menus/ComponentMenu'
 import LayoutDisplay from './LayoutDisplay'
 import ModalContainer, {
@@ -67,7 +67,11 @@ const PartDesigner = ({
 }) => {
     const containerRef = createRef()
     const { partTable } = usePartTable()
-    useKeyShortcuts({ layout, containerRef })
+    useKeyShortcuts({ 
+        layout, 
+        containerRef, 
+        onEscape: () => setAfterSelect(null) 
+    })
 
     const navigate = useNavigate()
     const realSizeRatio = useRealScaleRatio()
