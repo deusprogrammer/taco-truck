@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import LayoutDisplaySvg from '../components/svg/LayoutDisplaySvg'
+import BufferedInput from '../components/elements/BufferedInput'
 
 import config from '../../package.json'
 import { toast } from 'react-toastify'
@@ -147,12 +148,30 @@ const ComponentManagerRoute = () => {
         }
     }
 
+    // Helper to update URL search parameters
+    const updateSearchParams = (newSearch) => {
+        setSearchParams((params) => {
+            const newParams = new URLSearchParams(params)
+            if (newSearch) {
+                newParams.set('search', newSearch)
+            } else {
+                newParams.delete('search')
+            }
+            if (showPanelsWithoutButtonsOrParts) {
+                newParams.set('showBasePanels', 'true')
+            } else {
+                newParams.delete('showBasePanels')
+            }
+            return newParams
+        })
+    }
+
     // Helper to get a value from an object using a path like "layout.panelDimensions[0]"
     function getValueByPath(obj, path) {
         if (!obj || !path) return undefined
         // Split by . and handle [index]
         const parts = path.split('.').flatMap((part) => {
-            const matches = [...part.matchAll(/([^\[\]]+)|\[(\d+)\]/g)]
+            const matches = [...part.matchAll(/([^[\]]+)|[(\d+)]/g)]
             return matches.map((m) =>
                 m[1] !== undefined ? m[1] : Number(m[2])
             )
@@ -163,26 +182,36 @@ const ComponentManagerRoute = () => {
         )
     }
 
-    // Enhanced multi-field search logic with path support
-    const fieldRegex = /([\w.\[\]]+):([^\s]+)/g
+    // Enhanced multi-field search logic with path support and negation
+    const fieldRegex = /([\w.[\]]+):(!?)([^\s]+)/g
     let fieldSearches = {}
     let nameSearch = search
 
-    // Extract all field:value pairs
+    // Extract all field:value pairs with optional negation
     let match
     while ((match = fieldRegex.exec(search)) !== null) {
-        fieldSearches[match[1]] = match[2].toLowerCase()
+        const field = match[1]
+        const isNegated = match[2] === '!'
+        const value = match[3].toLowerCase()
+        fieldSearches[field] = { value, isNegated }
         nameSearch = nameSearch.replace(match[0], '').trim()
     }
 
-    // Helper to check if an object matches all fieldSearches (with path support)
+    // Helper to check if an object matches all fieldSearches (with path support and negation)
     const matchesFields = (obj) => {
-        return Object.entries(fieldSearches).every(([field, value]) => {
-            const fieldVal = getValueByPath(obj, field)
-            return fieldVal !== undefined && fieldVal !== null
-                ? fieldVal.toString().toLowerCase().includes(value)
-                : false
-        })
+        return Object.entries(fieldSearches).every(
+            ([field, { value, isNegated }]) => {
+                const fieldVal = getValueByPath(obj, field)
+                const hasValue = fieldVal !== undefined && fieldVal !== null
+                const matchesValue =
+                    hasValue &&
+                    fieldVal.toString().toLowerCase().includes(value)
+
+                // If negated, return true when field doesn't match or doesn't exist
+                // If not negated, return true when field exists and matches
+                return isNegated ? !matchesValue : matchesValue
+            }
+        )
     }
 
     let filteredProjects = combinedProjects.filter((project) => {
@@ -228,29 +257,22 @@ const ComponentManagerRoute = () => {
             </div>
             <div className="mx-auto flex w-[90%] flex-col justify-center">
                 <div className="mb-4 flex flex-col items-center justify-center gap-2">
-                    <input
+                    <BufferedInput
                         type="text"
-                        placeholder="Search by name or by field (i.e. owner:anonymous)..."
+                        className="w-full rounded p-2 text-black"
                         value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value)
-                            setSearchParams((params) => {
-                                const newParams = new URLSearchParams(params)
-                                if (e.target.value) {
-                                    newParams.set('search', e.target.value)
-                                } else {
-                                    newParams.delete('search')
-                                }
-                                if (showPanelsWithoutButtonsOrParts) {
-                                    newParams.set('showBasePanels', 'true')
-                                } else {
-                                    newParams.delete('showBasePanels')
-                                }
-                                return newParams
-                            })
+                        timeout={1000}
+                        placeholder="Search by name or field..."
+                        onChange={(newValue) => {
+                            setSearch(newValue)
+                            updateSearchParams(newValue)
                         }}
-                        className="w-[80%] rounded p-2 text-black"
                     />
+                    <div className="mb-2 text-sm text-gray-300">
+                        Search by name or by field (e.g. owner:anonymous,
+                        owner:!thetruekingofspace). Auto-applies after 1 second,
+                        or press Enter.
+                    </div>
                     <label className="">
                         <input
                             type="checkbox"

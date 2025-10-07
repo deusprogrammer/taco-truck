@@ -57,6 +57,16 @@ This document summarizes all the changes made during the comprehensive developme
 **Problem**: No visual reference system for precise component alignment and spatial awareness
 **Solution**: Implemented configurable background grid with zoom scaling, toggle controls, and granularity adjustment
 
+### Phase 11: Export System Debugging & Data Integrity
+
+**Problem**: Custom parts appeared in wrong positions in SVG/DXF exports due to corrupted data from ungroup/regroup operations
+**Solution**: Identified and fixed data corruption issue by cleaning origin data during custom part save process
+
+### Phase 12: Enhanced Search & Filtering System
+
+**Problem**: Component manager needed more powerful filtering capabilities and better performance
+**Solution**: Implemented negation search operators and debounced BufferedInput with visual feedback
+
 ## Major Features Added
 
 ### 1. Circular Dependency Prevention System
@@ -382,6 +392,131 @@ const drawGrid = useCallback(
 )
 ```
 
+### 11. Custom Part Export Data Integrity Fix
+
+**Files Modified**:
+
+- `src/components/utils.js`
+
+**Changes**:
+
+- Enhanced `normalizePartPositionsToZero()` function to clean corrupted data
+- Added origin data cleanup for parts inside custom parts during save process
+- Prevented invalid `origin` values from being stored in custom part definitions
+- Fixed SVG/DXF export positioning issues caused by data corruption from ungroup/regroup operations
+
+**Data Cleanup Implementation**:
+
+```javascript
+export const normalizePartPositionsToZero = (parts, partTable) => {
+    // ... existing normalization logic ...
+
+    // Clear origin data for all parts when creating a custom part
+    // Origin only has meaning when parts are on a panel, not inside custom parts
+    parts.forEach((part) => {
+        delete part.origin
+    })
+
+    return parts
+}
+```
+
+### 12. Enhanced Search & Filtering System
+
+**Files Modified**:
+
+- `src/routes/ComponentManagerRoute.jsx`
+- `src/components/elements/BufferedInput.jsx`
+
+**Changes**:
+
+- Added negation operator (`!`) support for field-based searches
+- Enhanced regex pattern to capture optional negation: `/([\w.[\]]+):(!?)([^\s]+)/g`
+- Implemented debounced search with configurable timeout (1 second default)
+- Added visual feedback states for BufferedInput (dirty, countdown, clean)
+- Enhanced BufferedInput with timeout functionality and status indicators
+- Added spinning animation and status text for auto-apply countdown
+- Improved search UX with immediate visual feedback and performance optimization
+
+**Negation Search Implementation**:
+
+```javascript
+// Enhanced field search with negation support
+const fieldRegex = /([\w.[\]]+):(!?)([^\s]+)/g
+const fieldSearches = {}
+
+while ((match = fieldRegex.exec(search)) !== null) {
+    const field = match[1]
+    const isNegated = match[2] === '!'
+    const value = match[3].toLowerCase()
+    fieldSearches[field] = { value, isNegated }
+}
+
+// Matching logic with negation
+const matchesFields = (obj) => {
+    return Object.entries(fieldSearches).every(
+        ([field, { value, isNegated }]) => {
+            const fieldVal = getValueByPath(obj, field)
+            const hasValue = fieldVal !== undefined && fieldVal !== null
+            const matchesValue =
+                hasValue && fieldVal.toString().toLowerCase().includes(value)
+
+            // If negated, return true when field doesn't match or doesn't exist
+            // If not negated, return true when field exists and matches
+            return isNegated ? !matchesValue : matchesValue
+        }
+    )
+}
+```
+
+**BufferedInput Enhancement**:
+
+```javascript
+const BufferedInput = ({
+    timeout = null, // Optional timeout in milliseconds
+    // ... other props
+}) => {
+    const [isDirty, setIsDirty] = useState(false)
+    const [isCountingDown, setIsCountingDown] = useState(false)
+    const timeoutRef = useRef(null)
+
+    // Visual feedback with timeout functionality
+    const getInputClassName = () => {
+        let classes = className
+
+        if (isDirty && !isCountingDown) {
+            classes += ' border-yellow-400 border-2 bg-yellow-50'
+        } else if (isCountingDown) {
+            classes += ' border-blue-400 border-2 bg-blue-50 animate-pulse'
+        }
+
+        return classes
+    }
+
+    // Auto-apply with timeout
+    if (timeout && hasChanged) {
+        setIsCountingDown(true)
+        timeoutRef.current = setTimeout(() => {
+            update(newValue)
+        }, timeout)
+    }
+}
+```
+
+### 9. Export System Data Corruption
+
+**Problem**: Custom parts appeared in wrong positions in SVG/DXF exports
+**Root Cause**: Corrupted `origin` data from ungroup/regroup operations being stored in custom parts
+**Solution**: Enhanced `normalizePartPositionsToZero()` to clean invalid origin data during save
+**Files**: `src/components/utils.js`
+
+### 10. Component Manager Search Performance
+
+**Problem**: Real-time filtering on every keystroke caused performance issues
+**Root Cause**: Expensive filtering operations running on every character input
+**Solution**: Implemented debounced BufferedInput with 1-second timeout and visual feedback
+**Files**: `src/routes/ComponentManagerRoute.jsx`, `src/components/elements/BufferedInput.jsx`
+
 ## Detailed Bug Fixes
 
 ### 1. Circular Dependency in Relative Positioning
@@ -484,6 +619,11 @@ const drawGrid = useCallback(
 8. **Relative Positioning**: Set parts relative to custom parts via anchors
 9. **MacOS Scroll Zoom**: Verify no rubber band effect during zoom operations
 10. **Import Behavior**: Import custom parts and verify default center anchors
+11. **Grid System**: Toggle grid visibility and verify zoom-aware scaling
+12. **Export Integrity**: Export layouts with custom parts and verify correct positioning
+13. **Search Negation**: Use `owner:!username` syntax and verify filtered results
+14. **Debounced Search**: Type rapidly and verify search only applies after timeout or Enter
+15. **Visual Feedback**: Verify BufferedInput shows dirty/countdown states correctly
 
 ### Edge Cases Addressed:
 
@@ -589,6 +729,9 @@ This comprehensive development session transformed the Taco Truck layout designe
 - ✅ **Robust Positioning**: Circular dependency prevention and position preservation
 - ✅ **Enhanced UX**: Smooth interactions, visual clarity, and platform-specific optimizations
 - ✅ **Background Grid System**: Configurable spatial reference with zoom-aware rendering and toggle controls
+- ✅ **Export System Integrity**: Fixed custom part positioning corruption and implemented data validation
+- ✅ **Advanced Search Capabilities**: Negation operators and debounced filtering with visual feedback
+- ✅ **Performance Optimizations**: BufferedInput timeout system and efficient search handling
 - ✅ **Technical Excellence**: Clean code, optimal performance, and maintainable architecture
 - ✅ **Future-Ready**: Extensible foundation for additional features and enhancements
 
