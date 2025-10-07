@@ -247,22 +247,38 @@ const Part = ({
     )
 
     const drawAnchorCross = useCallback(
-        (centerX, centerY, partWidth, partHeight, anchor, renderScale, g) => {
+        (
+            centerX,
+            centerY,
+            partWidth,
+            partHeight,
+            anchor,
+            renderScale,
+            shape,
+            g
+        ) => {
             g.clear()
 
             if (!anchor || !Array.isArray(anchor)) {
                 return // Only skip if anchor is null/undefined or not an array
             }
 
-            // Calculate anchor position relative to center
-            // For regular parts, the anchor is relative to the part's bounds
-            const halfWidth = partWidth / 2
-            const halfHeight = partHeight / 2
+            let anchorX, anchorY
 
-            // Convert anchor from [0,1] coordinates to actual position
-            // [0,0] = top-left, [0.5,0.5] = center, [1,1] = bottom-right
-            const anchorX = centerX - halfWidth + anchor[0] * partWidth
-            const anchorY = centerY - halfHeight + anchor[1] * partHeight
+            // For circles, always render anchor at center since they're naturally centered
+            if (shape === CIRCLE) {
+                anchorX = centerX
+                anchorY = centerY
+            } else {
+                // For non-circles, use the actual anchor coordinates
+                const halfWidth = partWidth / 2
+                const halfHeight = partHeight / 2
+
+                // Convert anchor from [0,1] coordinates to actual position
+                // [0,0] = top-left, [0.5,0.5] = center, [1,1] = bottom-right
+                anchorX = centerX - halfWidth + anchor[0] * partWidth
+                anchorY = centerY - halfHeight + anchor[1] * partHeight
+            }
 
             const crossSize = Math.max(3, 6 / renderScale) // Cross size that scales appropriately
             const lineWidth = Math.max(1, 2 / renderScale)
@@ -486,7 +502,7 @@ const Part = ({
                     {textComponents}
                 </>
             ) : null}
-            {showAnchors && part.anchor && !isChildOfCustomPart ? (
+            {showAnchors && !isChildOfCustomPart ? (
                 <Graphics
                     draw={(g) =>
                         drawAnchorCross(
@@ -494,8 +510,9 @@ const Part = ({
                             fixedY,
                             size, // Part width
                             size, // Part height (assuming square for regular parts)
-                            part.anchor,
+                            part.anchor || [0.5, 0.5], // Default to center if no anchor set
                             scale,
+                            shape, // Pass shape to determine circle vs non-circle behavior
                             g
                         )
                     }

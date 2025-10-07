@@ -2,10 +2,18 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BufferedInput from '../elements/BufferedInput'
 import { useAtom } from 'jotai'
-import { screenHeightAtom } from '../../atoms/ViewOptions.atom'
+import {
+    screenHeightAtom,
+    renderGridAtom,
+    gridGranularityAtom,
+    gridSnapAtom,
+} from '../../atoms/ViewOptions.atom'
 
 const OptionsModal = ({ open, onClose }) => {
     const [screenHeight, setScreenHeight] = useAtom(screenHeightAtom)
+    const [showGrid, setShowGrid] = useAtom(renderGridAtom)
+    const [gridGranularity, setGridGranularity] = useAtom(gridGranularityAtom)
+    const [gridSnap, setGridSnap] = useAtom(gridSnapAtom)
     const [presets, setPresets] = useState([])
     const [showRims, setShowRims] = useState(true)
     const [presetName, setPresetName] = useState('')
@@ -32,15 +40,30 @@ const OptionsModal = ({ open, onClose }) => {
         fetchPresets()
 
         if (dataJSON) {
-            setScreenHeight(JSON.parse(dataJSON).screenHeight)
+            const data = JSON.parse(dataJSON)
+            setScreenHeight(data.screenHeight)
+
+            // Load grid settings if they exist
+            if (data.showGrid !== undefined) {
+                setShowGrid(data.showGrid)
+            }
+            if (data.gridGranularity !== undefined) {
+                setGridGranularity(data.gridGranularity)
+            }
+            if (data.gridSnap !== undefined) {
+                setGridSnap(data.gridSnap)
+            }
         }
-    }, [open, setScreenHeight])
+    }, [open, setScreenHeight, setShowGrid, setGridGranularity, setGridSnap])
 
     const onSave = () => {
         localStorage.setItem(
             'screen-metrics',
             JSON.stringify({
                 screenHeight,
+                showGrid,
+                gridGranularity,
+                gridSnap,
             })
         )
         setScreenHeight(screenHeight)
@@ -126,6 +149,50 @@ const OptionsModal = ({ open, onClose }) => {
                         </button>
                     </Link>
                     <span>Ratio: {vRes / screenHeight} pixels/mm</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <h4 className="text-[1.5rem]">Grid Settings</h4>
+                    <div className="flex flex-row items-center gap-2">
+                        <label>Show Grid (Press 'g' to toggle)</label>
+                        <input
+                            type="checkbox"
+                            checked={showGrid}
+                            onChange={({ target: { checked } }) => {
+                                setShowGrid(checked)
+                            }}
+                        />
+                    </div>
+                    <div className="flex flex-row items-center gap-2">
+                        <label>Grid Snap Size (mm/inch)</label>
+                        <select
+                            className="w-20 text-black"
+                            value={gridGranularity}
+                            onChange={({ target: { value } }) =>
+                                setGridGranularity(parseFloat(value))
+                            }
+                        >
+                            <option value={0.5}>0.5</option>
+                            <option value={1}>1</option>
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                            <option value={20}>20</option>
+                            <option value={25}>25</option>
+                            <option value={30}>30</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                    <div className="flex flex-row items-center gap-2">
+                        <label>Grid Snap (Coming Soon)</label>
+                        <input
+                            type="checkbox"
+                            checked={gridSnap}
+                            disabled={true}
+                            onChange={({ target: { checked } }) => {
+                                setGridSnap(checked)
+                            }}
+                        />
+                    </div>
                 </div>
                 <div>
                     <h4 className="text-[1.5rem]">Real Size Button Preview</h4>

@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
 import { useCallback, useEffect } from "react"
-import { buttonOpacityAtom, editLockComponentAtom, mappingStyleAtom, modeAtom, previewAtom, renderAnchorsAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
+import { buttonOpacityAtom, editLockComponentAtom, mappingStyleAtom, modeAtom, previewAtom, renderAnchorsAtom, renderGridAtom, screenSizeAtom, scrollLockComponentAtom, selectedAtom, workspacePositionAtom, zoomAtom, zoomLockComponentAtom } from "../atoms/ViewOptions.atom"
 import { useContainerSize, useRealScaleRatio } from "./MouseHooks"
 import { calculateSizeOfPart } from "../components/utils"
 import { usePartTable } from "./PartTableHooks"
@@ -30,6 +30,7 @@ export const useKeyShortcuts = ({ layout, containerRef, onEscape }) => {
     const [, setSelected] = useAtom(selectedAtom)
     const [mappingStyle, setMappingStyle] = useAtom(mappingStyleAtom)
     const [showAnchors, setShowAnchors] = useAtom(renderAnchorsAtom)
+    const [showGrid, setShowGrid] = useAtom(renderGridAtom)
 
     const centerWorkPiece = useCallback(() => {
         setScreenSize([window.innerWidth, window.innerHeight])
@@ -126,9 +127,11 @@ export const useKeyShortcuts = ({ layout, containerRef, onEscape }) => {
                     }
                 } else if (evt.key === 'h') {
                     setShowAnchors(!showAnchors)
+                } else if (evt.key === 'g') {
+                    setShowGrid(!showGrid)
                 }
             },
-            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition, mappingStyle, setMappingStyle, onEscape, showAnchors, setShowAnchors]
+            [setSelected, setMode, centerWorkPiece, setPreview, preview, setEditLock, editLock, setScrollLock, scrollLock, setZoomLock, zoomLock, buttonOpacity, setButtonOpacity, setZoom, realSizeRatio, zoom, setWorkspacePosition, mappingStyle, setMappingStyle, onEscape, showAnchors, setShowAnchors, showGrid, setShowGrid]
     )
     
     useEffect(() => {

@@ -15,6 +15,7 @@ import { useMousePosition } from '../hooks/MouseHooks'
 import { ADD, ART_ADJUST, SELECT } from './elements/Modes'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
+import Grid from './Grid'
 import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
 import { usePartTable } from '../hooks/PartTableHooks'
@@ -428,6 +429,12 @@ const LayoutDisplay = ({
                     y={workspacePosition[1]}
                     sortChildren={true}
                 >
+                    <Grid
+                        scale={currentScale}
+                        screenWidth={screenWidth}
+                        screenHeight={screenHeight}
+                        workspacePosition={workspacePosition}
+                    />
                     <Panel
                         scale={currentScale}
                         layout={layout}

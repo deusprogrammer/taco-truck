@@ -370,6 +370,12 @@ export const normalizePartPositionsToZero = (parts, partTable) => {
             part.position[1] -= minY
         })
 
+    // Clear origin data for all parts when creating a custom part
+    // Origin only has meaning when parts are on a panel, not inside custom parts
+    parts.forEach((part) => {
+        delete part.origin;
+    })
+
     return parts
 }
 
