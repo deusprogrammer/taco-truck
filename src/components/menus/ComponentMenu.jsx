@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import BufferedInput from '../elements/BufferedInput'
 import {
+    calculateRelativePosition,
     decimalToRatio,
     getImageDimensions,
     removeUnits,
@@ -63,9 +64,44 @@ const ComponentMenu = ({
             partTable
         )
 
-        const updatedParts = layout.parts.filter(
+        let updatedParts = layout.parts.filter(
             (part) => part.id !== ungroupedPartId
         )
+
+        // Clear relative relationships involving the ungrouped custom part
+        // Convert any parts that were positioned relative to this custom part to absolute positioning
+        updatedParts = updatedParts.map((part) => {
+            if (part.relativeTo === ungroupedPartId) {
+                // Get the part's current calculated position, fallback to calculateRelativePosition if needed
+                let absolutePos = part.absolutePosition
+                if (!absolutePos) {
+                    absolutePos = calculateRelativePosition(
+                        part,
+                        layout.parts,
+                        layout.panelDimensions?.[0] || 0,
+                        layout.panelDimensions?.[1] || 0
+                    )
+                }
+
+                const [panelWidth, panelHeight] = layout.panelDimensions || [
+                    0, 0,
+                ]
+
+                return {
+                    ...part,
+                    relativeTo: null,
+                    position: [0, 0], // Reset position
+                    origin:
+                        panelWidth > 0 && panelHeight > 0
+                            ? [
+                                  absolutePos[0] / panelWidth,
+                                  absolutePos[1] / panelHeight,
+                              ]
+                            : [0, 0], // Convert to origin coordinates
+                }
+            }
+            return part
+        })
 
         // Find and update part in nested layout
         deleteComponent(ungroupedPartId)

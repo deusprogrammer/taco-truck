@@ -14,6 +14,7 @@ import {
     buttonOpacityAtom,
     mappingStyleAtom,
     modeAtom,
+    renderAnchorsAtom,
     renderMeasurementsAtom,
 } from '../../atoms/ViewOptions.atom'
 import { useButtonStatus } from '../LayoutDisplay'
@@ -31,9 +32,11 @@ const Part = ({
     onHoverPart,
     onClick,
     onClickPart,
+    isChildOfCustomPart = false,
 }) => {
     const { partTable } = usePartTable()
     const [showMeasurements] = useAtom(renderMeasurementsAtom)
+    const [showAnchors] = useAtom(renderAnchorsAtom)
     const [buttonOpacity] = useAtom(buttonOpacityAtom)
     const [mode] = useAtom(modeAtom)
     const [mappingStyle] = useAtom(mappingStyleAtom)
@@ -42,10 +45,26 @@ const Part = ({
 
     const { parts, panelDimensions } = parent
     const [panelWidth, panelHeight] = panelDimensions || [0, 0]
+
+    // Calculate part dimensions for anchor calculations
+    let partWithDimensions = part
+    if (!part.dimensions && partTable?.[type]?.[partId]) {
+        const { size } = partTable[type][partId]
+        // For basic parts, size is typically a single number (diameter/width)
+        // Convert to [width, height] format
+        const dimensions = Array.isArray(size) ? size : [size, size]
+        partWithDimensions = { ...part, dimensions }
+    }
+
     // Use absolutePosition if available, otherwise calculate it
     const [fixedX, fixedY] =
         part.absolutePosition ||
-        calculateRelativePosition(part, parts, panelWidth, panelHeight)
+        calculateRelativePosition(
+            partWithDimensions,
+            parts,
+            panelWidth,
+            panelHeight
+        )
 
     const drawCircle = useCallback(
         (x, y, radius, rim, renderScale, g) => {
@@ -225,6 +244,41 @@ const Part = ({
             }
         },
         [part, parts, panelHeight, panelWidth]
+    )
+
+    const drawAnchorCross = useCallback(
+        (centerX, centerY, partWidth, partHeight, anchor, renderScale, g) => {
+            g.clear()
+
+            if (!anchor || !Array.isArray(anchor)) {
+                return // Only skip if anchor is null/undefined or not an array
+            }
+
+            // Calculate anchor position relative to center
+            // For regular parts, the anchor is relative to the part's bounds
+            const halfWidth = partWidth / 2
+            const halfHeight = partHeight / 2
+
+            // Convert anchor from [0,1] coordinates to actual position
+            // [0,0] = top-left, [0.5,0.5] = center, [1,1] = bottom-right
+            const anchorX = centerX - halfWidth + anchor[0] * partWidth
+            const anchorY = centerY - halfHeight + anchor[1] * partHeight
+
+            const crossSize = Math.max(3, 6 / renderScale) // Cross size that scales appropriately
+            const lineWidth = Math.max(1, 2 / renderScale)
+
+            // Draw red cross at anchor point
+            g.lineStyle(lineWidth, 0xff0000, 1) // Red color
+
+            // Horizontal line
+            g.moveTo(renderScale * (anchorX - crossSize), renderScale * anchorY)
+            g.lineTo(renderScale * (anchorX + crossSize), renderScale * anchorY)
+
+            // Vertical line
+            g.moveTo(renderScale * anchorX, renderScale * (anchorY - crossSize))
+            g.lineTo(renderScale * anchorX, renderScale * (anchorY + crossSize))
+        },
+        []
     )
 
     if (type === 'custom') {
@@ -431,6 +485,22 @@ const Part = ({
                     />
                     {textComponents}
                 </>
+            ) : null}
+            {showAnchors && part.anchor && !isChildOfCustomPart ? (
+                <Graphics
+                    draw={(g) =>
+                        drawAnchorCross(
+                            fixedX, // Part's center position
+                            fixedY,
+                            size, // Part width
+                            size, // Part height (assuming square for regular parts)
+                            part.anchor,
+                            scale,
+                            g
+                        )
+                    }
+                    zIndex={1000} // Above measurement lines
+                />
             ) : null}
         </>
     )

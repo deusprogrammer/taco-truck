@@ -15,7 +15,6 @@ import { useMousePosition } from '../hooks/MouseHooks'
 import { ADD, ART_ADJUST, SELECT } from './elements/Modes'
 import Part from './parts/Part'
 import Panel from './parts/Panel'
-import { CIRCLE } from '../data/parts.table'
 import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
 import { usePartTable } from '../hooks/PartTableHooks'
@@ -66,13 +65,17 @@ const LayoutDisplay = ({
 
     const [mouseX, mouseY] = useMousePosition(workspaceRef)
     const [isDragging, setIsDragging] = useState(false)
+    const [dragStartPartPosition, setDragStartPartPosition] = useState(null)
+    const [dragStartPartId, setDragStartPartId] = useState(null)
 
     const bind = useGesture(
         {
             onDrag: ({
                 xy,
+                movement: [dx, dy],
                 offset: [artworkOffsetX, artworkOffsetY],
                 dragging,
+                first,
                 touches,
                 buttons,
                 shiftKey,
@@ -82,6 +85,23 @@ const LayoutDisplay = ({
 
                 if (editLock || (mode !== SELECT && mode !== ART_ADJUST)) {
                     return
+                }
+
+                // Initialize drag state on first drag event
+                if (
+                    first &&
+                    selectedIndex >= 0 &&
+                    selectedIndex < layout.parts.length
+                ) {
+                    const selectedPart = layout.parts[selectedIndex]
+                    setDragStartPartPosition([...selectedPart.position])
+                    setDragStartPartId(selectedPart.id)
+                }
+
+                // Reset drag state when dragging ends
+                if (!dragging && dragStartPartPosition) {
+                    setDragStartPartPosition(null)
+                    setDragStartPartId(null)
                 }
 
                 if (
@@ -102,58 +122,40 @@ const LayoutDisplay = ({
                     elapsedTime > timeThreshold &&
                     !shiftKey &&
                     dragging &&
-                    (touches === 1 || buttons === 1)
+                    (touches === 1 || buttons === 1) &&
+                    selectedIndex >= 0 &&
+                    selectedIndex < layout.parts.length
                 ) {
+                    // If dragStartPartPosition is null, initialize it now
+                    let currentDragStartPosition = dragStartPartPosition
+                    if (!currentDragStartPosition) {
+                        const selectedPart = layout.parts[selectedIndex]
+                        currentDragStartPosition = [...selectedPart.position]
+                        setDragStartPartPosition(currentDragStartPosition)
+                        setDragStartPartId(selectedPart.id)
+                    }
+
                     let updatedParts = [...layout.parts]
                     let found = { ...layout.parts[selectedIndex] }
 
                     if (found && !found?.relativeTo) {
-                        if (
-                            !partTable[found.type] ||
-                            partTable[found.type][
-                                found.partId
-                            ].shape.toUpperCase() !== CIRCLE
-                        ) {
-                            const partSize = calculateSizeOfPart(
-                                found,
-                                partTable
-                            )
+                        // Use movement deltas instead of absolute coordinates
+                        const scaledDx = dx / currentScale
+                        const scaledDy = dy / currentScale
 
-                            found = {
-                                ...found,
-                                position: [
-                                    Math.trunc(
-                                        (xy[0] -
-                                            workspacePosition[0] -
-                                            (partSize[0] * currentScale) / 2) /
-                                            currentScale
-                                    ),
-                                    Math.trunc(
-                                        (xy[1] -
-                                            workspacePosition[1] -
-                                            (partSize[1] * currentScale) / 2) /
-                                            currentScale
-                                    ),
-                                ],
-                                origin: [0, 0],
-                                anchor: [0, 0],
-                            }
-                        } else {
-                            found = {
-                                ...found,
-                                position: [
-                                    Math.trunc(
-                                        (xy[0] - workspacePosition[0]) /
-                                            currentScale
-                                    ),
-                                    Math.trunc(
-                                        (xy[1] - workspacePosition[1]) /
-                                            currentScale
-                                    ),
-                                ],
-                                origin: [0, 0],
-                                anchor: [0, 0],
-                            }
+                        found = {
+                            ...found,
+                            position: [
+                                Math.trunc(
+                                    currentDragStartPosition[0] + scaledDx
+                                ),
+                                Math.trunc(
+                                    currentDragStartPosition[1] + scaledDy
+                                ),
+                            ],
+                            // Preserve existing origin and anchor
+                            origin: found.origin || [0, 0],
+                            anchor: found.anchor || [0.5, 0.5],
                         }
 
                         updatedParts[selectedIndex] = found
@@ -235,6 +237,27 @@ const LayoutDisplay = ({
             }
 
             const name = partTable?.[placingPartType]?.[placingPartId].name
+            const defaultAnchor = [0.5, 0.5]
+
+            // Calculate part size for anchor positioning
+            const partSize = calculateSizeOfPart(
+                {
+                    type: placingPartType,
+                    partId: placingPartId,
+                    anchor: defaultAnchor,
+                },
+                partTable
+            )
+
+            // Calculate the adjustment that calculateRelativePosition will make
+            const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
+            const anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+
+            // Position the part so that after anchor adjustment, it appears at click location
+            const clickWorldX =
+                (evt.offsetX - workspacePosition[0]) / currentScale
+            const clickWorldY =
+                (evt.offsetY - workspacePosition[1]) / currentScale
 
             const partsCopy = [...layout.parts]
             let newPart = {
@@ -243,14 +266,11 @@ const LayoutDisplay = ({
                 type: placingPartType,
                 partId: placingPartId,
                 position: [
-                    Math.trunc(
-                        (evt.offsetX - workspacePosition[0]) / currentScale
-                    ),
-                    Math.trunc(
-                        (evt.offsetY - workspacePosition[1]) / currentScale
-                    ),
+                    Math.trunc(clickWorldX + anchorAdjustmentX),
+                    Math.trunc(clickWorldY + anchorAdjustmentY),
                 ],
                 origin: [0, 0],
+                anchor: defaultAnchor, // Default anchor to center
             }
 
             // if (placingPartType === 'user') {
@@ -312,7 +332,13 @@ const LayoutDisplay = ({
     useEffect(() => {
         const index = layout.parts?.findIndex(({ id }) => id === selected)
         setSelectedIndex(index)
-    }, [selected, layout.parts, setSelectedIndex])
+
+        // Reset drag state if we're switching to a different part
+        if (selected !== dragStartPartId) {
+            setDragStartPartPosition(null)
+            setDragStartPartId(null)
+        }
+    }, [selected, layout.parts, setSelectedIndex, dragStartPartId])
 
     useEffect(() => {
         if (!isDragging) {
@@ -323,6 +349,26 @@ const LayoutDisplay = ({
     let component
     switch (mode) {
         case ADD:
+            // For preview positioning, we need to account for how Part component
+            // will adjust the position based on anchor
+            const defaultAnchor = [0.5, 0.5]
+            const partSize = calculateSizeOfPart(
+                {
+                    type: placingPartType,
+                    partId: placingPartId,
+                    anchor: defaultAnchor,
+                },
+                partTable
+            )
+
+            // Calculate the adjustment that calculateRelativePosition will make
+            const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
+            const anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+
+            // Position the part so that after anchor adjustment, it appears at cursor
+            const mouseWorldX = (mouseX - workspacePosition[0]) / currentScale
+            const mouseWorldY = (mouseY - workspacePosition[1]) / currentScale
+
             component = (
                 <Part
                     scale={currentScale}
@@ -330,10 +376,11 @@ const LayoutDisplay = ({
                         partId: placingPartId,
                         type: placingPartType,
                         position: [
-                            (mouseX - workspacePosition[0]) / currentScale,
-                            (mouseY - workspacePosition[1]) / currentScale,
+                            mouseWorldX + anchorAdjustmentX,
+                            mouseWorldY + anchorAdjustmentY,
                         ],
                         origin: [0, 0],
+                        anchor: [0.5, 0.5],
                     }}
                     parent={{
                         parts: layout.parts,

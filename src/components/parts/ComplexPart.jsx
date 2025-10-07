@@ -2,6 +2,8 @@ import { Container, Graphics, Sprite } from '@pixi/react'
 import { convertPathToInstructions } from '../svg-utils'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { usePartTable } from '../../hooks/PartTableHooks'
+import { useAtom } from 'jotai'
+import { renderAnchorsAtom } from '../../atoms/ViewOptions.atom'
 
 const getColor = (node) => {
     const { graphical, hovered } = node
@@ -297,6 +299,7 @@ const ComplexPart = ({
     onClickPart,
 }) => {
     const { partTable } = usePartTable()
+    const [showAnchors] = useAtom(renderAnchorsAtom)
 
     if (!part) {
         return null
@@ -382,6 +385,32 @@ const ComplexPart = ({
                         g.drawRoundedRect(0, 0, width, height, 0)
                         g.endFill()
                     }}
+                />
+            ) : null}
+            {showAnchors && part.anchor ? (
+                <Graphics
+                    draw={(g) => {
+                        g.clear()
+
+                        // Calculate anchor position within the complex part bounds
+                        const anchorX = part.anchor[0] * width
+                        const anchorY = part.anchor[1] * height
+
+                        const crossSize = Math.max(3, 6 / scale) // Cross size that scales appropriately
+                        const lineWidth = Math.max(1, 2 / scale)
+
+                        // Draw red cross at anchor point
+                        g.lineStyle(lineWidth, 0xff0000, 1) // Red color
+
+                        // Horizontal line
+                        g.moveTo(anchorX - crossSize, anchorY)
+                        g.lineTo(anchorX + crossSize, anchorY)
+
+                        // Vertical line
+                        g.moveTo(anchorX, anchorY - crossSize)
+                        g.lineTo(anchorX, anchorY + crossSize)
+                    }}
+                    zIndex={1000} // Above other elements
                 />
             ) : null}
             {renderModelTree(partToRender?.modelTree)}

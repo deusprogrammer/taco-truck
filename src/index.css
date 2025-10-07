@@ -10,6 +10,24 @@ body {
         'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* Prevent rubber band scrolling on macOS */
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Apply overscroll prevention to all elements */
+*,
+*::before,
+*::after {
+    overscroll-behavior: none;
+}
+
+/* Specifically target the main container and canvas areas */
+#root {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 code {

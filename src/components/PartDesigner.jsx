@@ -67,10 +67,10 @@ const PartDesigner = ({
 }) => {
     const containerRef = createRef()
     const { partTable } = usePartTable()
-    useKeyShortcuts({ 
-        layout, 
-        containerRef, 
-        onEscape: () => setAfterSelect(null) 
+    useKeyShortcuts({
+        layout,
+        containerRef,
+        onEscape: () => setAfterSelect(null),
     })
 
     const navigate = useNavigate()
@@ -296,6 +296,7 @@ const PartDesigner = ({
                         id: generateUUID(),
                         position: [0, 0],
                         origin: [0, 0],
+                        anchor: [0.5, 0.5],
                         ...part,
                     }
                 } else if (partId.startsWith('cloud-')) {
@@ -307,6 +308,7 @@ const PartDesigner = ({
                             id: generateUUID(),
                             position: [0, 0],
                             origin: [0, 0],
+                            anchor: [0.5, 0.5],
                             ...part,
                         }
                     }

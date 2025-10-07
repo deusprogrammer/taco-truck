@@ -4,7 +4,7 @@ import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { Container, Graphics } from '@pixi/react'
 import Part from './Part'
 import { useAtom } from 'jotai'
-import { modeAtom } from '../../atoms/ViewOptions.atom'
+import { modeAtom, renderAnchorsAtom } from '../../atoms/ViewOptions.atom'
 import { ART_ADJUST } from '../elements/Modes'
 import { usePartTable } from '../../hooks/PartTableHooks'
 
@@ -21,6 +21,7 @@ const CustomPart = ({
     const { partTable } = usePartTable()
     const containerRef = createRef()
     const [mode] = useAtom(modeAtom)
+    const [showAnchors] = useAtom(renderAnchorsAtom)
     const [width, height] = calculateSizeOfPart(part, partTable)
 
     const { parts, panelDimensions } = parent
@@ -102,6 +103,44 @@ const CustomPart = ({
                         }}
                     />
                 ) : null}
+                {showAnchors && part.anchor ? (
+                    <Graphics
+                        draw={(g) => {
+                            g.clear()
+
+                            // Calculate anchor position within the custom part bounds
+                            const anchorX = part.anchor[0] * width
+                            const anchorY = part.anchor[1] * height
+
+                            const crossSize = Math.max(3, 6 / scale) // Cross size that scales appropriately
+                            const lineWidth = Math.max(1, 2 / scale)
+
+                            // Draw red cross at anchor point
+                            g.lineStyle(lineWidth, 0xff0000, 1) // Red color
+
+                            // Horizontal line
+                            g.moveTo(
+                                scale * (anchorX - crossSize),
+                                scale * anchorY
+                            )
+                            g.lineTo(
+                                scale * (anchorX + crossSize),
+                                scale * anchorY
+                            )
+
+                            // Vertical line
+                            g.moveTo(
+                                scale * anchorX,
+                                scale * (anchorY - crossSize)
+                            )
+                            g.lineTo(
+                                scale * anchorX,
+                                scale * (anchorY + crossSize)
+                            )
+                        }}
+                        zIndex={1000} // Above other elements
+                    />
+                ) : null}
                 {part.layout.parts.map((customPart, index) => (
                     <React.Fragment key={`custom-part-${index}`}>
                         <Part
@@ -117,6 +156,7 @@ const CustomPart = ({
                             onHoverPart={() => {}}
                             onClick={onClick}
                             onClickPart={onClickPart}
+                            isChildOfCustomPart={true}
                         />
                     </React.Fragment>
                 ))}

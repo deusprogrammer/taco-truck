@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { SELECT } from '../components/elements/Modes';
 
 export const renderMeasurementsAtom = atom(false);
+export const renderAnchorsAtom = atom(false);
 export const editLockComponentAtom = atom(false);
 export const scrollLockComponentAtom = atom(false);
 export const zoomLockComponentAtom = atom(false);
