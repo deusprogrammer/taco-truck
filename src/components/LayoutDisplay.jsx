@@ -21,6 +21,7 @@ import { useAtom } from 'jotai'
 import { usePartTable } from '../hooks/PartTableHooks'
 
 export const ButtonStatusContext = createContext()
+export const StageReadyContext = createContext(false)
 
 export const useButtonStatus = (part) => {
     const buttonsPressed = useContext(ButtonStatusContext)
@@ -55,6 +56,8 @@ const LayoutDisplay = ({
 }) => {
     const { partTable } = usePartTable()
     const componentRef = createRef()
+    const stageRef = useRef()
+    const [stageReady, setStageReady] = useState(false)
 
     const websocket = useRef()
     const controllerId = useRef()
@@ -417,18 +420,21 @@ const LayoutDisplay = ({
                 </div>
             ) : null}
             <Stage
+                ref={stageRef}
                 width={screenWidth}
                 height={screenHeight}
                 renderOnComponentChange={true}
                 options={{ background: 0x1099bb }}
+                onMount={() => setStageReady(true)}
                 {...bind()}
             >
-                <Container
-                    ref={componentRef}
-                    x={workspacePosition[0]}
-                    y={workspacePosition[1]}
-                    sortChildren={true}
-                >
+                <StageReadyContext.Provider value={stageReady}>
+                    <Container
+                        ref={componentRef}
+                        x={workspacePosition[0]}
+                        y={workspacePosition[1]}
+                        sortChildren={true}
+                    >
                     <Grid
                         scale={currentScale}
                         screenWidth={screenWidth}
@@ -489,6 +495,7 @@ const LayoutDisplay = ({
                         ))}
                     </ButtonStatusContext.Provider>
                 </Container>
+                </StageReadyContext.Provider>
             </Stage>
         </>
     )

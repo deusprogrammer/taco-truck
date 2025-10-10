@@ -305,10 +305,12 @@ const ComplexPart = ({
     const [forceRender, setForceRender] = useState(0)
 
     // Force a re-render after initial mount to fix sizing issues
+    // TODO: This is a workaround for a PIXI Stage initialization timing issue
+    // The real problem: scale isn't applied correctly on first render when Stage is still initializing
     useEffect(() => {
         const timer = setTimeout(() => {
             setForceRender((prev) => prev + 1)
-        }, 100) // Small delay to allow initial render to complete
+        }, 500) // Increased delay for slower network/remote environments
 
         return () => clearTimeout(timer)
     }, []) // Only run once on mount
@@ -346,8 +348,6 @@ const ComplexPart = ({
             key={`${part.id}-${forceRender}`}
             x={fixedX * scale}
             y={fixedY * scale}
-            width={width * scale}
-            height={height * scale}
             onclick={() => {
                 onClick && onClick(part)
             }}
@@ -384,7 +384,7 @@ const ComplexPart = ({
                     g.clear()
                     g.beginFill('green')
                     g.lineStyle({ width: 2, color: 'green' })
-                    g.drawRoundedRect(0, 0, width, height, 0)
+                    g.drawRoundedRect(0, 0, width * scale, height * scale, 0)
                     g.endFill()
                 }}
             />
@@ -393,7 +393,13 @@ const ComplexPart = ({
                     draw={(g) => {
                         g.clear()
                         g.lineStyle({ width: 2, color: 'green' })
-                        g.drawRoundedRect(0, 0, width, height, 0)
+                        g.drawRoundedRect(
+                            0,
+                            0,
+                            width * scale,
+                            height * scale,
+                            0
+                        )
                         g.endFill()
                     }}
                 />
@@ -425,7 +431,10 @@ const ComplexPart = ({
                 />
             ) : null}
             <Container
-                scale={[part.flipX ? -1 : 1, part.flipY ? -1 : 1]}
+                scale={[
+                    scale * (part.flipX ? -1 : 1),
+                    scale * (part.flipY ? -1 : 1),
+                ]}
                 x={part.flipX ? width : 0}
                 y={part.flipY ? height : 0}
             >
