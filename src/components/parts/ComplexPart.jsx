@@ -1,5 +1,5 @@
 import { Container, Graphics, Sprite } from '@pixi/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { convertPathToInstructions } from '../svg-utils'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { usePartTable } from '../../hooks/PartTableHooks'
@@ -302,6 +302,7 @@ const ComplexPart = ({
     const { partTable } = usePartTable()
     const [showAnchors] = useAtom(renderAnchorsAtom)
     const containerRef = useRef(null)
+    const [forceRender, setForceRender] = useState(0)
 
     // All hooks must be at the top, before any conditionals or returns
     useEffect(() => {
@@ -317,10 +318,21 @@ const ComplexPart = ({
                 modelTreeHeader: partToRender.modelTree?.header,
                 calculatedSize: [width, height],
                 scale: scale,
+                finalSize: [width * scale, height * scale],
                 timestamp: Date.now(),
+                forceRender: forceRender,
             })
         }
-    }, [part, partTable, scale])
+    }, [part, partTable, scale, forceRender])
+
+    // Force a re-render after initial mount to fix sizing issues
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setForceRender((prev) => prev + 1)
+        }, 100) // Small delay to allow initial render to complete
+
+        return () => clearTimeout(timer)
+    }, []) // Only run once on mount
 
     // Early return if no part
     if (!part) {
