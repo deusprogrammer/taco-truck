@@ -361,15 +361,14 @@ const ComplexPart = ({
             )
     }
 
+    console.log('FLIP X: ' + part.flipX)
+    console.log('FLIP Y: ' + part.flipY)
+
     return (
         <Container
             ref={containerRef}
             x={fixedX * scale}
             y={fixedY * scale}
-            scale={[
-                scale * (part.flipX ? -1 : 1),
-                scale * (part.flipY ? -1 : 1),
-            ]}
             width={width * scale}
             height={height * scale}
             onclick={() => {
@@ -448,7 +447,13 @@ const ComplexPart = ({
                     zIndex={1000} // Above other elements
                 />
             ) : null}
-            {renderModelTree(partToRender?.modelTree)}
+            <Container
+                scale={[part.flipX ? -1 : 1, part.flipY ? -1 : 1]}
+                x={part.flipX ? width : 0}
+                y={part.flipY ? height : 0}
+            >
+                {renderModelTree(partToRender?.modelTree)}
+            </Container>
         </Container>
     )
 }

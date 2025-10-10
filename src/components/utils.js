@@ -752,6 +752,23 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         const [x, y] = child.position;
         let userModel = makerjs.model.mirror(makerifyModelTree(child.modelTree, options), false, true);
         userModel = makerjs.model.rotate(userModel, rotation, [0, 0]);
+        
+        // Apply flipping for user parts (ComplexParts)
+        if (child.flipX || child.flipY) {
+            const bbox = makerjs.measure.modelExtents(userModel);
+            if (bbox) {
+                const centerX = (bbox.high[0] + bbox.low[0]) / 2;
+                const centerY = (bbox.high[1] + bbox.low[1]) / 2;
+                userModel = makerjs.model.mirror(userModel, child.flipX, child.flipY);
+                const tx = child.flipX ? 2 * centerX : 0;
+                const ty = child.flipY ? 2 * centerY : 0;
+                userModel = makerjs.model.moveRelative(userModel, [tx, ty]);
+            } else {
+                // If no bounding box, just mirror
+                userModel = makerjs.model.mirror(userModel, child.flipX, child.flipY);
+            }
+        }
+        
         userModel = makerjs.model.moveRelative(userModel, [x, y]);
         model.models[`user-parts-${index}`] = userModel;
     })
