@@ -1,5 +1,5 @@
 import { Container, Graphics, Sprite } from '@pixi/react'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { convertPathToInstructions } from '../svg-utils'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { usePartTable } from '../../hooks/PartTableHooks'
@@ -302,6 +302,16 @@ const ComplexPart = ({
     const { partTable } = usePartTable()
     const [showAnchors] = useAtom(renderAnchorsAtom)
     const containerRef = useRef(null)
+    const [forceRender, setForceRender] = useState(0)
+
+    // Force a re-render after initial mount to fix sizing issues
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setForceRender((prev) => prev + 1)
+        }, 100) // Small delay to allow initial render to complete
+
+        return () => clearTimeout(timer)
+    }, []) // Only run once on mount
 
     // Early return if no part
     if (!part) {
@@ -333,6 +343,7 @@ const ComplexPart = ({
     return (
         <Container
             ref={containerRef}
+            key={`${part.id}-${forceRender}`}
             x={fixedX * scale}
             y={fixedY * scale}
             width={width * scale}
