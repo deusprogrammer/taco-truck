@@ -1,5 +1,5 @@
 import { Container, Graphics, Sprite } from '@pixi/react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { convertPathToInstructions } from '../svg-utils'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { usePartTable } from '../../hooks/PartTableHooks'
@@ -302,37 +302,6 @@ const ComplexPart = ({
     const { partTable } = usePartTable()
     const [showAnchors] = useAtom(renderAnchorsAtom)
     const containerRef = useRef(null)
-    const [forceRender, setForceRender] = useState(0)
-
-    // All hooks must be at the top, before any conditionals or returns
-    useEffect(() => {
-        if (part) {
-            const partToRender = part.modelTree
-                ? { ...part, type: 'user' }
-                : { ...partTable['user']?.[part.partId], type: 'user' }
-            const [width, height] = calculateSizeOfPart(partToRender, partTable)
-
-            console.log('ComplexPart sizing debug:', {
-                partId: part.partId || part.id,
-                hasModelTree: !!partToRender.modelTree,
-                modelTreeHeader: partToRender.modelTree?.header,
-                calculatedSize: [width, height],
-                scale: scale,
-                finalSize: [width * scale, height * scale],
-                timestamp: Date.now(),
-                forceRender: forceRender,
-            })
-        }
-    }, [part, partTable, scale, forceRender])
-
-    // Force a re-render after initial mount to fix sizing issues
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setForceRender((prev) => prev + 1)
-        }, 100) // Small delay to allow initial render to complete
-
-        return () => clearTimeout(timer)
-    }, []) // Only run once on mount
 
     // Early return if no part
     if (!part) {
@@ -360,9 +329,6 @@ const ComplexPart = ({
                 panelHeight
             )
     }
-
-    console.log('FLIP X: ' + part.flipX)
-    console.log('FLIP Y: ' + part.flipY)
 
     return (
         <Container
