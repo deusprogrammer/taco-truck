@@ -1,4 +1,5 @@
 import { Container, Graphics, Sprite } from '@pixi/react'
+import { useEffect, useRef } from 'react'
 import { convertPathToInstructions } from '../svg-utils'
 import { calculateRelativePosition, calculateSizeOfPart } from '../utils'
 import { usePartTable } from '../../hooks/PartTableHooks'
@@ -300,7 +301,28 @@ const ComplexPart = ({
 }) => {
     const { partTable } = usePartTable()
     const [showAnchors] = useAtom(renderAnchorsAtom)
+    const containerRef = useRef(null)
 
+    // All hooks must be at the top, before any conditionals or returns
+    useEffect(() => {
+        if (part) {
+            const partToRender = part.modelTree
+                ? { ...part, type: 'user' }
+                : { ...partTable['user']?.[part.partId], type: 'user' }
+            const [width, height] = calculateSizeOfPart(partToRender, partTable)
+
+            console.log('ComplexPart sizing debug:', {
+                partId: part.partId || part.id,
+                hasModelTree: !!partToRender.modelTree,
+                modelTreeHeader: partToRender.modelTree?.header,
+                calculatedSize: [width, height],
+                scale: scale,
+                timestamp: Date.now(),
+            })
+        }
+    }, [part, partTable, scale])
+
+    // Early return if no part
     if (!part) {
         return null
     }
@@ -329,6 +351,7 @@ const ComplexPart = ({
 
     return (
         <Container
+            ref={containerRef}
             x={fixedX * scale}
             y={fixedY * scale}
             scale={[
