@@ -348,23 +348,6 @@ const ComplexPart = ({
             key={`${part.id}-${forceRender}`}
             x={fixedX * scale}
             y={fixedY * scale}
-            onclick={() => {
-                onClick && onClick(part)
-            }}
-            onmouseover={() => {
-                onHoverPart && onHoverPart(part)
-            }}
-            onmouseout={() => {
-                onHoverPart && onHoverPart(null)
-            }}
-            onpointerdown={() => {
-                onClick && onClick(part)
-                onClickPart && onClickPart(part, 'DOWN')
-            }}
-            onpointerup={() => {
-                onClickPart && onClickPart(part, 'UP')
-            }}
-            interactive={true}
         >
             <Graphics
                 alpha={0}
@@ -435,8 +418,8 @@ const ComplexPart = ({
                     scale * (part.flipX ? -1 : 1),
                     scale * (part.flipY ? -1 : 1),
                 ]}
-                x={part.flipX ? width : 0}
-                y={part.flipY ? height : 0}
+                x={part.flipX ? width * scale : 0}
+                y={part.flipY ? height * scale : 0}
             >
                 {renderModelTree(partToRender?.modelTree)}
             </Container>
