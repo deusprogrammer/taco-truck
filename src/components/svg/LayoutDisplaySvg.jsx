@@ -1,6 +1,10 @@
 import React, { createRef, useEffect, useState } from 'react'
 import { saveAs } from 'file-saver'
-import { makerify, simplify } from '../utils'
+import {
+    makerify,
+    simplify,
+    augmentLayoutWithAbsolutePositions,
+} from '../utils'
 import makerjs from 'makerjs'
 import { toast } from 'react-toastify'
 import { usePartTable } from '../../hooks/PartTableHooks'
@@ -16,14 +20,24 @@ const LayoutDisplaySvg = ({
     const [makerModel, setMakerModel] = useState()
 
     useEffect(() => {
-        const simplified = simplify(layout, null, partTable)
+        // Augment layout with absolute positions first
+        const augmentedLayout = augmentLayoutWithAbsolutePositions(
+            { ...layout },
+            partTable
+        )
+        const simplified = simplify(augmentedLayout, null, partTable)
         const makerified = makerify(simplified, null, partTable, {
             drillingGuide,
         })
         setMakerModel(makerjs.model.mirror(makerified, false, true))
     }, [layout, partTable, drillingGuide])
 
-    const simplified = simplify(layout, null, partTable)
+    // Augment layout with absolute positions before simplifying
+    const augmentedLayout = augmentLayoutWithAbsolutePositions(
+        { ...layout },
+        partTable
+    )
+    const simplified = simplify(augmentedLayout, null, partTable)
     const makerified = makerify(simplified, null, partTable, {
         includeGraphical: true,
         drillingGuide,

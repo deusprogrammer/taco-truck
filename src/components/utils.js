@@ -481,12 +481,19 @@ export const simplify = (layout, parent, partTable) => {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
             simplified.dimensions = clean(calculateSizeOfPart(layout, partTable)) 
-            simplified.position = clean(calculateRelativePosition(
-                { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
-                parts,
-                panelWidth,
-                panelHeight
-            )).slice(0, 2)
+            
+            // Use absolutePosition if available (from augmentLayoutWithAbsolutePositions)
+            // otherwise fall back to calculating it
+            if (layout.absolutePosition) {
+                simplified.position = clean(layout.absolutePosition)
+            } else {
+                simplified.position = clean(calculateRelativePosition(
+                    { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
+                    parts,
+                    panelWidth,
+                    panelHeight
+                )).slice(0, 2)
+            }
             delete simplified.panelDimensions
             partsToFlatten = layout.layout.parts
 
@@ -505,12 +512,19 @@ export const simplify = (layout, parent, partTable) => {
             const [panelWidth, panelHeight] = clean(panelDimensions) || [0, 0]
             simplified = { ...simplified, modelTree, geometry }
             simplified.dimensions = clean(calculateSizeOfPart({...layout, modelTree, geometry}, partTable)) 
-            simplified.position = clean(calculateRelativePosition(
-                { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
-                parts,
-                panelWidth,
-                panelHeight
-            )).slice(0, 2)
+            
+            // Use absolutePosition if available (from augmentLayoutWithAbsolutePositions)
+            // otherwise fall back to calculating it
+            if (layout.absolutePosition) {
+                simplified.position = clean(layout.absolutePosition)
+            } else {
+                simplified.position = clean(calculateRelativePosition(
+                    { ...layout, dimensions: [simplified.dimensions[0], simplified.dimensions[1]] },
+                    parts,
+                    panelWidth,
+                    panelHeight
+                )).slice(0, 2)
+            }
             delete simplified.panelDimensions
 
             parent = {
@@ -521,12 +535,19 @@ export const simplify = (layout, parent, partTable) => {
             const { parts, panelDimensions } = parent
             const [panelWidth, panelHeight] = simplified.dimensions = panelDimensions || [0, 0]
             simplified.dimensions = clean(calculateSizeOfPart(layout, partTable))
-            simplified.position = clean(calculateRelativePosition(
-                layout,
-                parts,
-                panelWidth,
-                panelHeight
-            )).slice(0, 2)
+            
+            // Use absolutePosition if available (from augmentLayoutWithAbsolutePositions)
+            // otherwise fall back to calculating it
+            if (layout.absolutePosition) {
+                simplified.position = clean(layout.absolutePosition)
+            } else {
+                simplified.position = clean(calculateRelativePosition(
+                    layout,
+                    parts,
+                    panelWidth,
+                    panelHeight
+                )).slice(0, 2)
+            }
             partsToFlatten = null
         }
     } else {

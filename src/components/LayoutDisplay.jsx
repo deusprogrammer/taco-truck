@@ -255,7 +255,7 @@ const LayoutDisplay = ({
             if (placingPartType === 'user') {
                 partTemplate = {
                     ...partTable['user'][placingPartId],
-                    ...partTemplate,
+                    ...partTemplate
                 }
             }
 
@@ -272,20 +272,16 @@ const LayoutDisplay = ({
             const clickWorldY =
                 (evt.offsetY - workspacePosition[1]) / currentScale
 
-            let position = [Math.trunc(clickWorldX), Math.trunc(clickWorldY)]
-
-            if (placingPartType !== 'user') {
-                position[0] = Math.trunc(clickWorldX + anchorAdjustmentX)
-                position[1] = Math.trunc(clickWorldY + anchorAdjustmentY)
-            }
-
             const partsCopy = [...layout.parts]
             let newPart = {
                 id: generateUUID(),
                 name,
                 type: placingPartType,
                 partId: placingPartId,
-                position,
+                position: [
+                    Math.trunc(clickWorldX + anchorAdjustmentX),
+                    Math.trunc(clickWorldY + anchorAdjustmentY),
+                ],
                 origin: [0, 0],
                 anchor: defaultAnchor, // Default anchor to center
             }
