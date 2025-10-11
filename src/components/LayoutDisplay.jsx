@@ -14,6 +14,7 @@ import { calculateSizeOfPart, generateUUID } from './utils'
 import { useMousePosition } from '../hooks/MouseHooks'
 import { ADD, ART_ADJUST, SELECT } from './elements/Modes'
 import Part from './parts/Part'
+import ComplexPart from './parts/ComplexPart'
 import Panel from './parts/Panel'
 import Grid from './Grid'
 import { editLockComponentAtom } from '../atoms/ViewOptions.atom'
@@ -243,15 +244,23 @@ const LayoutDisplay = ({
             const name = partTable?.[placingPartType]?.[placingPartId].name
             const defaultAnchor = [0.5, 0.5]
 
+            // Get the part template for size calculation
+            let partTemplate = {
+                type: placingPartType,
+                partId: placingPartId,
+                anchor: defaultAnchor,
+            }
+
+            // If it's a user part (complex part), include the model tree for proper size calculation
+            if (placingPartType === 'user') {
+                partTemplate = {
+                    ...partTable['user'][placingPartId],
+                    ...partTemplate,
+                }
+            }
+
             // Calculate part size for anchor positioning
-            const partSize = calculateSizeOfPart(
-                {
-                    type: placingPartType,
-                    partId: placingPartId,
-                    anchor: defaultAnchor,
-                },
-                partTable
-            )
+            const partSize = calculateSizeOfPart(partTemplate, partTable)
 
             // Calculate the adjustment that calculateRelativePosition will make
             const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
@@ -263,23 +272,23 @@ const LayoutDisplay = ({
             const clickWorldY =
                 (evt.offsetY - workspacePosition[1]) / currentScale
 
+            let position = [Math.trunc(clickWorldX), Math.trunc(clickWorldY)]
+
+            if (placingPartType !== 'user') {
+                position[0] = Math.trunc(clickWorldX + anchorAdjustmentX)
+                position[1] = Math.trunc(clickWorldY + anchorAdjustmentY)
+            }
+
             const partsCopy = [...layout.parts]
             let newPart = {
                 id: generateUUID(),
                 name,
                 type: placingPartType,
                 partId: placingPartId,
-                position: [
-                    Math.trunc(clickWorldX + anchorAdjustmentX),
-                    Math.trunc(clickWorldY + anchorAdjustmentY),
-                ],
+                position,
                 origin: [0, 0],
                 anchor: defaultAnchor, // Default anchor to center
             }
-
-            // if (placingPartType === 'user') {
-            //     newPart = { ...partTable['user'][placingPartId], ...newPart }
-            // }
 
             partsCopy.push(newPart)
             const updatedLayout = { ...layout, parts: partsCopy }
@@ -356,36 +365,59 @@ const LayoutDisplay = ({
             // For preview positioning, we need to account for how Part component
             // will adjust the position based on anchor
             const defaultAnchor = [0.5, 0.5]
-            const partSize = calculateSizeOfPart(
-                {
-                    type: placingPartType,
-                    partId: placingPartId,
-                    anchor: defaultAnchor,
-                },
-                partTable
-            )
 
-            // Calculate the adjustment that calculateRelativePosition will make
-            const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
-            const anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+            // Get the part template for size calculation
+            let previewPartTemplate = {
+                type: placingPartType,
+                partId: placingPartId,
+                anchor: defaultAnchor,
+            }
 
-            // Position the part so that after anchor adjustment, it appears at cursor
+            // If it's a user part (complex part), include the model tree for proper size calculation
+            if (placingPartType === 'user') {
+                previewPartTemplate = {
+                    ...partTable['user'][placingPartId],
+                    ...previewPartTemplate,
+                }
+            }
+
+            // Position the part so that its center appears at cursor
             const mouseWorldX = (mouseX - workspacePosition[0]) / currentScale
             const mouseWorldY = (mouseY - workspacePosition[1]) / currentScale
 
+            const partSize = calculateSizeOfPart(previewPartTemplate, partTable)
+
+            // Calculate the adjustment needed to center the part at cursor location
+            const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
+            const anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+
+            // Complex parts (user type) handle their own centering, regular parts need anchor adjustment
+            const position =
+                placingPartType === 'user'
+                    ? [mouseWorldX, mouseWorldY]
+                    : [
+                          mouseWorldX + anchorAdjustmentX,
+                          mouseWorldY + anchorAdjustmentY,
+                      ]
+
+            const previewPart = {
+                partId: placingPartId,
+                type: placingPartType,
+                position,
+                origin: [0, 0],
+                anchor: defaultAnchor,
+                ...(placingPartType === 'user' && {
+                    modelTree: partTable['user'][placingPartId].modelTree,
+                }),
+            }
+
+            // Use the correct component type for preview
+            const PartComponent =
+                placingPartType === 'user' ? ComplexPart : Part
             component = (
-                <Part
+                <PartComponent
                     scale={currentScale}
-                    part={{
-                        partId: placingPartId,
-                        type: placingPartType,
-                        position: [
-                            mouseWorldX + anchorAdjustmentX,
-                            mouseWorldY + anchorAdjustmentY,
-                        ],
-                        origin: [0, 0],
-                        anchor: [0.5, 0.5],
-                    }}
+                    part={previewPart}
                     parent={{
                         parts: layout.parts,
                         panelDimensions: workspaceDimensions,
@@ -435,66 +467,68 @@ const LayoutDisplay = ({
                         y={workspacePosition[1]}
                         sortChildren={true}
                     >
-                    <Grid
-                        scale={currentScale}
-                        screenWidth={screenWidth}
-                        screenHeight={screenHeight}
-                        workspacePosition={workspacePosition}
-                    />
-                    <Panel
-                        scale={currentScale}
-                        layout={layout}
-                        fill="#000000"
-                        onClick={(state) => {
-                            if (state === 'DOWN') {
-                                setArtSelected(true)
-                            } else {
-                                setArtSelected(false)
-                            }
-                        }}
-                    />
-                    {component}
-                    <ButtonStatusContext.Provider value={buttonsPressed}>
-                        {layout?.parts?.map((part, index) => (
-                            <Part
-                                key={`part-${part.id || index}`}
-                                selectedPartId={selected}
-                                hoveredPartId={hovered}
-                                scale={currentScale}
-                                part={part}
-                                index={index}
-                                parent={layout}
-                                onHoverPart={onHoverPart}
-                                onClick={onSecondarySelectPart || onSelectPart}
-                                onClickPart={(part, action) => {
-                                    if (
-                                        part.type !== 'button' ||
-                                        mode === ART_ADJUST
-                                    ) {
-                                        return
+                        <Grid
+                            scale={currentScale}
+                            screenWidth={screenWidth}
+                            screenHeight={screenHeight}
+                            workspacePosition={workspacePosition}
+                        />
+                        <Panel
+                            scale={currentScale}
+                            layout={layout}
+                            fill="#000000"
+                            onClick={(state) => {
+                                if (state === 'DOWN') {
+                                    setArtSelected(true)
+                                } else {
+                                    setArtSelected(false)
+                                }
+                            }}
+                        />
+                        {component}
+                        <ButtonStatusContext.Provider value={buttonsPressed}>
+                            {layout?.parts?.map((part, index) => (
+                                <Part
+                                    key={`part-${part.id || index}`}
+                                    selectedPartId={selected}
+                                    hoveredPartId={hovered}
+                                    scale={currentScale}
+                                    part={part}
+                                    index={index}
+                                    parent={layout}
+                                    onHoverPart={onHoverPart}
+                                    onClick={
+                                        onSecondarySelectPart || onSelectPart
                                     }
-
-                                    let old = [...buttonsPressed]
-                                    if (action === 'DOWN') {
+                                    onClickPart={(part, action) => {
                                         if (
-                                            !old.find(
-                                                ({ id }) => id === part.id
-                                            )
+                                            part.type !== 'button' ||
+                                            mode === ART_ADJUST
                                         ) {
-                                            old = [...buttonsPressed, part]
+                                            return
                                         }
-                                    } else if (action === 'UP') {
-                                        old = [...buttonsPressed].filter(
-                                            ({ id }) => id !== part.id
-                                        )
-                                    }
-                                    setButtonsPressed(old)
-                                    updateRemoteButtons(old)
-                                }}
-                            />
-                        ))}
-                    </ButtonStatusContext.Provider>
-                </Container>
+
+                                        let old = [...buttonsPressed]
+                                        if (action === 'DOWN') {
+                                            if (
+                                                !old.find(
+                                                    ({ id }) => id === part.id
+                                                )
+                                            ) {
+                                                old = [...buttonsPressed, part]
+                                            }
+                                        } else if (action === 'UP') {
+                                            old = [...buttonsPressed].filter(
+                                                ({ id }) => id !== part.id
+                                            )
+                                        }
+                                        setButtonsPressed(old)
+                                        updateRemoteButtons(old)
+                                    }}
+                                />
+                            ))}
+                        </ButtonStatusContext.Provider>
+                    </Container>
                 </StageReadyContext.Provider>
             </Stage>
         </>

@@ -403,12 +403,12 @@ const ComplexPart = ({
                         g.lineStyle(lineWidth, 0xff0000, 1) // Red color
 
                         // Horizontal line
-                        g.moveTo(anchorX - crossSize, anchorY)
-                        g.lineTo(anchorX + crossSize, anchorY)
+                        g.moveTo(scale * (anchorX - crossSize), scale * anchorY)
+                        g.lineTo(scale * (anchorX + crossSize), scale * anchorY)
 
                         // Vertical line
-                        g.moveTo(anchorX, anchorY - crossSize)
-                        g.lineTo(anchorX, anchorY + crossSize)
+                        g.moveTo(scale * anchorX, scale * (anchorY - crossSize))
+                        g.lineTo(scale * anchorX, scale * (anchorY + crossSize))
                     }}
                     zIndex={1000} // Above other elements
                 />
