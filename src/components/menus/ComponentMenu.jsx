@@ -399,7 +399,7 @@ const ComponentMenu = ({
                     Component Details
                 </h2>
             </div>
-            <div className="flex flex-col gap-1 overflow-y-auto">
+            <div className="flex flex-col gap-1">
                 <label>Name:</label>
                 <BufferedInput
                     id={`panel-name`}
