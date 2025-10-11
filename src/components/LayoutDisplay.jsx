@@ -255,16 +255,21 @@ const LayoutDisplay = ({
             if (placingPartType === 'user') {
                 partTemplate = {
                     ...partTable['user'][placingPartId],
-                    ...partTemplate
+                    ...partTemplate,
                 }
             }
 
             // Calculate part size for anchor positioning
             const partSize = calculateSizeOfPart(partTemplate, partTable)
 
-            // Calculate the adjustment that calculateRelativePosition will make
-            const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
-            const anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+            // Only apply anchor adjustments for custom and user parts
+            // Basic parts should be positioned directly at their center
+            let anchorAdjustmentX = 0
+            let anchorAdjustmentY = 0
+            if (placingPartType === 'custom' || placingPartType === 'user') {
+                anchorAdjustmentX = defaultAnchor[0] * partSize[0]
+                anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+            }
 
             // Position the part so that after anchor adjustment, it appears at click location
             const clickWorldX =
@@ -383,18 +388,20 @@ const LayoutDisplay = ({
 
             const partSize = calculateSizeOfPart(previewPartTemplate, partTable)
 
-            // Calculate the adjustment needed to center the part at cursor location
-            const anchorAdjustmentX = defaultAnchor[0] * partSize[0]
-            const anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+            // Only apply anchor adjustments for custom and user parts
+            // Basic parts should be positioned directly at their center
+            let anchorAdjustmentX = 0
+            let anchorAdjustmentY = 0
+            if (placingPartType === 'custom' || placingPartType === 'user') {
+                anchorAdjustmentX = defaultAnchor[0] * partSize[0]
+                anchorAdjustmentY = defaultAnchor[1] * partSize[1]
+            }
 
-            // Complex parts (user type) handle their own centering, regular parts need anchor adjustment
-            const position =
-                placingPartType === 'user'
-                    ? [mouseWorldX, mouseWorldY]
-                    : [
-                          mouseWorldX + anchorAdjustmentX,
-                          mouseWorldY + anchorAdjustmentY,
-                      ]
+            // All parts now use the same positioning logic since basic parts ignore anchors
+            const position = [
+                mouseWorldX + anchorAdjustmentX,
+                mouseWorldY + anchorAdjustmentY,
+            ]
 
             const previewPart = {
                 partId: placingPartId,

@@ -299,8 +299,12 @@ export const calculateRelativePosition = (
         part.dimensions = [0, 0]
     }
 
-    anchorAdjustmentX = part.anchor[0] * part.dimensions[0]
-    anchorAdjustmentY = part.anchor[1] * part.dimensions[1]
+    // Only apply anchor adjustments for custom and user parts
+    // Basic parts should always be positioned at their center
+    if (part.type === 'custom' || part.type === 'user') {
+        anchorAdjustmentX = part.anchor[0] * part.dimensions[0]
+        anchorAdjustmentY = part.anchor[1] * part.dimensions[1]
+    }
 
     originCoordX = originX * panelWidth
     originCoordY = originY * panelHeight

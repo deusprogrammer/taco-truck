@@ -343,6 +343,10 @@ const PartDetailsMenu = ({
                         id={`${selectedPart.id}-anchor-x`}
                         type="number"
                         value={selectedPart?.anchor?.[0] || 0}
+                        disabled={
+                            selectedPart.type !== 'custom' &&
+                            selectedPart.type !== 'user'
+                        }
                         onChange={(value) => {
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
@@ -360,6 +364,10 @@ const PartDetailsMenu = ({
                         id={`${selectedPart.id}-anchor-y`}
                         type="number"
                         value={selectedPart?.anchor?.[1] || 0}
+                        disabled={
+                            selectedPart.type !== 'custom' &&
+                            selectedPart.type !== 'user'
+                        }
                         onChange={(value) => {
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
@@ -403,10 +411,15 @@ const PartDetailsMenu = ({
                 <button
                     className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                     onClick={() => {
+                        const isComplexPart =
+                            selectedPart.type === 'custom' ||
+                            selectedPart.type === 'user'
                         onUpdatePart(selectedPart.id, {
                             ...selectedPart,
                             position: [0, selectedPart.position[1]],
-                            anchor: [0.5, selectedPart.anchor[1]],
+                            ...(isComplexPart && {
+                                anchor: [0.5, selectedPart.anchor[1]],
+                            }),
                             origin: [0.5, selectedPart.origin[1]],
                         })
                     }}
@@ -416,10 +429,15 @@ const PartDetailsMenu = ({
                 <button
                     className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                     onClick={() => {
+                        const isComplexPart =
+                            selectedPart.type === 'custom' ||
+                            selectedPart.type === 'user'
                         onUpdatePart(selectedPart.id, {
                             ...selectedPart,
                             position: [selectedPart.position[0], 0],
-                            anchor: [selectedPart.anchor[0], 0.5],
+                            ...(isComplexPart && {
+                                anchor: [selectedPart.anchor[0], 0.5],
+                            }),
                             origin: [selectedPart.origin[0], 0.5],
                         })
                     }}
@@ -429,10 +447,13 @@ const PartDetailsMenu = ({
                 <button
                     className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                     onClick={() => {
+                        const isComplexPart =
+                            selectedPart.type === 'custom' ||
+                            selectedPart.type === 'user'
                         onUpdatePart(selectedPart.id, {
                             ...selectedPart,
                             position: [0, 0],
-                            anchor: [0.5, 0.5],
+                            ...(isComplexPart && { anchor: [0.5, 0.5] }),
                             origin: [0.5, 0.5],
                         })
                     }}
@@ -444,10 +465,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [0, 0],
                                 })
                             }}
@@ -457,10 +483,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [0.5, 0],
                                 })
                             }}
@@ -470,10 +501,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [1, 0],
                                 })
                             }}
@@ -485,10 +521,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [0, 0.5],
                                 })
                             }}
@@ -498,10 +539,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [0.5, 0.5],
                                 })
                             }}
@@ -511,10 +557,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [1, 0.5],
                                 })
                             }}
@@ -526,10 +577,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [0, 1],
                                 })
                             }}
@@ -539,10 +595,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [0.5, 1],
                                 })
                             }}
@@ -552,10 +613,15 @@ const PartDetailsMenu = ({
                         <button
                             className={`h-8 min-w-20 border-2 border-solid border-black bg-white p-1`}
                             onClick={() => {
+                                const isComplexPart =
+                                    selectedPart.type === 'custom' ||
+                                    selectedPart.type === 'user'
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     position: [0, 0],
-                                    anchor: [0.5, 0.5],
+                                    ...(isComplexPart && {
+                                        anchor: [0.5, 0.5],
+                                    }),
                                     origin: [1, 1],
                                 })
                             }}
