@@ -306,8 +306,8 @@ export const calculateRelativePosition = (
         anchorAdjustmentY = part.anchor[1] * part.dimensions[1]
     }
 
-    originCoordX = originX * panelWidth
-    originCoordY = originY * panelHeight
+    originCoordX = (originX || 0) * panelWidth
+    originCoordY = (originY || 0) * panelHeight
 
     return [
         originCoordX + x + offsetX - anchorAdjustmentX,
