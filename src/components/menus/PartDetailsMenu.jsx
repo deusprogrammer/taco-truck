@@ -308,13 +308,13 @@ const PartDetailsMenu = ({
                     <BufferedInput
                         id={`${selectedPart.id}-origin-x`}
                         type="number"
-                        value={selectedPart?.origin[0]}
+                        value={selectedPart?.origin?.[0] || 0}
                         onChange={(value) => {
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
                                 origin: [
                                     parseFloat(value),
-                                    selectedPart.origin[1],
+                                    selectedPart?.origin?.[1] || 0,
                                 ],
                             })
                         }}
@@ -325,12 +325,12 @@ const PartDetailsMenu = ({
                     <BufferedInput
                         id={`${selectedPart.id}-origin-y`}
                         type="number"
-                        value={selectedPart?.origin[1]}
+                        value={selectedPart?.origin?.[1] || 0}
                         onChange={(value) => {
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
                                 origin: [
-                                    selectedPart.origin[0],
+                                    selectedPart?.origin?.[0] || 0,
                                     parseFloat(value),
                                 ],
                             })
@@ -420,7 +420,7 @@ const PartDetailsMenu = ({
                             ...(isComplexPart && {
                                 anchor: [0.5, selectedPart.anchor[1]],
                             }),
-                            origin: [0.5, selectedPart.origin[1]],
+                            origin: [0.5, selectedPart?.origin?.[1] || 0],
                         })
                     }}
                 >
@@ -438,7 +438,7 @@ const PartDetailsMenu = ({
                             ...(isComplexPart && {
                                 anchor: [selectedPart.anchor[0], 0.5],
                             }),
-                            origin: [selectedPart.origin[0], 0.5],
+                            origin: [selectedPart?.origin?.[0] || 0, 0.5],
                         })
                     }}
                 >
@@ -637,8 +637,8 @@ const PartDetailsMenu = ({
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
                                 origin: [
-                                    selectedPart.origin[0] * 0.5,
-                                    selectedPart.origin[1],
+                                    (selectedPart?.origin?.[0] || 0) * 0.5,
+                                    selectedPart?.origin?.[1] || 0,
                                 ],
                             })
                         }}
@@ -652,8 +652,8 @@ const PartDetailsMenu = ({
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     origin: [
-                                        selectedPart.origin[0],
-                                        selectedPart.origin[1] * 0.5,
+                                        selectedPart?.origin?.[0] || 0,
+                                        (selectedPart?.origin?.[1] || 0) * 0.5,
                                     ],
                                 })
                             }}
@@ -666,8 +666,8 @@ const PartDetailsMenu = ({
                                 onUpdatePart(selectedPart.id, {
                                     ...selectedPart,
                                     origin: [
-                                        selectedPart.origin[0],
-                                        selectedPart.origin[1] * 1.5,
+                                        selectedPart?.origin?.[0] || 0,
+                                        (selectedPart?.origin?.[1] || 0) * 1.5,
                                     ],
                                 })
                             }}
@@ -681,8 +681,8 @@ const PartDetailsMenu = ({
                             onUpdatePart(selectedPart.id, {
                                 ...selectedPart,
                                 origin: [
-                                    selectedPart.origin[0] * 1.5,
-                                    selectedPart.origin[1],
+                                    (selectedPart?.origin?.[0] || 0) * 1.5,
+                                    selectedPart?.origin?.[1] || 0,
                                 ],
                             })
                         }}

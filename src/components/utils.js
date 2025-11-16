@@ -262,13 +262,13 @@ export const calculateRelativePosition = (
     panelWidth,
     panelHeight
 ) => {
-    if (!part || !part.position || !part.origin) {
+    if (!part || !part.position) {
         return [0, 0, 0, 0]
     }
 
     const {
         position: [x, y],
-        origin: [originX, originY],
+        origin: [originX, originY] = [0, 0],
         relativeTo,
     } = part
     const relativePart = parts.find(({ id }) => id && relativeTo && id === relativeTo)

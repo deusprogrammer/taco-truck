@@ -70,7 +70,7 @@ const ComponentManagerRoute = () => {
                 const areaA = a.panelDimensions?.[0] * a.panelDimensions?.[1]
                 const areaB = b.panelDimensions?.[0] * b.panelDimensions?.[1]
                 if (areaA !== areaB) return areaA - areaB
-                return a.name.localeCompare(b.name)
+                return (a.name || '').localeCompare(b.name || '')
             })
             const combinedParts = [
                 ...cloudData.components,
@@ -78,7 +78,7 @@ const ComponentManagerRoute = () => {
                     ...part,
                     isLocal: true,
                 })),
-            ].sort((a, b) => a.name.localeCompare(b.name))
+            ].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 
             setCombinedProjects(combinedProjects)
             setCombinedParts(combinedParts)
@@ -313,7 +313,7 @@ const ComponentManagerRoute = () => {
                                 className={`flex w-full flex-col p-2 lg:w-52 ${project.isLocal ? 'bg-teal-500 text-white' : ''} items-center justify-center`}
                             >
                                 <div>
-                                    {project.name}
+                                    {project.name || ''}
                                     {project.isLocal ? '(Local)' : ''}
                                     <br />
                                     <br />
@@ -323,7 +323,7 @@ const ComponentManagerRoute = () => {
                                     mm
                                     <br />
                                     <br />
-                                    Created by {project.owner}
+                                    Created by {project.owner || ''}
                                 </div>
                             </td>
                             <td className="p-8">
@@ -402,11 +402,11 @@ const ComponentManagerRoute = () => {
                                 className={`flex w-full flex-col p-2 lg:w-52 ${part.isLocal ? 'bg-teal-500 text-white' : ''} items-center justify-center`}
                             >
                                 <div>
-                                    {part.name}
+                                    {part.name || ''}
                                     {part.isLocal ? '(Local)' : ''}
                                     <br />
                                     <br />
-                                    Created by {part.owner}
+                                    Created by {part.owner || ''}
                                 </div>
                             </td>
                             <td className="items-center justify-center p-8">
