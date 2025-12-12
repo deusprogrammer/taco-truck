@@ -270,6 +270,25 @@ const PartDetailsMenu = ({
                     />
                 </div>
                 <div className="flex flex-col gap-1">
+                    <label>layer:</label>
+                    <select
+                        value={selectedPart?.layer || 'both'}
+                        id={`${selectedPart.id}-layer`}
+                        onChange={({ target: { value } }) => {
+                            onUpdatePart(selectedPart.id, {
+                                ...selectedPart,
+                                layer: value,
+                            })
+                        }}
+                        className="rounded border border-slate-500 bg-slate-700 px-2 py-1 text-white"
+                    >
+                        <option value="both">Both Layers</option>
+                        <option value="top">Top Only</option>
+                        <option value="bottom">Bottom Only</option>
+                        <option value="none">None (Graphical)</option>
+                    </select>
+                </div>
+                <div className="flex flex-col gap-1">
                     <label>x:</label>
                     <BufferedInput
                         id={`${selectedPart.id}-x`}

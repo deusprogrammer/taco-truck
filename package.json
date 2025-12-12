@@ -20,6 +20,7 @@
         "fast-xml-parser": "^5.2.3",
         "file-saver": "^2.0.5",
         "jotai": "^2.11.0",
+        "jszip": "^3.10.1",
         "lodash": "^4.17.21",
         "makerjs": "^0.18.1",
         "pixi.js": "^7.4.2",
@@ -32,6 +33,9 @@
         "react-toastify": "^11.0.5",
         "svgdom": "^0.1.21",
         "svgson": "^5.3.1",
+        "three": "^0.181.2",
+        "three-bvh-csg": "^0.0.17",
+        "three-stdlib": "^2.36.1",
         "web-vitals": "^2.1.4",
         "websocket": "^1.0.35"
     },

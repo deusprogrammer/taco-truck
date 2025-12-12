@@ -322,45 +322,46 @@ const ComponentMenu = ({
 
         return (
             <div className="ml-3 flex flex-col border-2 border-black bg-white">
-                <div className="flex flex-row gap-2">
-                    <div
-                        onMouseOver={(e) => {
-                            let copy = { ...layout.panelModel }
-                            unsetValuePath('hovered', false, copy)
-                            setValuePath(
-                                path.split(','),
-                                { hovered: true },
-                                copy
-                            )
-                            e.stopPropagation()
-                        }}
-                        onMouseOut={(e) => {
-                            let copy = { ...layout.panelModel }
-                            unsetValuePath('hovered', false, copy)
-                            e.stopPropagation()
-                        }}
-                        className="cursor-pointer font-extrabold"
-                    >
+                <div
+                    className="flex flex-row gap-2 overflow-x-auto pr-8 text-sm"
+                    onMouseOver={(e) => {
+                        let copy = { ...layout.panelModel }
+                        unsetValuePath('hovered', false, copy)
+                        setValuePath(path.split(','), { hovered: true }, copy)
+                        e.stopPropagation()
+                    }}
+                    onMouseOut={(e) => {
+                        let copy = { ...layout.panelModel }
+                        unsetValuePath('hovered', false, copy)
+                        e.stopPropagation()
+                    }}
+                >
+                    <div className="cursor-pointer whitespace-nowrap font-extrabold">
                         {panelModel.type || 'root'}
                     </div>
-                    <div>
-                        <input
-                            type="checkbox"
-                            checked={panelModel.graphical}
-                            onChange={({ target: { checked } }) => {
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                        <label>Layer:</label>
+                        <select
+                            value={panelModel.layer || 'both'}
+                            onChange={({ target: { value } }) => {
                                 let copy = { ...layout.panelModel }
                                 setValuePath(
                                     path.split(','),
-                                    { graphical: checked },
+                                    { layer: value },
                                     copy
                                 )
                             }}
-                        />
-                        <label>graphical</label>
+                            className="rounded border border-slate-500 bg-slate-700 px-2 py-1 text-xs text-white"
+                        >
+                            <option value="both">Both Layers</option>
+                            <option value="top">Top Only</option>
+                            <option value="bottom">Bottom Only</option>
+                            <option value="none">None (Graphical)</option>
+                        </select>
                     </div>
-                    <div>
+                    <div className="whitespace-nowrap">
                         <button
-                            className="border-1 m-[1px] bg-slate-500 text-white"
+                            className="border-1 m-[1px] rounded bg-slate-500 px-2 py-1 text-white"
                             onClick={() => {
                                 let copy = { ...layout.panelModel }
                                 deleteNodeByPath(path.split(','), copy)
@@ -383,7 +384,7 @@ const ComponentMenu = ({
 
     return !toggleMenu ? (
         <div
-            className="absolute left-[10px] hidden max-w-[300px] overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:block"
+            className="absolute left-[10px] hidden max-w-[400px] overflow-y-auto border-2 border-white bg-slate-400 p-2 lg:block"
             ref={scrollContainerRef}
             {...bind()}
         >

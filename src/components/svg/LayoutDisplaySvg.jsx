@@ -4,33 +4,63 @@ import {
     makerify,
     simplify,
     augmentLayoutWithAbsolutePositions,
+    BOTTOM_LAYER_BUTTON_ENLARGEMENT,
 } from '../utils'
 import makerjs from 'makerjs'
 import { toast } from 'react-toastify'
 import { usePartTable } from '../../hooks/PartTableHooks'
+import JSZip from 'jszip'
 
 const LayoutDisplaySvg = ({
     layout,
     hideButton,
     scale = 1,
     drillingGuide = false,
+    experimentalClustering = false,
 }) => {
     const { partTable } = usePartTable()
     const svgRef = createRef()
     const [makerModel, setMakerModel] = useState()
+    const [makerModelBottom, setMakerModelBottom] = useState()
+    const [isProcessing, setIsProcessing] = useState(false)
 
     useEffect(() => {
-        // Augment layout with absolute positions first
-        const augmentedLayout = augmentLayoutWithAbsolutePositions(
-            { ...layout },
-            partTable
-        )
-        const simplified = simplify(augmentedLayout, null, partTable)
-        const makerified = makerify(simplified, null, partTable, {
-            drillingGuide,
-        })
-        setMakerModel(makerjs.model.mirror(makerified, false, true))
-    }, [layout, partTable, drillingGuide])
+        // Use setTimeout to defer heavy computation and allow UI to update first
+        setIsProcessing(true)
+        const timeoutId = setTimeout(() => {
+            try {
+                // Augment layout with absolute positions first
+                const augmentedLayout = augmentLayoutWithAbsolutePositions(
+                    { ...layout },
+                    partTable
+                )
+                const simplified = simplify(augmentedLayout, null, partTable)
+
+                // Generate top layer model
+                const makerified = makerify(simplified, null, partTable, {
+                    drillingGuide,
+                    targetLayer: 'top',
+                })
+                setMakerModel(makerjs.model.mirror(makerified, false, true))
+
+                // Always generate bottom layer model with enlarged buttons
+                // Use clustering if experimental option is enabled
+                const makerifiedBottom = makerify(simplified, null, partTable, {
+                    drillingGuide,
+                    buttonEnlargement: BOTTOM_LAYER_BUTTON_ENLARGEMENT,
+                    useButtonClustering: experimentalClustering,
+                    targetLayer: 'bottom',
+                })
+                setMakerModelBottom(
+                    makerjs.model.mirror(makerifiedBottom, false, true)
+                )
+            } finally {
+                setIsProcessing(false)
+            }
+        }, 100) // Small delay to allow checkbox to update visually
+
+        return () => clearTimeout(timeoutId)
+    }, [layout, partTable, drillingGuide, experimentalClustering])
 
     // Augment layout with absolute positions before simplifying
     const augmentedLayout = augmentLayoutWithAbsolutePositions(
@@ -43,26 +73,37 @@ const LayoutDisplaySvg = ({
         drillingGuide,
     })
 
-    const downloadSvg = () => {
-        const blob = new Blob(
-            [makerjs.exporter.toSVG(makerModel, { units: layout.units })],
-            {
-                type: 'image/svg+xml;charset=utf-8',
-            }
-        )
-        saveAs(blob, `${layout.name}.svg`)
-        toast.success('Saved SVG')
-    }
+    const downloadZip = async () => {
+        if (!makerModel || !makerModelBottom) {
+            toast.error('Models not ready yet')
+            return
+        }
 
-    const downloadDxf = () => {
-        const blob = new Blob(
-            [makerjs.exporter.toDXF(makerModel, { units: layout.units })],
-            {
-                type: 'image/x-dxf;charset=utf-8',
-            }
-        )
-        saveAs(blob, `${layout.name}.dxf`)
-        toast.success('Saved DXF')
+        const zip = new JSZip()
+
+        // Export both SVG files
+        const topSvg = makerjs.exporter.toSVG(makerModel, {
+            units: layout.units,
+        })
+        const bottomSvg = makerjs.exporter.toSVG(makerModelBottom, {
+            units: layout.units,
+        })
+        zip.file('top-layer.svg', topSvg)
+        zip.file('bottom-layer.svg', bottomSvg)
+
+        // Export both DXF files
+        const topDxf = makerjs.exporter.toDXF(makerModel, {
+            units: layout.units,
+        })
+        const bottomDxf = makerjs.exporter.toDXF(makerModelBottom, {
+            units: layout.units,
+        })
+        zip.file('top-layer.dxf', topDxf)
+        zip.file('bottom-layer.dxf', bottomDxf)
+
+        const blob = await zip.generateAsync({ type: 'blob' })
+        saveAs(blob, `${layout.name}.zip`)
+        toast.success('Exported multi-layer ZIP with SVG and DXF files')
     }
 
     const copyMakerJs = () => {
@@ -114,20 +155,18 @@ const LayoutDisplaySvg = ({
 
     return (
         <div className="flex flex-col items-center justify-center gap-4">
+            {isProcessing && (
+                <div className="text-yellow-400">Processing layout...</div>
+            )}
             <div ref={svgRef} dangerouslySetInnerHTML={{ __html: svg }} />
             {!hideButton ? (
                 <>
                     <button
-                        onClick={downloadSvg}
-                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                        onClick={downloadZip}
+                        disabled={isProcessing}
+                        className="rounded bg-green-600 px-6 py-3 text-lg font-bold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        Save SVG
-                    </button>
-                    <button
-                        onClick={downloadDxf}
-                        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                    >
-                        Save DXF
+                        {isProcessing ? 'Processing...' : 'Export (Zip)'}
                     </button>
                     <button
                         onClick={copyMakerJs}

@@ -3,6 +3,248 @@ import axios from 'axios';
 
 import makerjs from 'makerjs'
 
+// Multi-layer export constant - enlargement in mm for bottom layer buttons
+export const BOTTOM_LAYER_BUTTON_ENLARGEMENT = 5;
+
+// Clustering distance threshold - buttons within this distance are considered part of the same cluster
+const CLUSTER_DISTANCE_THRESHOLD = 40; // mm
+
+/**
+ * Cluster buttons using distance-based grouping
+ */
+const clusterButtons = (buttons, distanceThreshold) => {
+    if (buttons.length === 0) return [];
+    
+    const clusters = [];
+    const visited = new Set();
+    
+    buttons.forEach((button, index) => {
+        if (visited.has(index)) return;
+        
+        const cluster = [button];
+        visited.add(index);
+        
+        // Find all buttons within threshold distance
+        const queue = [button];
+        while (queue.length > 0) {
+            const current = queue.shift();
+            const [cx, cy] = current.position;
+            
+            buttons.forEach((other, otherIndex) => {
+                if (visited.has(otherIndex)) return;
+                
+                const [ox, oy] = other.position;
+                const distance = Math.sqrt((cx - ox) ** 2 + (cy - oy) ** 2);
+                
+                if (distance <= distanceThreshold) {
+                    cluster.push(other);
+                    visited.add(otherIndex);
+                    queue.push(other);
+                }
+            });
+        }
+        
+        clusters.push(cluster);
+    });
+    
+    return clusters;
+};
+
+/**
+ * Create a smooth rounded cluster outline by connecting enlarged button circles
+ * This creates curves around each button and smooth connections between them
+ */
+const createClusterOutline = (cluster, partTable, offset) => {
+    if (cluster.length === 0) return null;
+    
+    // For a single button, just return the enlarged circle/square
+    if (cluster.length === 1) {
+        const button = cluster[0];
+        const { shape, size } = partTable[button.type]?.[button.partId] || {};
+        const [cx, cy] = button.position;
+        
+        if (shape === CIRCLE) {
+            const radius = size / 2 + offset;
+            return {
+                paths: {
+                    circle: new makerjs.paths.Circle([cx, cy], radius)
+                }
+            };
+        } else if (shape === SQUARE) {
+            const width = size[0] + offset * 2;
+            const height = size[1] + offset * 2;
+            const rect = new makerjs.models.Rectangle(width, height);
+            rect.origin = [cx - width/2, cy - height/2];
+            return rect;
+        }
+    }
+    
+    // For multiple buttons, create smooth arcs connecting the enlarged circles
+    // This creates tangent lines between circles where they don't overlap
+    
+    const circles = cluster.map((button) => {
+        const { shape, size } = partTable[button.type]?.[button.partId] || {};
+        const [cx, cy] = button.position;
+        if (shape === CIRCLE) {
+            const radius = size / 2 + offset;
+            return { cx, cy, radius };
+        }
+        return null;
+    }).filter(Boolean);
+    
+    if (circles.length < 2) {
+        // Fallback for single circle
+        return {
+            paths: {
+                circle: new makerjs.paths.Circle([circles[0].cx, circles[0].cy], circles[0].radius)
+            }
+        };
+    }
+    
+    // Find external tangent lines between each pair of nearby circles
+    // and create arcs for the visible portions of each circle
+    const paths = {};
+    let pathIndex = 0;
+    
+    // For each circle, find which portions are visible (not covered by other circles)
+    circles.forEach((circle, i) => {
+        // Find all angles where this circle intersects with others
+        const intersectionAngles = [];
+        
+        circles.forEach((other, j) => {
+            if (i === j) return;
+            
+            const dx = other.cx - circle.cx;
+            const dy = other.cy - circle.cy;
+            const dist = Math.hypot(dx, dy);
+            
+            // If circles overlap, find the intersection angles
+            if (dist < circle.radius + other.radius) {
+                // Angle to the other circle's center
+                const angleToOther = Math.atan2(dy, dx);
+                
+                // Calculate the angle span where circles overlap
+                // Using law of cosines
+                const a = circle.radius;
+                const b = other.radius;
+                const c = dist;
+                
+                if (dist > Math.abs(a - b)) { // Circles actually intersect (not one inside other)
+                    const alpha = Math.acos((a * a + c * c - b * b) / (2 * a * c));
+                    intersectionAngles.push({ angle: angleToOther - alpha, type: 'start', otherId: j });
+                    intersectionAngles.push({ angle: angleToOther + alpha, type: 'end', otherId: j });
+                }
+            }
+        });
+        
+        // Sort intersection angles
+        intersectionAngles.sort((a, b) => a.angle - b.angle);
+        
+        // Find visible arc segments (portions not covered by other circles)
+        if (intersectionAngles.length === 0) {
+            // Entire circle is visible
+            paths[`arc_${pathIndex++}`] = new makerjs.paths.Circle([circle.cx, circle.cy], circle.radius);
+        } else {
+            // Create arcs for visible portions
+            // We need to track regions where we're NOT inside any other circle
+            
+            for (let k = 0; k < intersectionAngles.length; k++) {
+                const curr = intersectionAngles[k];
+                const next = intersectionAngles[(k + 1) % intersectionAngles.length];
+                
+                // Check if the arc between curr and next is visible
+                // by testing the midpoint angle
+                let midAngle = (curr.angle + next.angle) / 2;
+                if (next.angle < curr.angle) midAngle += Math.PI;
+                
+                // Test point at this angle
+                const testX = circle.cx + circle.radius * Math.cos(midAngle);
+                const testY = circle.cy + circle.radius * Math.sin(midAngle);
+                
+                // Check if this point is outside all other circles
+                let isVisible = true;
+                for (let j = 0; j < circles.length; j++) {
+                    if (i === j) continue;
+                    const other = circles[j];
+                    const dist = Math.hypot(testX - other.cx, testY - other.cy);
+                    if (dist < other.radius - 0.1) {
+                        isVisible = false;
+                        break;
+                    }
+                }
+                
+                if (isVisible) {
+                    let startAngle = curr.angle * (180 / Math.PI);
+                    let endAngle = next.angle * (180 / Math.PI);
+                    
+                    // Normalize angles
+                    while (endAngle < startAngle) endAngle += 360;
+                    
+                    const angleDiff = endAngle - startAngle;
+                    if (angleDiff > 1 && angleDiff < 359) { // At least 1 degree, less than full circle
+                        paths[`arc_${pathIndex++}`] = new makerjs.paths.Arc(
+                            [circle.cx, circle.cy],
+                            circle.radius,
+                            startAngle,
+                            endAngle
+                        );
+                    }
+                }
+            }
+        }
+    });
+    
+    // Cleanup pass: identify chains and keep only outer perimeters
+    // We want to keep chains that represent button outlines (going counterclockwise/outward)
+    // and discard internal arcs that are inside other circles
+    const model = { paths };
+    const chains = makerjs.model.findChains(model);
+    
+    if (chains && chains.length > 0) {
+        // For each chain, check if it represents an outer boundary
+        // by testing if its centroid is inside any of the original button circles
+        const validChains = chains.filter(chain => {
+            // Get the chain's paths
+            const chainPaths = {};
+            chain.links.forEach((link, idx) => {
+                chainPaths[`path_${idx}`] = link.walkedPath.pathContext;
+            });
+            const chainModel = { paths: chainPaths };
+            const bounds = makerjs.measure.modelExtents(chainModel);
+            
+            if (!bounds) return false;
+            
+            // Calculate centroid of the chain's bounding box
+            const centroidX = (bounds.low[0] + bounds.high[0]) / 2;
+            const centroidY = (bounds.low[1] + bounds.high[1]) / 2;
+            
+            // Check if this centroid is reasonably close to one of our button centers
+            // (within the button radius) - this means it's a valid button outline
+            for (const circle of circles) {
+                const dist = Math.hypot(centroidX - circle.cx, centroidY - circle.cy);
+                if (dist < circle.radius) {
+                    return true; // This chain is around a button
+                }
+            }
+            
+            return false;
+        });
+        
+        // Combine all valid chains into the output
+        const outerPaths = {};
+        let pathIdx = 0;
+        validChains.forEach(chain => {
+            chain.links.forEach((link) => {
+                outerPaths[`outer_${pathIdx++}`] = link.walkedPath.pathContext;
+            });
+        });
+        
+        return { paths: outerPaths };
+    }
+    
+    return { paths };
+};
+
 // Lazy fix for firebase being too primitive to store nested lists 
 export const convertNestedArraysToObjects = (obj) => {
     if (Array.isArray(obj)) {
@@ -577,13 +819,16 @@ export const simplify = (layout, parent, partTable) => {
 
 const convertPartToPath = ({type, partId, position, rx, ry, cx, cy}, partTable, options) => {
     const { shape, size } = partTable[type]?.[partId] || {};
-    const { drillingGuide } = options;
+    const { drillingGuide, buttonEnlargement = 0 } = options;
+    
+    // Apply button enlargement only for button type parts
+    const enlargement = type === 'button' ? buttonEnlargement : 0;
 
     switch (shape) {
         case CIRCLE: {
             const model = {
                 paths: {
-                    circle: new makerjs.paths.Circle(position, size / 2),
+                    circle: new makerjs.paths.Circle(position, (size / 2) + enlargement),
                     hLine: drillingGuide ? new makerjs.paths.Line(
                         [position[0] - size / 2, position[1]],
                         [position[0] + size / 2, position[1]]
@@ -617,9 +862,11 @@ const convertPartToPath = ({type, partId, position, rx, ry, cx, cy}, partTable, 
             return model;
         }
         case SQUARE: {
-            const model = new makerjs.models.Rectangle(size[0], size[1])
+            const enlargedWidth = size[0] + (enlargement * 2);
+            const enlargedHeight = size[1] + (enlargement * 2);
+            const model = new makerjs.models.Rectangle(enlargedWidth, enlargedHeight)
             const [x, y] = position
-            model.origin = [x - size[0]/2, y - size[1]/2]
+            model.origin = [x - enlargedWidth/2, y - enlargedHeight/2]
             return model;
         }
         default:
@@ -628,12 +875,19 @@ const convertPartToPath = ({type, partId, position, rx, ry, cx, cy}, partTable, 
 }
 
 export const makerifyModelTree = (modelTree, options = {}) => {
-    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical } = modelTree || {};
+    const { header, type, d, width, height, x, y, cx, cy, rx, ry, r, children, transform, graphical, layer } = modelTree || {};
     const { translate, rotate, scale, skewX, skewY } = transform || {};
-    const { includeGraphical, drillingGuide } = options;
+    const { includeGraphical, drillingGuide, targetLayer } = options;
     
     let model = {};
 
+    // Handle layer filtering
+    const partLayer = layer || (graphical ? 'none' : 'both'); // Backward compatibility with graphical
+    if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) {
+        return model; // Skip this part - it's not for this layer
+    }
+    
+    // Legacy graphical support
     if (!includeGraphical && graphical) {
         return model;
     }
@@ -767,13 +1021,90 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         model.units = simplifiedLayout.units;
     }
 
-    children.filter((child) => child.type === 'custom').forEach((child, index) => {
+    children.filter((child) => {
+        if (child.type !== 'custom') return false;
+        const partLayer = child.layer || 'both';
+        const { targetLayer } = options;
+        if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
+        return true;
+    }).forEach((child, index) => {
         model.models[`customs-${index}`] = makerify(child, parent, partTable, options, layer++);
     })
-    children.filter((child) => child.type !== 'custom' && child.type !== 'svg').forEach((child, index) => {
-        model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
-    })
-    children.filter((child) => child.type === 'user').forEach((child, index) => {
+    
+    // Check if we should use button clustering for bottom layer
+    const { buttonEnlargement, useButtonClustering } = options;
+    const shouldCluster = useButtonClustering && buttonEnlargement > 0;
+    
+    if (shouldCluster && !parent?.isNested) {
+        // Collect all buttons from this level that belong to target layer
+        const buttons = children.filter((child) => {
+            if (child.type !== 'button') return false;
+            const partLayer = child.layer || 'both';
+            const { targetLayer } = options;
+            if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
+            return true;
+        });
+        
+        if (buttons.length > 0) {
+            // Cluster buttons
+            const clusters = clusterButtons(buttons, CLUSTER_DISTANCE_THRESHOLD);
+            
+            // For each cluster, create an outline
+            clusters.forEach((cluster, clusterIndex) => {
+                if (cluster.length === 1) {
+                    // Single button - use normal enlargement
+                    model.models[`button-${clusterIndex}`] = convertPartToPath(cluster[0], partTable, options);
+                } else {
+                    // Multiple buttons - create cluster outline
+                    const outline = createClusterOutline(cluster, partTable, buttonEnlargement);
+                    if (outline) {
+                        model.models[`cluster-${clusterIndex}`] = outline;
+                    }
+                }
+            });
+            
+            // Add non-button parts normally
+            children.filter((child) => {
+                if (child.type === 'custom' || child.type === 'svg' || child.type === 'button') return false;
+                const partLayer = child.layer || 'both';
+                const { targetLayer } = options;
+                if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
+                return true;
+            }).forEach((child, index) => {
+                model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
+            });
+        } else {
+            // No buttons to cluster, process normally
+            children.filter((child) => {
+                if (child.type === 'custom' || child.type === 'svg') return false;
+                const partLayer = child.layer || 'both';
+                const { targetLayer } = options;
+                if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
+                return true;
+            }).forEach((child, index) => {
+                model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
+            });
+        }
+    } else {
+        // Normal processing without clustering
+        children.filter((child) => {
+            if (child.type === 'custom' || child.type === 'svg') return false;
+            const partLayer = child.layer || 'both';
+            const { targetLayer } = options;
+            if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
+            return true;
+        }).forEach((child, index) => {
+            model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
+        });
+    }
+    
+    children.filter((child) => {
+        if (child.type !== 'user') return false;
+        const partLayer = child.layer || 'both';
+        const { targetLayer } = options;
+        if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
+        return true;
+    }).forEach((child, index) => {
         const [x, y] = child.position;
         let userModel = makerjs.model.mirror(makerifyModelTree(child.modelTree, options), false, true);
         userModel = makerjs.model.rotate(userModel, rotation, [0, 0]);
