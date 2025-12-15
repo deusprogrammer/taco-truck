@@ -28,12 +28,13 @@ const clusterButtons = (buttons, distanceThreshold) => {
         const queue = [button];
         while (queue.length > 0) {
             const current = queue.shift();
-            const [cx, cy] = current.position;
+            // Use panelPosition for clustering if available, otherwise fall back to position
+            const [cx, cy] = current.panelPosition || current.position;
             
             buttons.forEach((other, otherIndex) => {
                 if (visited.has(otherIndex)) return;
                 
-                const [ox, oy] = other.position;
+                const [ox, oy] = other.panelPosition || other.position;
                 const distance = Math.sqrt((cx - ox) ** 2 + (cy - oy) ** 2);
                 
                 if (distance <= distanceThreshold) {
@@ -50,6 +51,56 @@ const clusterButtons = (buttons, distanceThreshold) => {
     return clusters;
 };
 
+// Recursively collect all buttons from simplified tree, using panelPosition
+const collectAllButtons = (simplified, targetLayer) => {
+    const buttons = [];
+    
+    const traverse = (node) => {
+        if (!node) return;
+        
+        // If this is a button and matches the target layer, add it
+        if (node.type === 'button') {
+            const partLayer = node.layer || 'both';
+            if (!targetLayer || partLayer === 'both' || partLayer === targetLayer) {
+                buttons.push(node);
+            }
+        }
+        
+        // Recursively traverse children
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child));
+        }
+    };
+    
+    traverse(simplified);
+    return buttons;
+};
+
+// Recursively collect all user/svg parts from simplified tree, using panelPosition
+const collectAllVectorParts = (simplified, targetLayer) => {
+    const parts = [];
+    
+    const traverse = (node) => {
+        if (!node) return;
+        
+        // If this is a user or svg part and matches the target layer, add it
+        if (node.type === 'user' || node.type === 'svg') {
+            const partLayer = node.layer || 'both';
+            if (!targetLayer || partLayer === 'both' || partLayer === targetLayer) {
+                parts.push(node);
+            }
+        }
+        
+        // Recursively traverse children
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child));
+        }
+    };
+    
+    traverse(simplified);
+    return parts;
+};
+
 /**
  * Create a smooth rounded cluster outline by connecting enlarged button circles
  * This creates curves around each button and smooth connections between them
@@ -61,7 +112,8 @@ const createClusterOutline = (cluster, partTable, offset) => {
     if (cluster.length === 1) {
         const button = cluster[0];
         const { shape, size } = partTable[button.type]?.[button.partId] || {};
-        const [cx, cy] = button.position;
+        // Use panelPosition if available, otherwise position
+        const [cx, cy] = button.panelPosition || button.position;
         
         if (shape === CIRCLE) {
             const radius = size / 2 + offset;
@@ -84,7 +136,8 @@ const createClusterOutline = (cluster, partTable, offset) => {
     
     const circles = cluster.map((button) => {
         const { shape, size } = partTable[button.type]?.[button.partId] || {};
-        const [cx, cy] = button.position;
+        // Use panelPosition if available, otherwise position
+        const [cx, cy] = button.panelPosition || button.position;
         if (shape === CIRCLE) {
             const radius = size / 2 + offset;
             return { cx, cy, radius };
@@ -1068,39 +1121,43 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         model.units = simplifiedLayout.units;
     }
 
-    children.filter((child) => {
-        if (child.type !== 'custom') return false;
-        const partLayer = child.layer || 'both';
-        const { targetLayer } = options;
-        if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
-        return true;
-    }).forEach((child, index) => {
-        model.models[`customs-${index}`] = makerify(child, parent, partTable, options, layer++);
-    })
-    
     // Check if we should use button clustering for bottom layer
     const { buttonEnlargement, useButtonClustering } = options;
     const shouldCluster = useButtonClustering && buttonEnlargement > 0;
-    
-    if (shouldCluster && !parent?.isNested) {
-        // Collect all buttons from this level that belong to target layer
-        const buttons = children.filter((child) => {
-            if (child.type !== 'button') return false;
+
+    // Only process custom parts recursively if we're NOT clustering at this level
+    // When clustering, custom parts are transparent - we collect their buttons directly
+    if (!shouldCluster || parent?.isNested) {
+        children.filter((child) => {
+            if (child.type !== 'custom') return false;
             const partLayer = child.layer || 'both';
             const { targetLayer } = options;
             if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
             return true;
-        });
+        }).forEach((child, index) => {
+            model.models[`customs-${index}`] = makerify(child, parent, partTable, options, layer++);
+        })
+    }
+    
+    if (shouldCluster && !parent?.isNested) {
+        // Collect ALL buttons from the entire simplified tree (including nested custom parts)
+        const { targetLayer } = options;
+        const allButtons = collectAllButtons(simplifiedLayout, targetLayer);
         
-        if (buttons.length > 0) {
-            // Cluster buttons
-            const clusters = clusterButtons(buttons, CLUSTER_DISTANCE_THRESHOLD);
+        if (allButtons.length > 0) {
+            // Cluster buttons using their panelPosition
+            const clusters = clusterButtons(allButtons, CLUSTER_DISTANCE_THRESHOLD);
             
             // For each cluster, create an outline
             clusters.forEach((cluster, clusterIndex) => {
                 if (cluster.length === 1) {
-                    // Single button - use normal enlargement
-                    model.models[`button-${clusterIndex}`] = convertPartToPath(cluster[0], partTable, options);
+                    // Single button - use panelPosition for correct placement
+                    const button = cluster[0];
+                    const buttonWithCorrectPosition = {
+                        ...button,
+                        position: button.panelPosition || button.position
+                    };
+                    model.models[`button-${clusterIndex}`] = convertPartToPath(buttonWithCorrectPosition, partTable, options);
                 } else {
                     // Multiple buttons - create cluster outline
                     const outline = createClusterOutline(cluster, partTable, buttonEnlargement);
@@ -1109,12 +1166,20 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
                     }
                 }
             });
+
+            // Collect and add ALL vector parts (user/svg) from entire tree
+            const allVectorParts = collectAllVectorParts(simplifiedLayout, targetLayer);
+            allVectorParts.forEach((part, index) => {
+                const position = part.panelPosition || part.position || [0, 0];
+                let partModel = makerjs.model.mirror(makerifyModelTree(part.modelTree, options), false, true);
+                partModel = makerjs.model.moveRelative(partModel, position);
+                model.models[`vector-${index}`] = partModel;
+            });
             
-            // Add non-button parts normally
+            // Add other non-button, non-vector parts from root level only
             children.filter((child) => {
-                if (child.type === 'custom' || child.type === 'svg' || child.type === 'button') return false;
+                if (child.type === 'custom' || child.type === 'button' || child.type === 'user' || child.type === 'svg') return false;
                 const partLayer = child.layer || 'both';
-                const { targetLayer } = options;
                 if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
                 return true;
             }).forEach((child, index) => {
@@ -1123,13 +1188,20 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         } else {
             // No buttons to cluster, process normally
             children.filter((child) => {
-                if (child.type === 'custom' || child.type === 'svg') return false;
+                if (child.type === 'custom') return false;
                 const partLayer = child.layer || 'both';
-                const { targetLayer } = options;
                 if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
                 return true;
             }).forEach((child, index) => {
-                model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
+                // For user/svg parts, use makerifyModelTree and apply position
+                if (child.type === 'user' || child.type === 'svg') {
+                    const position = child.panelPosition || child.position || [0, 0];
+                    let partModel = makerjs.model.mirror(makerifyModelTree(child.modelTree, options), false, true);
+                    partModel = makerjs.model.moveRelative(partModel, position);
+                    model.models[`parts-${index}`] = partModel;
+                } else {
+                    model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
+                }
             });
         }
     } else {
