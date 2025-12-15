@@ -14,8 +14,13 @@ const ExportModal = ({ open, layout, onClose }) => {
             for (const part of parts) {
                 if (part.type === 'custom') {
                     // rotation should be a number, not an array
-                    const rotation = typeof part.rotation === 'number' ? part.rotation : 0
-                    if (rotation !== 0 || part.flipX === true || part.flipY === true) {
+                    const rotation =
+                        typeof part.rotation === 'number' ? part.rotation : 0
+                    if (
+                        rotation !== 0 ||
+                        part.flipX === true ||
+                        part.flipY === true
+                    ) {
                         return true
                     }
                     // Recursively check nested custom parts
