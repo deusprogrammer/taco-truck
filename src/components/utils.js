@@ -201,10 +201,14 @@ const createClusterOutline = (cluster, partTable, offset) => {
     const chains = makerjs.model.findChains(model);
     
     if (chains && chains.length > 0) {
-        // For each chain, check if it represents an outer boundary
-        // by testing if its centroid is inside any of the original button circles
-        const validChains = chains.filter(chain => {
-            // Get the chain's paths
+        // For button clusters, we want the outer perimeter chain(s)
+        // Calculate the overall cluster center
+        const clusterCenterX = circles.reduce((sum, c) => sum + c.cx, 0) / circles.length;
+        const clusterCenterY = circles.reduce((sum, c) => sum + c.cy, 0) / circles.length;
+        
+        // Score each chain by how close its centroid is to the cluster center
+        // and its bounding box size (larger = more likely to be outer perimeter)
+        const chainScores = chains.map(chain => {
             const chainPaths = {};
             chain.links.forEach((link, idx) => {
                 chainPaths[`path_${idx}`] = link.walkedPath.pathContext;
@@ -212,23 +216,31 @@ const createClusterOutline = (cluster, partTable, offset) => {
             const chainModel = { paths: chainPaths };
             const bounds = makerjs.measure.modelExtents(chainModel);
             
-            if (!bounds) return false;
+            if (!bounds) return { chain, score: -1 };
             
-            // Calculate centroid of the chain's bounding box
             const centroidX = (bounds.low[0] + bounds.high[0]) / 2;
             const centroidY = (bounds.low[1] + bounds.high[1]) / 2;
+            const distToClusterCenter = Math.hypot(centroidX - clusterCenterX, centroidY - clusterCenterY);
             
-            // Check if this centroid is reasonably close to one of our button centers
-            // (within the button radius) - this means it's a valid button outline
-            for (const circle of circles) {
-                const dist = Math.hypot(centroidX - circle.cx, centroidY - circle.cy);
-                if (dist < circle.radius) {
-                    return true; // This chain is around a button
-                }
-            }
+            // Calculate bounding box area (larger is better for outer perimeter)
+            const width = bounds.high[0] - bounds.low[0];
+            const height = bounds.high[1] - bounds.low[1];
+            const area = width * height;
             
-            return false;
+            // Score: prefer large area and proximity to cluster center
+            // Normalize distance by cluster size to make it comparable
+            const maxRadius = Math.max(...circles.map(c => c.radius));
+            const normalizedDist = distToClusterCenter / maxRadius;
+            const score = area / (1 + normalizedDist); // Higher area and lower distance = higher score
+            
+            return { chain, score, area };
         });
+        
+        // Keep chains with high scores (top 50% or chains within 80% of max score)
+        const maxScore = Math.max(...chainScores.map(cs => cs.score));
+        const validChains = chainScores
+            .filter(cs => cs.score > maxScore * 0.5)
+            .map(cs => cs.chain);
         
         // Combine all valid chains into the output
         const outerPaths = {};
