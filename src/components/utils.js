@@ -571,6 +571,23 @@ export const calculateRelativePosition = (
     ]
 }
 
+// Calculate position relative to the root panel (not parent container)
+// This is used for export where we need absolute panel coordinates
+// We track position by accumulating offsets as we recurse through simplify
+export const calculatePanelPosition = (
+    localPosition,
+    parentPanelPosition = [0, 0]
+) => {
+    if (!localPosition || localPosition.length < 2) {
+        return parentPanelPosition
+    }
+
+    return [
+        parentPanelPosition[0] + localPosition[0],
+        parentPanelPosition[1] + localPosition[1]
+    ]
+}
+
 export const calculateTextPositionAndRotation = (
     lineStartX,
     lineStartY,
@@ -725,9 +742,14 @@ const clean = (arr) => {
     return arr?.map(value => Number(value));
 }
 
-export const simplify = (layout, parent, partTable) => {
+export const simplify = (layout, parent, partTable, rootLayout = null, parentPanelPosition = [0, 0]) => {
     if (!layout) {
         return null
+    }
+
+    // If no rootLayout provided, this is the root call
+    if (!rootLayout) {
+        rootLayout = parent || layout
     }
 
     let { panelDimensions, type, partId, modelTree, geometry } = layout
@@ -752,6 +774,10 @@ export const simplify = (layout, parent, partTable) => {
                     panelHeight
                 )).slice(0, 2)
             }
+            
+            // Calculate panelPosition by adding local position to parent's panel position
+            simplified.panelPosition = calculatePanelPosition(simplified.position, parentPanelPosition)
+            
             delete simplified.panelDimensions
             partsToFlatten = layout.layout.parts
 
@@ -783,6 +809,10 @@ export const simplify = (layout, parent, partTable) => {
                     panelHeight
                 )).slice(0, 2)
             }
+            
+            // Calculate panelPosition by adding local position to parent's panel position
+            simplified.panelPosition = calculatePanelPosition(simplified.position, parentPanelPosition)
+            
             delete simplified.panelDimensions
 
             parent = {
@@ -806,6 +836,10 @@ export const simplify = (layout, parent, partTable) => {
                     panelHeight
                 )).slice(0, 2)
             }
+            
+            // Calculate panelPosition by adding local position to parent's panel position
+            simplified.panelPosition = calculatePanelPosition(simplified.position, parentPanelPosition)
+            
             partsToFlatten = null
         }
     } else {
@@ -816,7 +850,8 @@ export const simplify = (layout, parent, partTable) => {
 
     simplified.children = [];
     partsToFlatten?.forEach((part) => {
-        const simplifiedChild = simplify(part, parent, partTable)
+        // Pass the current part's panelPosition as the parentPanelPosition for children
+        const simplifiedChild = simplify(part, parent, partTable, rootLayout, simplified.panelPosition || parentPanelPosition)
         simplified.children.push(simplifiedChild)
     });
 
