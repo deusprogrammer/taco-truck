@@ -13,11 +13,15 @@ const ExportModal = ({ open, layout, onClose }) => {
         const checkParts = (parts) => {
             for (const part of parts) {
                 if (part.type === 'custom') {
-                    // rotation should be a number, not an array
-                    const rotation =
-                        typeof part.rotation === 'number' ? part.rotation : 0
+                    // Check if rotation exists and is actually a non-zero value
+                    let hasRotation = false
+                    if (typeof part.rotation === 'number' && part.rotation !== 0) {
+                        hasRotation = true
+                    }
+                    // Don't treat empty arrays as rotation
+                    
                     if (
-                        rotation !== 0 ||
+                        hasRotation ||
                         part.flipX === true ||
                         part.flipY === true
                     ) {

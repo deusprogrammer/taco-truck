@@ -290,9 +290,13 @@ const createClusterOutline = (cluster, partTable, offset) => {
         });
         
         // Keep chains with high scores (top 50% or chains within 80% of max score)
-        const maxScore = Math.max(...chainScores.map(cs => cs.score));
+        // Sort by score descending
+        chainScores.sort((a, b) => b.score - a.score);
+        
+        // Keep the highest scoring chain, plus any chains with area > 10% of the largest
+        const maxArea = Math.max(...chainScores.map(cs => cs.area));
         const validChains = chainScores
-            .filter(cs => cs.score > maxScore * 0.5)
+            .filter(cs => cs.score > 0 && cs.area > maxArea * 0.1) // Keep chains with significant area
             .map(cs => cs.chain);
         
         // Combine all valid chains into the output
@@ -1144,20 +1148,40 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         const { targetLayer } = options;
         const allButtons = collectAllButtons(simplifiedLayout, targetLayer);
         
+        console.log('Clustering enabled, collected buttons:', allButtons.length);
+        console.log('Button positions:', allButtons.map(b => ({
+            id: b.id?.substring(0, 8),
+            position: b.position,
+            panelPosition: b.panelPosition,
+            layer: b.layer
+        })));
+        
+        // Debug: check distances between left-most and right-most buttons
+        const sortedByX = [...allButtons].sort((a, b) => {
+            const aPos = a.panelPosition || a.position;
+            const bPos = b.panelPosition || b.position;
+            return aPos[0] - bPos[0];
+        });
+        console.log('Left-most button:', sortedByX[0].panelPosition || sortedByX[0].position);
+        console.log('Right-most button:', sortedByX[sortedByX.length - 1].panelPosition || sortedByX[sortedByX.length - 1].position);
+        
         if (allButtons.length > 0) {
             // Cluster buttons using their panelPosition
             const clusters = clusterButtons(allButtons, CLUSTER_DISTANCE_THRESHOLD);
             
+            console.log('Created clusters:', clusters.length);
+            clusters.forEach((cluster, idx) => {
+                console.log(`Cluster ${idx}:`, cluster.length, 'buttons');
+            });
+            
             // For each cluster, create an outline
             clusters.forEach((cluster, clusterIndex) => {
                 if (cluster.length === 1) {
-                    // Single button - use panelPosition for correct placement
-                    const button = cluster[0];
-                    const buttonWithCorrectPosition = {
-                        ...button,
-                        position: button.panelPosition || button.position
-                    };
-                    model.models[`button-${clusterIndex}`] = convertPartToPath(buttonWithCorrectPosition, partTable, options);
+                    // Single button - create enlarged outline using same logic as cluster
+                    const outline = createClusterOutline(cluster, partTable, buttonEnlargement);
+                    if (outline) {
+                        model.models[`button-${clusterIndex}`] = outline;
+                    }
                 } else {
                     // Multiple buttons - create cluster outline
                     const outline = createClusterOutline(cluster, partTable, buttonEnlargement);
@@ -1186,22 +1210,23 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
                 model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
             });
         } else {
-            // No buttons to cluster, process normally
+            // No buttons to cluster, but still need to collect ALL vector parts from tree
+            const allVectorParts = collectAllVectorParts(simplifiedLayout, targetLayer);
+            allVectorParts.forEach((part, index) => {
+                const position = part.panelPosition || part.position || [0, 0];
+                let partModel = makerjs.model.mirror(makerifyModelTree(part.modelTree, options), false, true);
+                partModel = makerjs.model.moveRelative(partModel, position);
+                model.models[`vector-${index}`] = partModel;
+            });
+            
+            // Add other non-button, non-vector parts from root level only
             children.filter((child) => {
-                if (child.type === 'custom') return false;
+                if (child.type === 'custom' || child.type === 'button' || child.type === 'user' || child.type === 'svg') return false;
                 const partLayer = child.layer || 'both';
                 if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
                 return true;
             }).forEach((child, index) => {
-                // For user/svg parts, use makerifyModelTree and apply position
-                if (child.type === 'user' || child.type === 'svg') {
-                    const position = child.panelPosition || child.position || [0, 0];
-                    let partModel = makerjs.model.mirror(makerifyModelTree(child.modelTree, options), false, true);
-                    partModel = makerjs.model.moveRelative(partModel, position);
-                    model.models[`parts-${index}`] = partModel;
-                } else {
-                    model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
-                }
+                model.models[`parts-${index}`] = convertPartToPath(child, partTable, options);
             });
         }
     } else {
