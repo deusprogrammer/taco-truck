@@ -527,13 +527,21 @@ export const transformChildPartsToGlobalCoordinates = (
         const globalY = customPartGlobalY + transformedY
 
         // Convert global coordinates back to panel-relative origin/position format
-        const originX = globalX / parentPanelWidth
-        const originY = globalY / parentPanelHeight
+        // If panel dimensions are zero, use absolute positioning instead
+        let finalOrigin, finalPosition
+        if (parentPanelWidth > 0 && parentPanelHeight > 0) {
+            finalOrigin = [globalX / parentPanelWidth, globalY / parentPanelHeight]
+            finalPosition = [0, 0]
+        } else {
+            // Panel has no dimensions, use absolute positioning
+            finalOrigin = [0, 0]
+            finalPosition = [globalX, globalY]
+        }
 
         return {
             ...childPart,
-            position: [0, 0], // Reset position since we're using origin coordinates
-            origin: [originX, originY],
+            position: finalPosition,
+            origin: finalOrigin,
             relativeTo: null, // Root parts don't have relativeTo
             id: idMapping[childPart.id], // Use new ID
         }
@@ -577,11 +585,15 @@ export const calculateRelativePosition = (
         return [0, 0, 0, 0]
     }
 
+    // Handle empty arrays for position and origin
+    const position = (Array.isArray(part.position) && part.position.length >= 2) ? part.position : [0, 0]
+    const origin = (Array.isArray(part.origin) && part.origin.length >= 2) ? part.origin : [0, 0]
+    
     const {
         position: [x, y],
-        origin: [originX, originY] = [0, 0],
+        origin: [originX, originY],
         relativeTo,
-    } = part
+    } = { ...part, position, origin }
     const relativePart = parts.find(({ id }) => id && relativeTo && id === relativeTo)
 
     // If this part is relative to another part get the other part and use it's position as an offset
