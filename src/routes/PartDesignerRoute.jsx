@@ -115,6 +115,7 @@ const PartDesignerRoute = () => {
             <PartDesigner
                 layout={layout}
                 isNew={isNew}
+                type={type}
                 onLayoutChange={(layout) => {
                     // Augment layout with absolute positions before storing/setting
                     const augmentedLayout = augmentLayoutWithAbsolutePositions(

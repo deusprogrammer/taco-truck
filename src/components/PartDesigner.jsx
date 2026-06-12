@@ -35,6 +35,7 @@ import {
 } from '../atoms/ViewOptions.atom'
 import { useAtom } from 'jotai'
 import {
+    GenericButton,
     LockToggleButton,
     ModeButton,
     NewButton,
@@ -64,6 +65,7 @@ const PartDesigner = ({
     preview: previewOverride,
     isNew,
     onLayoutChange,
+    type,
 }) => {
     const containerRef = createRef()
     const { partTable } = usePartTable()
@@ -641,6 +643,18 @@ const PartDesigner = ({
                         >
                             Transparent
                         </ToggleButton>
+                        {type === 'projects' && (layout._id || layout.id) && (
+                            <GenericButton
+                                onClick={() =>
+                                    window.open(
+                                        `${process.env.PUBLIC_URL}/designer/projects/${layout._id || layout.id}/art`,
+                                        '_blank'
+                                    )
+                                }
+                            >
+                                Art Cutter
+                            </GenericButton>
+                        )}
                         {!securityContext ? (
                             <button
                                 className={`h-20 w-64 border-2 border-solid border-black bg-slate-600 text-white`}

@@ -109,3 +109,21 @@ export const updateProject = async (id, project) => {
     const { data } = await axios.put(BASE_URL + `/projects/${id}`, project, getAxiosOptions())
     return data;
 }
+
+export const getProjectFile = async (id, ext = 'svg', params = {}) => {
+    const query = new URLSearchParams(params).toString()
+    const { data } = await axios.get(
+        `${BASE_URL}/projects/${id}/file.${ext}${query ? '?' + query : ''}`,
+        { ...getAxiosOptions(), responseType: 'text' }
+    )
+    return data
+}
+
+export const getComponentFile = async (id, ext = 'svg', params = {}) => {
+    const query = new URLSearchParams(params).toString()
+    const { data } = await axios.get(
+        `${BASE_URL}/components/${id}/file.${ext}${query ? '?' + query : ''}`,
+        { ...getAxiosOptions(), responseType: 'text' }
+    )
+    return data
+}
