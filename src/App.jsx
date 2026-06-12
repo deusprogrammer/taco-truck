@@ -16,6 +16,8 @@ import Interstitial from './components/elements/Interstitial'
 
 import 'react-toastify/dist/ReactToastify.css'
 import './App.css'
+import ArtDesigner from './components/ArtDesigner'
+import ArtDesignerRoute from './routes/ArtDesignerRoute'
 
 const App = () => {
     const [securityContext, setSecurityContext] = useState()
@@ -48,6 +50,10 @@ const App = () => {
                     <Route
                         path={`/designer/complex-parts`}
                         element={<ComplexPartDesigner />}
+                    />
+                    <Route
+                        path={`/designer/:type/:id/art`}
+                        element={<ArtDesignerRoute />}
                     />
                     <Route
                         path={`/designer/:type/:id`}

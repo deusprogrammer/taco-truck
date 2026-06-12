@@ -348,6 +348,7 @@ const ComplexPart = ({
             key={`${part.id}-${forceRender}`}
             x={fixedX * scale}
             y={fixedY * scale}
+            angle={part.rotation || 0}
         >
             <Graphics
                 alpha={0}

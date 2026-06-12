@@ -1263,7 +1263,7 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
     }).forEach((child, index) => {
         const [x, y] = child.position;
         let userModel = makerjs.model.mirror(makerifyModelTree(child.modelTree, options), false, true);
-        userModel = makerjs.model.rotate(userModel, rotation, [0, 0]);
+        userModel = makerjs.model.rotate(userModel, child.rotation || 0, [0, 0]);
         
         // Apply flipping for user parts (ComplexParts)
         if (child.flipX || child.flipY) {

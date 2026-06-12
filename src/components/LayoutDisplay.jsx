@@ -1,4 +1,5 @@
-import { Container, Stage } from '@pixi/react'
+import { Container, Graphics, Sprite, Stage } from '@pixi/react'
+import '@pixi/events'
 import React, {
     createContext,
     createRef,
@@ -50,6 +51,8 @@ const LayoutDisplay = ({
     placingPartId,
     placingPartType,
     preview,
+    artDataUri,
+    artMasked,
     onSelectPart,
     onHoverPart,
     onSecondarySelectPart,
@@ -64,7 +67,6 @@ const LayoutDisplay = ({
     const controllerId = useRef()
 
     const [editLock] = useAtom(editLockComponentAtom)
-    const [artSelected, setArtSelected] = useState(false)
 
     const [selectedIndex, setSelectedIndex] = useState(-1)
 
@@ -72,6 +74,11 @@ const LayoutDisplay = ({
     const [isDragging, setIsDragging] = useState(false)
     const [dragStartPartPosition, setDragStartPartPosition] = useState(null)
     const [dragStartPartId, setDragStartPartId] = useState(null)
+    const [artworkDragStart, setArtworkDragStart] = useState(null)
+    const [artImageSize, setArtImageSize] = useState(null)
+    const cornerDragRef = useRef(null)
+    const artStateRef = useRef(null)
+    const [artMaskGraphics, setArtMaskGraphics] = useState(null)
 
     const bind = useGesture(
         {
@@ -92,34 +99,30 @@ const LayoutDisplay = ({
                     return
                 }
 
-                // Initialize drag state on first drag event
-                if (
-                    first &&
-                    selectedIndex >= 0 &&
-                    selectedIndex < layout.parts.length
-                ) {
-                    const selectedPart = layout.parts[selectedIndex]
-                    setDragStartPartPosition([...selectedPart.position])
-                    setDragStartPartId(selectedPart.id)
-                }
-
-                // Reset drag state when dragging ends
-                if (!dragging && dragStartPartPosition) {
-                    setDragStartPartPosition(null)
-                    setDragStartPartId(null)
-                }
-
-                if (
-                    mode === ART_ADJUST &&
-                    artSelected &&
-                    elapsedTime > timeThreshold &&
-                    !shiftKey &&
-                    (touches === 1 || buttons === 1)
-                ) {
-                    onLayoutChange({
-                        ...layout,
-                        artworkOffset: [artworkOffsetX, artworkOffsetY],
-                    })
+                if (mode === ART_ADJUST) {
+                    if (cornerDragRef.current) {
+                        return
+                    }
+                    if (first) {
+                        setArtworkDragStart(layout.artworkOffset || [0, 0])
+                        return
+                    }
+                    if (
+                        dragging &&
+                        elapsedTime > timeThreshold &&
+                        !shiftKey &&
+                        (touches === 1 || buttons === 1)
+                    ) {
+                        const start = artworkDragStart ||
+                            layout.artworkOffset || [0, 0]
+                        onLayoutChange({
+                            ...layout,
+                            artworkOffset: [
+                                start[0] + dx / currentScale,
+                                start[1] + dy / currentScale,
+                            ],
+                        })
+                    }
                     return
                 }
 
@@ -360,6 +363,86 @@ const LayoutDisplay = ({
         }
     }, [isDragging])
 
+    useEffect(() => {
+        if (!artDataUri) {
+            setArtImageSize(null)
+            return
+        }
+        const img = new window.Image()
+        img.onload = () => {
+            setArtImageSize([img.naturalWidth, img.naturalHeight])
+            const { layout: l, onLayoutChange: onChange } = artStateRef.current
+            const imgW = img.naturalWidth
+            const imgH = img.naturalHeight
+            const panelW = l.panelDimensions?.[0]
+            const panelH = l.panelDimensions?.[1]
+            if (panelW && panelH) {
+                const artworkZoom = Math.max(panelW / imgW, panelH / imgH)
+                const offsetX = (panelW - imgW * artworkZoom) / 2
+                const offsetY = (panelH - imgH * artworkZoom) / 2
+                onChange({
+                    ...l,
+                    artworkZoom,
+                    artworkOffset: [offsetX, offsetY],
+                })
+            }
+        }
+        img.src = artDataUri
+    }, [artDataUri])
+
+    useEffect(() => {
+        const onMove = (e) => {
+            if (!cornerDragRef.current) return
+            const { corner, imgW, imgH, fixedX, fixedY, startOffset } =
+                cornerDragRef.current
+            const {
+                workspacePosition: wp,
+                currentScale: cs,
+                layout: l,
+                onLayoutChange: onChange,
+            } = artStateRef.current
+
+            const mx = e.clientX - wp[0]
+
+            let newZoom =
+                corner === 'br' || corner === 'tr'
+                    ? (mx - fixedX) / (imgW * cs)
+                    : (fixedX - mx) / (imgW * cs)
+            newZoom = Math.max(0.01, newZoom)
+
+            let [newOffsetX, newOffsetY] = startOffset
+            if (corner === 'tl' || corner === 'bl') {
+                newOffsetX = fixedX / cs - imgW * newZoom
+            }
+            if (corner === 'tl' || corner === 'tr') {
+                newOffsetY = fixedY / cs - imgH * newZoom
+            }
+
+            onChange({
+                ...l,
+                artworkZoom: newZoom,
+                artworkOffset: [newOffsetX, newOffsetY],
+            })
+        }
+        const onUp = () => {
+            cornerDragRef.current = null
+        }
+        window.addEventListener('pointermove', onMove)
+        window.addEventListener('pointerup', onUp)
+        return () => {
+            window.removeEventListener('pointermove', onMove)
+            window.removeEventListener('pointerup', onUp)
+        }
+    }, [])
+
+    // Update ref each render so event handlers always see latest values
+    artStateRef.current = {
+        workspacePosition,
+        currentScale,
+        layout,
+        onLayoutChange,
+    }
+
     let component
     switch (mode) {
         case ADD:
@@ -476,17 +559,152 @@ const LayoutDisplay = ({
                             screenHeight={screenHeight}
                             workspacePosition={workspacePosition}
                         />
+                        {artDataUri && (
+                            <>
+                                {artMasked && (
+                                    <Graphics
+                                        ref={setArtMaskGraphics}
+                                        draw={(g) => {
+                                            g.clear()
+                                            g.beginFill(0xffffff)
+                                            g.drawRoundedRect(
+                                                0,
+                                                0,
+                                                layout?.panelDimensions?.[0] *
+                                                    currentScale,
+                                                layout?.panelDimensions?.[1] *
+                                                    currentScale,
+                                                layout?.cornerRadius *
+                                                    currentScale || 0
+                                            )
+                                            g.endFill()
+                                        }}
+                                    />
+                                )}
+                                <Sprite
+                                    image={artDataUri}
+                                    x={
+                                        layout.artworkOffset?.[0] *
+                                            currentScale || 0
+                                    }
+                                    y={
+                                        layout.artworkOffset?.[1] *
+                                            currentScale || 0
+                                    }
+                                    anchor={0}
+                                    scale={
+                                        currentScale * (layout.artworkZoom || 1)
+                                    }
+                                    mask={artMasked ? artMaskGraphics : null}
+                                />
+                            </>
+                        )}
+                        {artDataUri &&
+                            artImageSize &&
+                            (() => {
+                                const [imgW, imgH] = artImageSize
+                                const artZoom = layout.artworkZoom || 1
+                                const offset = layout.artworkOffset || [0, 0]
+                                const cs = currentScale
+                                const artLeft = offset[0] * cs
+                                const artTop = offset[1] * cs
+                                const artW = imgW * artZoom * cs
+                                const artH = imgH * artZoom * cs
+                                const artRight = artLeft + artW
+                                const artBottom = artTop + artH
+                                const r = 6
+                                const corners = [
+                                    {
+                                        key: 'tl',
+                                        x: artLeft,
+                                        y: artTop,
+                                        fx: artRight,
+                                        fy: artBottom,
+                                        cursor: 'nwse-resize',
+                                    },
+                                    {
+                                        key: 'tr',
+                                        x: artRight,
+                                        y: artTop,
+                                        fx: artLeft,
+                                        fy: artBottom,
+                                        cursor: 'nesw-resize',
+                                    },
+                                    {
+                                        key: 'bl',
+                                        x: artLeft,
+                                        y: artBottom,
+                                        fx: artRight,
+                                        fy: artTop,
+                                        cursor: 'nesw-resize',
+                                    },
+                                    {
+                                        key: 'br',
+                                        x: artRight,
+                                        y: artBottom,
+                                        fx: artLeft,
+                                        fy: artTop,
+                                        cursor: 'nwse-resize',
+                                    },
+                                ]
+                                return (
+                                    <>
+                                        <Graphics
+                                            draw={(g) => {
+                                                g.clear()
+                                                g.lineStyle(2, 0xffffff, 0.8)
+                                                g.drawRect(
+                                                    artLeft,
+                                                    artTop,
+                                                    artW,
+                                                    artH
+                                                )
+                                            }}
+                                        />
+                                        {corners.map(
+                                            ({ key, x, y, fx, fy, cursor }) => (
+                                                <Graphics
+                                                    key={key}
+                                                    draw={(g) => {
+                                                        g.clear()
+                                                        g.beginFill(
+                                                            0xffffff,
+                                                            0.9
+                                                        )
+                                                        g.lineStyle(
+                                                            1,
+                                                            0x000000,
+                                                            0.8
+                                                        )
+                                                        g.drawCircle(x, y, r)
+                                                        g.endFill()
+                                                    }}
+                                                    eventMode="static"
+                                                    cursor={cursor}
+                                                    onpointerdown={() => {
+                                                        cornerDragRef.current =
+                                                            {
+                                                                corner: key,
+                                                                imgW,
+                                                                imgH,
+                                                                fixedX: fx,
+                                                                fixedY: fy,
+                                                                startOffset: [
+                                                                    ...offset,
+                                                                ],
+                                                            }
+                                                    }}
+                                                />
+                                            )
+                                        )}
+                                    </>
+                                )
+                            })()}
                         <Panel
                             scale={currentScale}
                             layout={layout}
                             fill="#000000"
-                            onClick={(state) => {
-                                if (state === 'DOWN') {
-                                    setArtSelected(true)
-                                } else {
-                                    setArtSelected(false)
-                                }
-                            }}
+                            onClick={() => {}}
                         />
                         {component}
                         <ButtonStatusContext.Provider value={buttonsPressed}>

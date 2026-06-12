@@ -168,3 +168,15 @@ export const RealSizeZoomButton = ({ zoomValue, onClick }) => {
         </button>
     )
 }
+
+export const GenericButton = ({ onClick, children }) => {
+    return (
+        <button
+            className={`h-20 w-auto border-2 border-solid border-black bg-slate-600 p-2 text-white`}
+            title="Lock the current configuration so it does not move during select"
+            onClick={onClick}
+        >
+            {children}
+        </button>
+    )
+}
