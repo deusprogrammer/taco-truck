@@ -1208,6 +1208,7 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
             allVectorParts.forEach((part, index) => {
                 const position = part.panelPosition || part.position || [0, 0];
                 let partModel = makerjs.model.mirror(makerifyModelTree(part.modelTree, options), false, true);
+                partModel = makerjs.model.rotate(partModel, part.rotation || 0, [0, 0]);
                 partModel = makerjs.model.moveRelative(partModel, position);
                 model.models[`vector-${index}`] = partModel;
             });
@@ -1227,6 +1228,7 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
             allVectorParts.forEach((part, index) => {
                 const position = part.panelPosition || part.position || [0, 0];
                 let partModel = makerjs.model.mirror(makerifyModelTree(part.modelTree, options), false, true);
+                partModel = makerjs.model.rotate(partModel, part.rotation || 0, [0, 0]);
                 partModel = makerjs.model.moveRelative(partModel, position);
                 model.models[`vector-${index}`] = partModel;
             });
@@ -1244,7 +1246,7 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
     } else {
         // Normal processing without clustering
         children.filter((child) => {
-            if (child.type === 'custom' || child.type === 'svg') return false;
+            if (child.type === 'custom' || child.type === 'svg' || child.type === 'user') return false;
             const partLayer = child.layer || 'both';
             const { targetLayer } = options;
             if (targetLayer && partLayer !== 'both' && partLayer !== targetLayer) return false;
@@ -1254,7 +1256,7 @@ export const makerify = (simplifiedLayout, parent, partTable, options = {}, laye
         });
     }
     
-    children.filter((child) => {
+    if (!shouldCluster || parent?.isNested) children.filter((child) => {
         if (child.type !== 'user') return false;
         const partLayer = child.layer || 'both';
         const { targetLayer } = options;
